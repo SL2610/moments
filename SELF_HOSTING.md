@@ -8,7 +8,7 @@ prompt you hand to an AI assistant that does this for you.
 ## Quick start
 
 ```bash
-git clone https://github.com/sagi5060/moments
+git clone https://github.com/SL2610/moments
 cd moments
 ./setup.sh
 ```

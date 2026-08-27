@@ -55,7 +55,7 @@ server). Everything below is free unless noted.
      — this is optional and more advanced; the couple's own computer is the
      simpler default.
 
-3. Clone https://github.com/sagi5060/moments into a sensible local directory
+3. Clone https://github.com/SL2610/moments into a sensible local directory
    (ask the couple, or default to their home directory).
 
 4. Run `./setup.sh` inside the cloned repo, non-interactively, using their

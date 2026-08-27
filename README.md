@@ -19,7 +19,7 @@ Not a developer? Two easier options first:
 Comfortable with a terminal:
 
 ```bash
-git clone https://github.com/sagi5060/moments
+git clone https://github.com/SL2610/moments
 cd moments
 ./setup.sh
 ```
@@ -34,8 +34,8 @@ Don't want to run anything yourself? We'll deploy and manage your gallery on
 our infrastructure — you just send us your details and get a link back.
 
 > **TODO (repo owner):** replace this with your actual pricing + a Stripe
-> Payment Link or contact email. See `docs/HOSTING_RUNBOOK.md` for how orders
-> get fulfilled.
+> Payment Link or contact email. (Order fulfillment runbook lives in the
+> private `SL2610/moments-admin` repo.)
 
 ## How it works
 
@@ -80,7 +80,7 @@ MIT — see [LICENSE](LICENSE). Built on the architecture of
 נוח לכם עם טרמינל:
 
 ```bash
-git clone https://github.com/sagi5060/moments
+git clone https://github.com/SL2610/moments
 cd moments
 ./setup.sh
 ```
