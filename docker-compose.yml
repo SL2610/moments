@@ -1,0 +1,144 @@
+services:
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+        NEXT_PUBLIC_DEMO_SELFIE_UPLOAD: ${DEMO_SELFIE_UPLOAD:-false}
+        NEXT_PUBLIC_MAX_PHOTO_MB: ${PHOTO_MAX_SIZE_MB:-30}
+        NEXT_PUBLIC_EVENT_NAME: ${EVENT_NAME:-Your Names Here}
+        NEXT_PUBLIC_EVENT_DATE: ${EVENT_DATE:-DD.MM.YYYY}
+        NEXT_PUBLIC_PUBLIC_URL: ${PUBLIC_URL:-https://your-domain.example.com}
+    restart: unless-stopped
+    # Bound to localhost only; the public entry point is the Cloudflare Tunnel.
+    ports:
+      - "127.0.0.1:${WEB_PORT:-2610}:3000"
+    volumes:
+      # Landing-page wedding photo: put your photo at data/branding/hero.jpg
+      - ./data/branding:/app/public/branding:ro
+    depends_on:
+      - api
+      - ai-search
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-grabpic}
+      DB_USERNAME: ${POSTGRES_USER:-grabpic}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      VIEW_URL_SECRET: ${VIEW_URL_SECRET}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      STORAGE_PATH: /data/photos
+      IMPORT_PATH: /import
+      PHOTO_MAX_SIZE_MB: ${PHOTO_MAX_SIZE_MB:-30}
+      MAX_PHOTOS_PER_USER: ${MAX_PHOTOS_PER_USER:-10000}
+      REDIS_URL: redis://redis:6379
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:2610}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TURNSTILE_ALLOWED_HOSTNAMES: ${TURNSTILE_ALLOWED_HOSTNAMES:-}
+      GUEST_PASSWORD: ${GUEST_PASSWORD}
+      EVENT_NAME: ${EVENT_NAME:-Your Names Here}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    volumes:
+      - ./data/photos:/data/photos
+      - ./data/import:/import:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  ai-search:
+    build: ./ai-face-worker
+    command: ["python", "api.py"]
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-grabpic}
+      DB_USER: ${POSTGRES_USER:-grabpic}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      FACE_DEVICE: ${FACE_DEVICE:-cpu}
+      FACE_RECOGNIZER: ${FACE_RECOGNIZER:-adaface_ir101}
+      AI_INFERENCE_CONCURRENCY: ${AI_INFERENCE_CONCURRENCY:-2}
+      FACE_STRICT_THRESHOLD: ${FACE_STRICT_THRESHOLD:-0.45}
+      FACE_RECOVERY_THRESHOLD: ${FACE_RECOVERY_THRESHOLD:-0.34}
+      FACE_MIN_SEED_QUALITY: ${FACE_MIN_SEED_QUALITY:-0.45}
+      ADMIN_DEBUG_TOKEN: ${ADMIN_DEBUG_TOKEN:-}
+      SEARCH_RATE_LIMIT: ${SEARCH_RATE_LIMIT:-6/minute}
+      ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:2610}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      TURNSTILE_ALLOWED_HOSTNAMES: ${TURNSTILE_ALLOWED_HOSTNAMES:-}
+    volumes:
+      - ai-models:/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-worker:
+    build: ./ai-face-worker
+    command: ["python", "main.py"]
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-grabpic}
+      DB_USER: ${POSTGRES_USER:-grabpic}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      FACE_DEVICE: ${FACE_DEVICE:-cpu}
+      FACE_RECOGNIZER: ${FACE_RECOGNIZER:-adaface_ir101}
+      FACE_DETECTION_LONG_SIDE: ${FACE_DETECTION_LONG_SIDE:-2400}
+      FACE_DETECTION_TILING: ${FACE_DETECTION_TILING:-true}
+      STORE_DEBUG_FACE_CROPS: ${STORE_DEBUG_FACE_CROPS:-false}
+      STORAGE_PATH: /data/photos
+      JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-3}
+    volumes:
+      - ai-models:/models
+      - ./data/photos:/data/photos
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-grabpic}
+      POSTGRES_USER: ${POSTGRES_USER:-grabpic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-grabpic} -d ${POSTGRES_DB:-grabpic}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Optional compose-managed Cloudflare Tunnel:
+  #   docker compose --profile tunnel up -d
+  # Point the tunnel's public hostname (your-domain.example.com) at http://web:3000.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - web
+    profiles:
+      - tunnel
+
+volumes:
+  pgdata:
+  ai-models:

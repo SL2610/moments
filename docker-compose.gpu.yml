@@ -1,0 +1,34 @@
+# NVIDIA GPU mode for the AI services. Requires the NVIDIA Container Toolkit.
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml build ai-worker ai-search
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
+services:
+  ai-search:
+    build:
+      context: ./ai-face-worker
+      args:
+        ORT_GPU: "1"
+    environment:
+      FACE_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  ai-worker:
+    build:
+      context: ./ai-face-worker
+      args:
+        ORT_GPU: "1"
+    environment:
+      FACE_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

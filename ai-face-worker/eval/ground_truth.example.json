@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to ground_truth.json. Keys are selfie files in eval/queries/, values are the photo UUIDs that person appears in.",
+  "query_sagi_01.jpg": [
+    "00000000-0000-0000-0000-000000000001",
+    "00000000-0000-0000-0000-000000000017"
+  ]
+}

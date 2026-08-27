@@ -1,0 +1,39 @@
+{
+ "url": "http://localhost:2610/api/ai/search",
+ "sequential_ms": {
+  "p50": 48,
+  "p95": 62,
+  "p99": 62,
+  "mean": 49
+ },
+ "concurrency": {
+  "1": {
+   "wall_ms": 48,
+   "p95_ms": 47,
+   "max_ms": 47,
+   "errors": 0,
+   "deterministic": true
+  },
+  "5": {
+   "wall_ms": 127,
+   "p95_ms": 124,
+   "max_ms": 124,
+   "errors": 0,
+   "deterministic": true
+  },
+  "10": {
+   "wall_ms": 262,
+   "p95_ms": 262,
+   "max_ms": 262,
+   "errors": 0,
+   "deterministic": true
+  },
+  "20": {
+   "wall_ms": 410,
+   "p95_ms": 393,
+   "max_ms": 393,
+   "errors": 0,
+   "deterministic": true
+  }
+ }
+}

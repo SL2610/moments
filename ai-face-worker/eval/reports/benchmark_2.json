@@ -1,0 +1,1471 @@
+{
+ "meta": {
+  "date": "2026-08-22T15:35:54",
+  "git_commit": "7b70fc7",
+  "dataset_version": "lfw-synth-1",
+  "detector": "scrfd_10g_buffalo_l",
+  "recognizer": "adaface_ir101_webface12m",
+  "thresholds": {
+   "strict": 0.45,
+   "recovery": 0.34,
+   "seed_quality": 0.45,
+   "max_seeds": 8
+  },
+  "long_side": 2400
+ },
+ "dataset": {
+  "photos": 598,
+  "gt_faces": 758,
+  "identities": 26,
+  "indexed_faces": 898
+ },
+ "detection": {
+  "v2_tiled": {
+   "overall": {
+    "all": {
+     "recall": 0.9974,
+     "n": 758
+    }
+   },
+   "by_size": {
+    "all": {
+     "recall": 0.9974,
+     "n": 758
+    },
+    "128-+px": {
+     "recall": 0.9986,
+     "n": 690
+    },
+    "32-64px": {
+     "recall": 0.9615,
+     "n": 26
+    },
+    "64-128px": {
+     "recall": 1.0,
+     "n": 42
+    }
+   },
+   "by_subset": {
+    "all": {
+     "recall": 0.9974,
+     "n": 758
+    },
+    "NORMAL": {
+     "recall": 0.9979,
+     "n": 480
+    },
+    "DARK": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "BLUR": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "SMALL": {
+     "recall": 0.9615,
+     "n": 26
+    },
+    "GROUP": {
+     "recall": 1.0,
+     "n": 200
+    }
+   },
+   "ms_avg": 81.5
+  },
+  "v2_notile": {
+   "overall": {
+    "all": {
+     "recall": 0.9631,
+     "n": 758
+    }
+   },
+   "by_size": {
+    "all": {
+     "recall": 0.9631,
+     "n": 758
+    },
+    "128-+px": {
+     "recall": 0.9971,
+     "n": 690
+    },
+    "32-64px": {
+     "recall": 0.1154,
+     "n": 26
+    },
+    "64-128px": {
+     "recall": 0.9286,
+     "n": 42
+    }
+   },
+   "by_subset": {
+    "all": {
+     "recall": 0.9631,
+     "n": 758
+    },
+    "NORMAL": {
+     "recall": 0.9979,
+     "n": 480
+    },
+    "DARK": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "BLUR": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "SMALL": {
+     "recall": 0.1154,
+     "n": 26
+    },
+    "GROUP": {
+     "recall": 0.98,
+     "n": 200
+    }
+   },
+   "ms_avg": 23.8
+  },
+  "v1_retinaface": {
+   "overall": {
+    "all": {
+     "recall": 0.9499,
+     "n": 758
+    }
+   },
+   "by_size": {
+    "all": {
+     "recall": 0.9499,
+     "n": 758
+    },
+    "128-+px": {
+     "recall": 0.9942,
+     "n": 690
+    },
+    "32-64px": {
+     "recall": 0.1923,
+     "n": 26
+    },
+    "64-128px": {
+     "recall": 0.6905,
+     "n": 42
+    }
+   },
+   "by_subset": {
+    "all": {
+     "recall": 0.9499,
+     "n": 758
+    },
+    "NORMAL": {
+     "recall": 1.0,
+     "n": 480
+    },
+    "DARK": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "BLUR": {
+     "recall": 1.0,
+     "n": 26
+    },
+    "SMALL": {
+     "recall": 0.1923,
+     "n": 26
+    },
+    "GROUP": {
+     "recall": 0.915,
+     "n": 200
+    }
+   },
+   "ms_avg": 2684.5
+  }
+ },
+ "pipelines": {
+  "V1_GHOSTFACENET(d0.70)": {
+   "precision": 0.6529,
+   "recall": 0.69,
+   "fp_total": 278,
+   "fn_total": 235,
+   "zero_fp_guest_rate": 0.2308,
+   "any_fp_rate": 0.7692,
+   "fp_per_guest_avg": 10.692,
+   "fp_per_guest_p95": 34,
+   "fn_per_guest_avg": 9.038,
+   "returned_avg": 30.8,
+   "returned_median": 28,
+   "subset_recall": {
+    "NORMAL": 0.7438,
+    "DARK": 0.5,
+    "BLUR": 0.6538,
+    "SMALL": 0.1154,
+    "GROUP": 0.665
+   },
+   "per_guest": [
+    {
+     "person": "abdullah_gul",
+     "tp": 20,
+     "fp": 53,
+     "fn": 10,
+     "returned": 73
+    },
+    {
+     "person": "alejandro_toledo",
+     "tp": 23,
+     "fp": 1,
+     "fn": 7,
+     "returned": 24
+    },
+    {
+     "person": "alvaro_uribe",
+     "tp": 4,
+     "fp": 6,
+     "fn": 32,
+     "returned": 10
+    },
+    {
+     "person": "amelie_mauresmo",
+     "tp": 28,
+     "fp": 27,
+     "fn": 2,
+     "returned": 55
+    },
+    {
+     "person": "andre_agassi",
+     "tp": 27,
+     "fp": 13,
+     "fn": 3,
+     "returned": 40
+    },
+    {
+     "person": "andy_roddick",
+     "tp": 6,
+     "fp": 34,
+     "fn": 17,
+     "returned": 40
+    },
+    {
+     "person": "angelina_jolie",
+     "tp": 25,
+     "fp": 1,
+     "fn": 4,
+     "returned": 26
+    },
+    {
+     "person": "ariel_sharon",
+     "tp": 27,
+     "fp": 0,
+     "fn": 2,
+     "returned": 27
+    },
+    {
+     "person": "arnold_schwarzenegger",
+     "tp": 24,
+     "fp": 0,
+     "fn": 11,
+     "returned": 24
+    },
+    {
+     "person": "atal_bihari_vajpayee",
+     "tp": 20,
+     "fp": 0,
+     "fn": 6,
+     "returned": 20
+    },
+    {
+     "person": "bill_clinton",
+     "tp": 23,
+     "fp": 29,
+     "fn": 6,
+     "returned": 52
+    },
+    {
+     "person": "bill_gates",
+     "tp": 16,
+     "fp": 33,
+     "fn": 8,
+     "returned": 49
+    },
+    {
+     "person": "bill_simon",
+     "tp": 15,
+     "fp": 14,
+     "fn": 3,
+     "returned": 29
+    },
+    {
+     "person": "carlos_menem",
+     "tp": 26,
+     "fp": 13,
+     "fn": 6,
+     "returned": 39
+    },
+    {
+     "person": "carlos_moya",
+     "tp": 14,
+     "fp": 3,
+     "fn": 17,
+     "returned": 17
+    },
+    {
+     "person": "colin_powell",
+     "tp": 29,
+     "fp": 0,
+     "fn": 3,
+     "returned": 29
+    },
+    {
+     "person": "david_beckham",
+     "tp": 22,
+     "fp": 3,
+     "fn": 3,
+     "returned": 25
+    },
+    {
+     "person": "dominique_de_villepin",
+     "tp": 17,
+     "fp": 10,
+     "fn": 9,
+     "returned": 27
+    },
+    {
+     "person": "donald_rumsfeld",
+     "tp": 24,
+     "fp": 1,
+     "fn": 3,
+     "returned": 25
+    },
+    {
+     "person": "fidel_castro",
+     "tp": 22,
+     "fp": 0,
+     "fn": 8,
+     "returned": 22
+    },
+    {
+     "person": "george_robertson",
+     "tp": 26,
+     "fp": 7,
+     "fn": 6,
+     "returned": 33
+    },
+    {
+     "person": "george_w_bush",
+     "tp": 27,
+     "fp": 1,
+     "fn": 5,
+     "returned": 28
+    },
+    {
+     "person": "gerhard_schroeder",
+     "tp": 26,
+     "fp": 13,
+     "fn": 9,
+     "returned": 39
+    },
+    {
+     "person": "gloria_macapagal_arroyo",
+     "tp": 4,
+     "fp": 0,
+     "fn": 25,
+     "returned": 4
+    },
+    {
+     "person": "gray_davis",
+     "tp": 27,
+     "fp": 4,
+     "fn": 6,
+     "returned": 31
+    },
+    {
+     "person": "guillermo_coria",
+     "tp": 1,
+     "fp": 12,
+     "fn": 24,
+     "returned": 13
+    }
+   ]
+  },
+  "V1_GHOSTFACENET(d0.80)": {
+   "precision": 0.2391,
+   "recall": 0.8417,
+   "fp_total": 2030,
+   "fn_total": 120,
+   "zero_fp_guest_rate": 0.0,
+   "any_fp_rate": 1.0,
+   "fp_per_guest_avg": 78.077,
+   "fp_per_guest_p95": 162,
+   "fn_per_guest_avg": 4.615,
+   "returned_avg": 102.6,
+   "returned_median": 89,
+   "subset_recall": {
+    "NORMAL": 0.875,
+    "DARK": 0.7308,
+    "BLUR": 0.8462,
+    "SMALL": 0.3077,
+    "GROUP": 0.845
+   },
+   "per_guest": [
+    {
+     "person": "abdullah_gul",
+     "tp": 26,
+     "fp": 195,
+     "fn": 4,
+     "returned": 221
+    },
+    {
+     "person": "alejandro_toledo",
+     "tp": 29,
+     "fp": 31,
+     "fn": 1,
+     "returned": 60
+    },
+    {
+     "person": "alvaro_uribe",
+     "tp": 17,
+     "fp": 58,
+     "fn": 19,
+     "returned": 75
+    },
+    {
+     "person": "amelie_mauresmo",
+     "tp": 29,
+     "fp": 145,
+     "fn": 1,
+     "returned": 174
+    },
+    {
+     "person": "andre_agassi",
+     "tp": 28,
+     "fp": 126,
+     "fn": 2,
+     "returned": 154
+    },
+    {
+     "person": "andy_roddick",
+     "tp": 8,
+     "fp": 136,
+     "fn": 15,
+     "returned": 144
+    },
+    {
+     "person": "angelina_jolie",
+     "tp": 29,
+     "fp": 36,
+     "fn": 0,
+     "returned": 65
+    },
+    {
+     "person": "ariel_sharon",
+     "tp": 27,
+     "fp": 35,
+     "fn": 2,
+     "returned": 62
+    },
+    {
+     "person": "arnold_schwarzenegger",
+     "tp": 30,
+     "fp": 56,
+     "fn": 5,
+     "returned": 86
+    },
+    {
+     "person": "atal_bihari_vajpayee",
+     "tp": 23,
+     "fp": 15,
+     "fn": 3,
+     "returned": 38
+    },
+    {
+     "person": "bill_clinton",
+     "tp": 28,
+     "fp": 162,
+     "fn": 1,
+     "returned": 190
+    },
+    {
+     "person": "bill_gates",
+     "tp": 23,
+     "fp": 137,
+     "fn": 1,
+     "returned": 160
+    },
+    {
+     "person": "bill_simon",
+     "tp": 17,
+     "fp": 145,
+     "fn": 1,
+     "returned": 162
+    },
+    {
+     "person": "carlos_menem",
+     "tp": 29,
+     "fp": 60,
+     "fn": 3,
+     "returned": 89
+    },
+    {
+     "person": "carlos_moya",
+     "tp": 21,
+     "fp": 61,
+     "fn": 10,
+     "returned": 82
+    },
+    {
+     "person": "colin_powell",
+     "tp": 30,
+     "fp": 7,
+     "fn": 2,
+     "returned": 37
+    },
+    {
+     "person": "david_beckham",
+     "tp": 24,
+     "fp": 28,
+     "fn": 1,
+     "returned": 52
+    },
+    {
+     "person": "dominique_de_villepin",
+     "tp": 18,
+     "fp": 80,
+     "fn": 8,
+     "returned": 98
+    },
+    {
+     "person": "donald_rumsfeld",
+     "tp": 24,
+     "fp": 22,
+     "fn": 3,
+     "returned": 46
+    },
+    {
+     "person": "fidel_castro",
+     "tp": 24,
+     "fp": 7,
+     "fn": 6,
+     "returned": 31
+    },
+    {
+     "person": "george_robertson",
+     "tp": 32,
+     "fp": 111,
+     "fn": 0,
+     "returned": 143
+    },
+    {
+     "person": "george_w_bush",
+     "tp": 29,
+     "fp": 31,
+     "fn": 3,
+     "returned": 60
+    },
+    {
+     "person": "gerhard_schroeder",
+     "tp": 29,
+     "fp": 120,
+     "fn": 6,
+     "returned": 149
+    },
+    {
+     "person": "gloria_macapagal_arroyo",
+     "tp": 18,
+     "fp": 6,
+     "fn": 11,
+     "returned": 24
+    },
+    {
+     "person": "gray_davis",
+     "tp": 32,
+     "fp": 108,
+     "fn": 1,
+     "returned": 140
+    },
+    {
+     "person": "guillermo_coria",
+     "tp": 14,
+     "fp": 112,
+     "fn": 11,
+     "returned": 126
+    }
+   ]
+  },
+  "V2_DIRECT": {
+   "precision": 0.9987,
+   "recall": 0.9815,
+   "fp_total": 1,
+   "fn_total": 14,
+   "zero_fp_guest_rate": 0.9615,
+   "any_fp_rate": 0.0385,
+   "fp_per_guest_avg": 0.038,
+   "fp_per_guest_p95": 0,
+   "fn_per_guest_avg": 0.538,
+   "returned_avg": 28.7,
+   "returned_median": 29,
+   "subset_recall": {
+    "NORMAL": 0.9917,
+    "DARK": 1.0,
+    "BLUR": 0.8462,
+    "SMALL": 0.8462,
+    "GROUP": 0.99
+   },
+   "per_guest": [
+    {
+     "person": "abdullah_gul",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alejandro_toledo",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alvaro_uribe",
+     "tp": 35,
+     "fp": 0,
+     "fn": 1,
+     "returned": 35
+    },
+    {
+     "person": "amelie_mauresmo",
+     "tp": 27,
+     "fp": 0,
+     "fn": 3,
+     "returned": 27
+    },
+    {
+     "person": "andre_agassi",
+     "tp": 29,
+     "fp": 0,
+     "fn": 1,
+     "returned": 29
+    },
+    {
+     "person": "andy_roddick",
+     "tp": 21,
+     "fp": 0,
+     "fn": 2,
+     "returned": 21
+    },
+    {
+     "person": "angelina_jolie",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "ariel_sharon",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "arnold_schwarzenegger",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "atal_bihari_vajpayee",
+     "tp": 25,
+     "fp": 0,
+     "fn": 1,
+     "returned": 25
+    },
+    {
+     "person": "bill_clinton",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "bill_gates",
+     "tp": 24,
+     "fp": 0,
+     "fn": 0,
+     "returned": 24
+    },
+    {
+     "person": "bill_simon",
+     "tp": 16,
+     "fp": 0,
+     "fn": 2,
+     "returned": 16
+    },
+    {
+     "person": "carlos_menem",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "carlos_moya",
+     "tp": 30,
+     "fp": 0,
+     "fn": 1,
+     "returned": 30
+    },
+    {
+     "person": "colin_powell",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "david_beckham",
+     "tp": 23,
+     "fp": 0,
+     "fn": 2,
+     "returned": 23
+    },
+    {
+     "person": "dominique_de_villepin",
+     "tp": 26,
+     "fp": 0,
+     "fn": 0,
+     "returned": 26
+    },
+    {
+     "person": "donald_rumsfeld",
+     "tp": 27,
+     "fp": 0,
+     "fn": 0,
+     "returned": 27
+    },
+    {
+     "person": "fidel_castro",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "george_robertson",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "george_w_bush",
+     "tp": 32,
+     "fp": 1,
+     "fn": 0,
+     "returned": 33
+    },
+    {
+     "person": "gerhard_schroeder",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "gloria_macapagal_arroyo",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "gray_davis",
+     "tp": 32,
+     "fp": 0,
+     "fn": 1,
+     "returned": 32
+    },
+    {
+     "person": "guillermo_coria",
+     "tp": 25,
+     "fp": 0,
+     "fn": 0,
+     "returned": 25
+    }
+   ]
+  },
+  "V2_TEMPLATE": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "fn_total": 2,
+   "zero_fp_guest_rate": 0.9615,
+   "any_fp_rate": 0.0385,
+   "fp_per_guest_avg": 0.038,
+   "fp_per_guest_p95": 0,
+   "fn_per_guest_avg": 0.077,
+   "returned_avg": 29.1,
+   "returned_median": 30,
+   "subset_recall": {
+    "NORMAL": 0.9979,
+    "DARK": 1.0,
+    "BLUR": 1.0,
+    "SMALL": 0.9615,
+    "GROUP": 1.0
+   },
+   "per_guest": [
+    {
+     "person": "abdullah_gul",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alejandro_toledo",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alvaro_uribe",
+     "tp": 36,
+     "fp": 0,
+     "fn": 0,
+     "returned": 36
+    },
+    {
+     "person": "amelie_mauresmo",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "andre_agassi",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "andy_roddick",
+     "tp": 23,
+     "fp": 0,
+     "fn": 0,
+     "returned": 23
+    },
+    {
+     "person": "angelina_jolie",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "ariel_sharon",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "arnold_schwarzenegger",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "atal_bihari_vajpayee",
+     "tp": 26,
+     "fp": 0,
+     "fn": 0,
+     "returned": 26
+    },
+    {
+     "person": "bill_clinton",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "bill_gates",
+     "tp": 24,
+     "fp": 0,
+     "fn": 0,
+     "returned": 24
+    },
+    {
+     "person": "bill_simon",
+     "tp": 18,
+     "fp": 0,
+     "fn": 0,
+     "returned": 18
+    },
+    {
+     "person": "carlos_menem",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "carlos_moya",
+     "tp": 30,
+     "fp": 0,
+     "fn": 1,
+     "returned": 30
+    },
+    {
+     "person": "colin_powell",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "david_beckham",
+     "tp": 25,
+     "fp": 0,
+     "fn": 0,
+     "returned": 25
+    },
+    {
+     "person": "dominique_de_villepin",
+     "tp": 26,
+     "fp": 0,
+     "fn": 0,
+     "returned": 26
+    },
+    {
+     "person": "donald_rumsfeld",
+     "tp": 27,
+     "fp": 0,
+     "fn": 0,
+     "returned": 27
+    },
+    {
+     "person": "fidel_castro",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "george_robertson",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "george_w_bush",
+     "tp": 32,
+     "fp": 1,
+     "fn": 0,
+     "returned": 33
+    },
+    {
+     "person": "gerhard_schroeder",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "gloria_macapagal_arroyo",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "gray_davis",
+     "tp": 32,
+     "fp": 0,
+     "fn": 1,
+     "returned": 32
+    },
+    {
+     "person": "guillermo_coria",
+     "tp": 25,
+     "fp": 0,
+     "fn": 0,
+     "returned": 25
+    }
+   ]
+  },
+  "V2_TEMPLATE_VERIFY": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "fn_total": 2,
+   "zero_fp_guest_rate": 0.9615,
+   "any_fp_rate": 0.0385,
+   "fp_per_guest_avg": 0.038,
+   "fp_per_guest_p95": 0,
+   "fn_per_guest_avg": 0.077,
+   "returned_avg": 29.1,
+   "returned_median": 30,
+   "subset_recall": {
+    "NORMAL": 0.9979,
+    "DARK": 1.0,
+    "BLUR": 1.0,
+    "SMALL": 0.9615,
+    "GROUP": 1.0
+   },
+   "per_guest": [
+    {
+     "person": "abdullah_gul",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alejandro_toledo",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "alvaro_uribe",
+     "tp": 36,
+     "fp": 0,
+     "fn": 0,
+     "returned": 36
+    },
+    {
+     "person": "amelie_mauresmo",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "andre_agassi",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "andy_roddick",
+     "tp": 23,
+     "fp": 0,
+     "fn": 0,
+     "returned": 23
+    },
+    {
+     "person": "angelina_jolie",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "ariel_sharon",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "arnold_schwarzenegger",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "atal_bihari_vajpayee",
+     "tp": 26,
+     "fp": 0,
+     "fn": 0,
+     "returned": 26
+    },
+    {
+     "person": "bill_clinton",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "bill_gates",
+     "tp": 24,
+     "fp": 0,
+     "fn": 0,
+     "returned": 24
+    },
+    {
+     "person": "bill_simon",
+     "tp": 18,
+     "fp": 0,
+     "fn": 0,
+     "returned": 18
+    },
+    {
+     "person": "carlos_menem",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "carlos_moya",
+     "tp": 30,
+     "fp": 0,
+     "fn": 1,
+     "returned": 30
+    },
+    {
+     "person": "colin_powell",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "david_beckham",
+     "tp": 25,
+     "fp": 0,
+     "fn": 0,
+     "returned": 25
+    },
+    {
+     "person": "dominique_de_villepin",
+     "tp": 26,
+     "fp": 0,
+     "fn": 0,
+     "returned": 26
+    },
+    {
+     "person": "donald_rumsfeld",
+     "tp": 27,
+     "fp": 0,
+     "fn": 0,
+     "returned": 27
+    },
+    {
+     "person": "fidel_castro",
+     "tp": 30,
+     "fp": 0,
+     "fn": 0,
+     "returned": 30
+    },
+    {
+     "person": "george_robertson",
+     "tp": 32,
+     "fp": 0,
+     "fn": 0,
+     "returned": 32
+    },
+    {
+     "person": "george_w_bush",
+     "tp": 32,
+     "fp": 1,
+     "fn": 0,
+     "returned": 33
+    },
+    {
+     "person": "gerhard_schroeder",
+     "tp": 35,
+     "fp": 0,
+     "fn": 0,
+     "returned": 35
+    },
+    {
+     "person": "gloria_macapagal_arroyo",
+     "tp": 29,
+     "fp": 0,
+     "fn": 0,
+     "returned": 29
+    },
+    {
+     "person": "gray_davis",
+     "tp": 32,
+     "fp": 0,
+     "fn": 1,
+     "returned": 32
+    },
+    {
+     "person": "guillermo_coria",
+     "tp": 25,
+     "fp": 0,
+     "fn": 0,
+     "returned": 25
+    }
+   ]
+  }
+ },
+ "strict_sweep": {
+  "0.3": {
+   "direct": {
+    "precision": 0.9987,
+    "recall": 0.9974,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9921,
+    "recall": 0.9974,
+    "fp_total": 6,
+    "zero_fp_guest_rate": 0.8077
+   }
+  },
+  "0.35": {
+   "direct": {
+    "precision": 0.9987,
+    "recall": 0.9947,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9974,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  },
+  "0.4": {
+   "direct": {
+    "precision": 0.9987,
+    "recall": 0.9908,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9974,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  },
+  "0.45": {
+   "direct": {
+    "precision": 0.9987,
+    "recall": 0.9815,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9974,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  },
+  "0.5": {
+   "direct": {
+    "precision": 0.9986,
+    "recall": 0.9525,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9947,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  },
+  "0.55": {
+   "direct": {
+    "precision": 0.9985,
+    "recall": 0.8984,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9921,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  },
+  "0.6": {
+   "direct": {
+    "precision": 0.9982,
+    "recall": 0.7427,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   },
+   "template": {
+    "precision": 0.9987,
+    "recall": 0.9908,
+    "fp_total": 1,
+    "zero_fp_guest_rate": 0.9615
+   }
+  }
+ },
+ "recovery_sweep": {
+  "0.26": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "0.3": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "0.34": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "0.38": {
+   "precision": 0.9987,
+   "recall": 0.996,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "0.42": {
+   "precision": 0.9987,
+   "recall": 0.9934,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  }
+ },
+ "seeds_sweep": {
+  "1": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "3": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "5": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "8": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "12": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  }
+ },
+ "seed_strategy": {
+  "quality+diverse (prod)": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1
+  },
+  "quality, no diversity": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1
+  },
+  "plain top-K": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1
+  }
+ },
+ "consensus_rules": {
+  "A best-similarity only (=C)": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "B >=2 reference agreement": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "C quality-scaled recovery": {
+   "precision": 0.9987,
+   "recall": 0.996,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "D both": {
+   "precision": 0.9987,
+   "recall": 0.996,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  }
+ },
+ "second_selfie": {
+  "one_selfie": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  },
+  "two_selfies": {
+   "precision": 0.9987,
+   "recall": 0.9974,
+   "fp_total": 1,
+   "zero_fp_guest_rate": 0.9615
+  }
+ },
+ "quality_buckets": {
+  "HIGH(>0.7)": {
+   "tp_faces": 55,
+   "fp_faces": 0
+  },
+  "MED(0.45-0.7)": {
+   "tp_faces": 662,
+   "fp_faces": 1
+  },
+  "LOW(<0.45)": {
+   "tp_faces": 40,
+   "fp_faces": 0
+  }
+ },
+ "failure_classes": {
+  "QUERY_FAILED": 0,
+  "DETECTION_MISS": 2,
+  "RECOGNITION_MISS": 0,
+  "TEMPLATE_MISS": 0,
+  "VERIFICATION_REJECT": 0,
+  "UNKNOWN": 0
+ },
+ "worst_false_positives": [
+  {
+   "query_identity": "george_w_bush",
+   "photo": "colin_powell_n05",
+   "wrong_identity": "colin_powell",
+   "similarity": 0.7005,
+   "quality": 0.594,
+   "face_px": 96,
+   "subset": "NORMAL"
+  }
+ ],
+ "margin": {
+  "tp": {
+   "n": 756,
+   "median": 0.543,
+   "p10": 0.42
+  },
+  "fp": {
+   "n": 1,
+   "median": 0.59,
+   "p10": 0.59
+  }
+ }
+}

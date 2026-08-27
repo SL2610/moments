@@ -1,0 +1,23 @@
+[project]
+name = "grabpic-ai"
+version = "2.0.0"
+description = "GrabPic face engine v2: SCRFD + AdaFace IR101, two-stage identity search"
+requires-python = ">=3.11"
+dependencies = [
+    "insightface==1.0.1",          # SCRFD detector + 5-point alignment utils
+    "onnxruntime==1.29.0",         # CPU inference (GPU build swaps in onnxruntime-gpu)
+    "opencv-python-headless>=4.10",
+    "numpy>=2.0",
+    "pillow>=10.0",
+    "scikit-image>=0.24",          # required by insightface alignment
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "python-multipart>=0.0.9",
+    "slowapi==0.1.9",
+    "psycopg2-binary==2.9.11",
+    "python-dotenv>=1.0",
+    "requests>=2.32",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
