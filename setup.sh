@@ -37,7 +37,7 @@ command -v docker >/dev/null || { echo "Docker is required. Install it first: ht
 command -v openssl >/dev/null || { echo "openssl is required (usually preinstalled on macOS/Linux)." >&2; exit 1; }
 
 if [ -f .env ]; then
-	echo ".env already exists — delete it first if you want to start over. Exiting without changes."
+	echo ".env already exists. Delete it first if you want to start over. Exiting without changes."
 	exit 1
 fi
 
@@ -97,7 +97,7 @@ if [ -n "$SKIP_UP" ]; then
 	exit 0
 fi
 
-echo "Building and starting (this downloads the AI models on first run — can take a few minutes)..."
+echo "Building and starting (this downloads the AI models on first run, can take a few minutes)..."
 docker compose build
 docker compose up -d
 

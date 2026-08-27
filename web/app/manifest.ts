@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 const EVENT_NAME = process.env.NEXT_PUBLIC_EVENT_NAME || "Your Names Here";
 
 // ponytail: manifest name/description stay Hebrew (matches the default
-// <html lang="he">) rather than switching with the lang cookie — the PWA
+// <html lang="he">) rather than switching with the lang cookie. The PWA
 // install prompt isn't worth the extra plumbing.
 export default function manifest(): MetadataRoute.Manifest {
 	return {

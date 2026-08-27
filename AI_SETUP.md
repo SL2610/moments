@@ -6,9 +6,9 @@ AI assistant that can actually run commands on a computer, and it does the
 setup for you, then tells you your gallery link and password.
 
 **This needs an AI tool with real terminal access to the computer that will
-run the gallery** — [Claude Code](https://claude.com/product/claude-code) is
+run the gallery.** [Claude Code](https://claude.com/product/claude-code) is
 the one we've tested this with. A plain chat window (ChatGPT, Claude on the
-web, etc.) can't do this — it has no way to actually run commands on your
+web, etc.) can't do this: it has no way to actually run commands on your
 computer, so it can talk you through the steps but can't do them for you.
 
 If you don't have Claude Code and don't want to install it, use the manual
@@ -20,7 +20,7 @@ pay someone else to do this entirely.
 
 1. Install [Claude Code](https://claude.com/product/claude-code) on the
    computer you want to run your gallery on (your own laptop/desktop that
-   you can leave on, or a free cloud server — the assistant will explain the
+   you can leave on, or a free cloud server; the assistant will explain the
    cloud option if you ask it to).
 2. Open a terminal, run `claude`, and paste the entire box below as your
    first message.
@@ -44,15 +44,15 @@ server). Everything below is free unless noted.
    - Their names, the way they want guests to see them (e.g. "Dana & Yossi").
    - Their wedding date.
    - A guest password guests will type to get in (offer to generate a simple
-     memorable one if they don't want to pick one — it goes on their invite/QR
+     memorable one if they don't want to pick one, it goes on their invite/QR
      code, so it should be easy to say out loud).
    - An email + password for their own admin login (to manage the gallery).
    - Whether this will run on the computer you're working on right now (they
      need to leave it powered on and connected to the internet), or on a
      cloud server. If they want a cloud server and don't have one, point them
      to the free Oracle Cloud "Always Free" tier (see SELF_HOSTING.md in the
-     repo once cloned) and offer to SSH in and continue there once it's created
-     — this is optional and more advanced; the couple's own computer is the
+     repo once cloned) and offer to SSH in and continue there once it's created.
+     This is optional and more advanced; the couple's own computer is the
      simpler default.
 
 3. Clone https://github.com/SL2610/moments into a sensible local directory
@@ -64,7 +64,7 @@ server). Everything below is free unless noted.
        --guest-password sunflower22 --admin-email dana@example.com \
        --admin-password <their password>
    This builds and starts everything with Docker Compose. The first build
-   downloads AI models and can take several minutes — say so, don't go quiet.
+   downloads AI models and can take several minutes: say so, don't go quiet.
 
 5. Confirm it's actually up: `curl -sf http://localhost:2610 >/dev/null` (or
    equivalent) before declaring success.
@@ -72,10 +72,10 @@ server). Everything below is free unless noted.
 6. Set up a way for guests outside their home network to reach it. Default to
    the quick, zero-setup Cloudflare Tunnel mode (`cloudflared tunnel --url
    http://localhost:2610`, no account needed) and explain plainly that this
-   free URL changes if the tunnel restarts — fine for testing, but before the
+   free URL changes if the tunnel restarts: fine for testing, but before the
    wedding they should either keep that tunnel process running continuously,
    or (if they already own a domain, or are willing to buy one for ~$10-15/yr)
-   set up a named Cloudflare Tunnel with a stable address — see
+   set up a named Cloudflare Tunnel with a stable address. See
    SELF_HOSTING.md's Cloudflare Tunnel section for both options, and confirm
    with them before spending any money.
 

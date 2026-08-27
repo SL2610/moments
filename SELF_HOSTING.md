@@ -2,7 +2,7 @@
 
 Everything runs on one machine through Docker Compose. No cloud accounts required.
 
-Not comfortable with a terminal at all? See [AI_SETUP.md](AI_SETUP.md) — a
+Not comfortable with a terminal at all? See [AI_SETUP.md](AI_SETUP.md): a
 prompt you hand to an AI assistant that does this for you.
 
 ## Quick start
@@ -16,7 +16,7 @@ cd moments
 `setup.sh` asks for your names, wedding date, guest password, and admin
 login, generates the random secrets, writes `.env`, and starts everything.
 (Prefer to do it by hand? `cp .env.example .env`, fill in the `CHANGE ME`
-lines — `openssl rand -base64 48` for `JWT_SECRET`/`VIEW_URL_SECRET` — then
+lines (`openssl rand -base64 48` for `JWT_SECRET`/`VIEW_URL_SECRET`), then
 `docker compose up -d`.)
 
 Then:
@@ -27,7 +27,7 @@ Then:
 2. Add photos: bulk import (below) or the admin upload page.
 3. Guests open http://localhost:2610 (or your public URL), enter their phone
    number, full name, and `GUEST_PASSWORD`, and get the shared gallery.
-4. Guests outside your own Wi-Fi need a public URL — see **Hosting options**
+4. Guests outside your own Wi-Fi need a public URL: see **Hosting options**
    below.
 
 ## The guest experience (Hebrew + English)
@@ -37,7 +37,7 @@ how-to, and the join form. Guests can switch language (Hebrew is the
 default) with the toggle on the page. Put your own photo at
 `./data/branding/hero.jpg` on the host to replace the default, and an
 invitation graphic at `./data/branding/invite-card.png` if you have one
-(both served live, no rebuild — skipped cleanly if you don't provide them).
+(both served live, no rebuild, skipped cleanly if you don't provide them).
 
 The root page is the wedding app: guests join with their phone number, full
 name, and the shared password (the phone number is the stable identity; the
@@ -52,7 +52,7 @@ first admin account. Imported and guest-uploaded photos are PUBLIC (visible
 to every logged-in guest); photos an admin marks PROTECTED only surface
 through a face match.
 
-## Hosting options — getting a public URL
+## Hosting options: getting a public URL
 
 Everything above works on `localhost`. To let guests who aren't on your home
 Wi-Fi in, you need a public address pointed at your machine. Two realistic
@@ -62,11 +62,11 @@ $0 options:
 on and connected to the internet; Cloudflare Tunnel exposes it publicly
 without opening any router ports. Two modes:
 
-- **Quick tunnel** — zero setup: `cloudflared tunnel --url http://localhost:2610`
+- **Quick tunnel**: zero setup. `cloudflared tunnel --url http://localhost:2610`
   gives you a random `trycloudflare.com` URL immediately. It's genuinely
-  free, but the address **changes every time the tunnel restarts** — fine
+  free, but the address **changes every time the tunnel restarts**: fine
   for testing, risky for sharing on invitations.
-- **Named tunnel** — a stable address that doesn't change. Requires you to
+- **Named tunnel**: a stable address that doesn't change. Requires you to
   already own (or buy, ~$10–15/yr) a domain on Cloudflare. Set up:
   1. Cloudflare Zero Trust → Networks → Tunnels → create a tunnel, copy the
      token into `CLOUDFLARE_TUNNEL_TOKEN` in `.env`.
@@ -77,11 +77,11 @@ without opening any router ports. Two modes:
   Only the web app is ever exposed; every other service stays on the private
   Docker network either way.
 
-**2. Oracle Cloud "Always Free" tier — no home computer needed.** Oracle
+**2. Oracle Cloud "Always Free" tier: no home computer needed.** Oracle
 gives away an ARM VM (up to 24 GB RAM / 4 OCPU) forever, free, no card
 charged. Good if you don't want to leave a computer running at home. Caveat:
 it's ARM64, and this stack's AI images (TensorFlow/PyTorch-based) are
-**not verified on ARM** — build the `ai-worker`/`ai-search` images on the VM
+**not verified on ARM**: build the `ai-worker`/`ai-search` images on the VM
 first (`docker compose build ai-worker ai-search`) and confirm they start
 before committing to this path. If they don't build cleanly, fall back to
 option 1 or a small paid x86 VM.

@@ -1,8 +1,8 @@
 import type he from "./he";
 
-// English locale. Keep keys in sync with he.ts — `satisfies` below enforces it.
+// English locale. Keep keys in sync with he.ts; `satisfies` below enforces it.
 const en = {
-	// Navbar (admin area: login/signup/dashboard only — never shown on the guest pages)
+	// Navbar (admin area: login/signup/dashboard only, never shown on the guest pages)
 	"nav.admin": "ADMIN",
 	"nav.home": "Home",
 	"nav.dashboard": "Dashboard",

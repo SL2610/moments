@@ -1,6 +1,6 @@
 // Hebrew (default locale). Keep keys in sync with en.ts.
 const he = {
-	// Navbar (admin area: login/signup/dashboard only — never shown on the guest pages)
+	// Navbar (admin area: login/signup/dashboard only, never shown on the guest pages)
 	"nav.admin": "ADMIN",
 	"nav.home": "ראשי",
 	"nav.dashboard": "ניהול",
