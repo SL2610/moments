@@ -5,34 +5,34 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * "Editorial Invitation" palette (shared with the Moments site). Remapping the
+ * Moments album palette (shared with the site): ivory, charcoal, forest. Remapping the
  * Tailwind ramps re-themes every existing utility class: violet -> forest
  * accent, zinc -> paper-to-ink neutrals, emerald/red/amber -> muted.
  */
 @theme {
-	--color-violet-50: #f3f6f3;
-	--color-violet-100: #e3ebe5;
-	--color-violet-200: #c6d6cb;
-	--color-violet-300: #9fb8a8;
-	--color-violet-400: #6f927d;
-	--color-violet-500: #4a6f5a;
-	--color-violet-600: #2f4b3c;
-	--color-violet-700: #263e31;
-	--color-violet-800: #1e3227;
-	--color-violet-900: #17261e;
-	--color-violet-950: #0e1812;
+	--color-violet-50: #eef2ef;
+	--color-violet-100: #dbe4dd;
+	--color-violet-200: #b9c9bd;
+	--color-violet-300: #8ea595;
+	--color-violet-400: #5d7c69;
+	--color-violet-500: #35584a;
+	--color-violet-600: #1d3a2f;
+	--color-violet-700: #172f26;
+	--color-violet-800: #12251e;
+	--color-violet-900: #0d1b16;
+	--color-violet-950: #08110d;
 
-	--color-zinc-50: #faf7f1;
-	--color-zinc-100: #f1eae0;
-	--color-zinc-200: #e4dccf;
-	--color-zinc-300: #d0c6b6;
-	--color-zinc-400: #7d7365;
-	--color-zinc-500: #6b6255;
-	--color-zinc-600: #574f44;
-	--color-zinc-700: #433d34;
-	--color-zinc-800: #2e2a24;
-	--color-zinc-900: #1c1a16;
-	--color-zinc-950: #12110e;
+	--color-zinc-50: #f4efe6;
+	--color-zinc-100: #ebe3d6;
+	--color-zinc-200: #ddd4c4;
+	--color-zinc-300: #c8beac;
+	--color-zinc-400: #776f63;
+	--color-zinc-500: #645e54;
+	--color-zinc-600: #4f4a42;
+	--color-zinc-700: #3b3832;
+	--color-zinc-800: #28261f;
+	--color-zinc-900: #191917;
+	--color-zinc-950: #0f0f0d;
 
 	--color-emerald-50: #eff2ee;
 	--color-emerald-100: #dfe5dd;
@@ -117,25 +117,25 @@
 }
 
 :root {
-	--radius: 0.25rem;
-	--background: #faf7f1;
-	--foreground: #1c1a16;
-	--card: #ffffff;
+	--radius: 0.125rem;
+	--background: #f4efe6;
+	--foreground: #191917;
+	--card: #fbf8f2;
 	--card-foreground: #1c1a16;
-	--popover: #ffffff;
+	--popover: #fbf8f2;
 	--popover-foreground: #1c1a16;
-	--primary: #1c1a16;
-	--primary-foreground: #faf7f1;
-	--secondary: #f1eae0;
+	--primary: #1d3a2f;
+	--primary-foreground: #e9e3d6;
+	--secondary: #ebe3d6;
 	--secondary-foreground: #1c1a16;
-	--muted: #f1eae0;
-	--muted-foreground: #6b6255;
-	--accent: #f1eae0;
+	--muted: #ebe3d6;
+	--muted-foreground: #645e54;
+	--accent: #ebe3d6;
 	--accent-foreground: #1c1a16;
 	--destructive: #9a3038;
-	--border: rgba(28, 26, 22, 0.14);
-	--input: rgba(28, 26, 22, 0.22);
-	--ring: #2f4b3c;
+	--border: rgba(25, 25, 23, 0.16);
+	--input: rgba(25, 25, 23, 0.22);
+	--ring: #1d3a2f;
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -193,7 +193,8 @@ html {
 }
 html:lang(he) {
 	--font-ui-stack: var(--font-ui-he-face), ui-sans-serif, system-ui, sans-serif;
-	--font-display-stack: var(--font-display-he-face), ui-serif, Georgia, serif;
+	/* Bodoni draws Latin names; Hebrew falls through to Frank Ruhl. */
+	--font-display-stack: var(--font-display-face), var(--font-display-he-face), ui-serif, Georgia, serif;
 }
 
 @layer base {
@@ -204,8 +205,8 @@ html:lang(he) {
 		@apply bg-background text-foreground font-sans antialiased;
 	}
 	::selection {
-		background: #c6d6cb;
-		color: #1c1a16;
+		background: #1d3a2f;
+		color: #e9e3d6;
 	}
 }
 
@@ -352,4 +353,54 @@ section {
 }
 .img-fade.img-loaded {
 	opacity: 1;
+}
+
+/* ------------------------------------------------------------------
+ * Album signatures (shared with the Moments site).
+ * .crop: forest printer's crop marks at two opposite corners, outside the box.
+ * .meta: caption metadata, small tracked caps like a photo book's captions.
+ * ------------------------------------------------------------------ */
+.crop { position: relative; }
+.crop::before,
+.crop::after {
+	content: "";
+	position: absolute;
+	width: 22px;
+	height: 22px;
+	pointer-events: none;
+	border: 0 solid var(--color-violet-600);
+	z-index: 1;
+}
+.crop::before { top: -12px; inset-inline-start: -12px; border-top-width: 1px; border-inline-start-width: 1px; }
+.crop::after { bottom: -12px; inset-inline-end: -12px; border-bottom-width: 1px; border-inline-end-width: 1px; }
+.crop-light::before, .crop-light::after { border-color: #e9e3d6; }
+
+.meta {
+	font-family: var(--font-ui-stack);
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	font-variant-numeric: tabular-nums;
+}
+:lang(he) .meta { letter-spacing: 0.04em; font-size: 0.78rem; }
+
+/* Barely-there print grain. */
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	pointer-events: none;
+	background: url("/grain.png");
+	opacity: 0.03;
+	mix-blend-mode: multiply;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.develop { animation: develop 1.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+@keyframes develop {
+	from { clip-path: inset(0 0 100% 0); transform: scale(1.06); filter: brightness(1.25); }
+	to { clip-path: inset(0); transform: none; filter: none; }
 }

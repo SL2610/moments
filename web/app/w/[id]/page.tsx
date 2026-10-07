@@ -65,8 +65,8 @@ const SHOW_CREDIT = process.env.NEXT_PUBLIC_SHOW_CREDIT !== "false";
 function Credit() {
 	if (!SHOW_CREDIT) return null;
 	return (
-		<p className="mt-6 text-center text-sm text-zinc-500">
-			<a href="https://sagi-lior-wedding.com" className="underline underline-offset-4 hover:text-zinc-900">
+		<p className="meta text-zinc-500 shrink-0" dir="ltr">
+			<a href="https://sagi-lior-wedding.com" className="hover:text-zinc-900">
 				Made with Moments
 			</a>
 		</p>
@@ -75,30 +75,18 @@ function Credit() {
 
 const MAX_PHOTO_MB = Number(process.env.NEXT_PUBLIC_MAX_PHOTO_MB || "30");
 
-// Matches the wedding stationery: letterspaced serif caps in bronze,
-// a small heart between thin rules, then the date.
-function Wordmark({ name, date, size = "lg" }: { name: string; date: string; size?: "sm" | "lg" }) {
+// The couple's names as a running head, the date as a caption beneath.
+function Wordmark({ name, date }: { name: string; date: string; size?: "sm" | "lg" }) {
 	return (
-		<div className="text-center" dir="ltr">
-			<p
-				className={`uppercase whitespace-nowrap text-violet-700 ${size === "lg" ? "text-3xl sm:text-4xl tracking-[0.3em]" : "text-sm sm:text-lg tracking-[0.12em] sm:tracking-[0.2em]"}`}
-				style={{ fontFamily: "var(--font-display)", fontWeight: 600 }}
-			>
+		<div className="text-start min-w-0">
+			<p className="truncate text-xl sm:text-2xl leading-none text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
 				{name}
 			</p>
-			{size === "lg" ? (
-				<div className="flex items-center justify-center gap-3 mt-3">
-					<span className="h-px w-10 bg-violet-300" />
-					<span className="text-violet-600 text-xs">♥</span>
-					<span className="h-px w-10 bg-violet-300" />
-				</div>
-			) : null}
-			<p
-				className={`whitespace-nowrap tracking-[0.35em] text-violet-600/80 ${size === "lg" ? "mt-3 text-sm" : "mt-0.5 text-[9px] sm:text-[10px]"}`}
-				style={{ fontFamily: "var(--font-display)" }}
-			>
-				{date}
-			</p>
+			{date && (
+				<p className="meta text-zinc-500 mt-1.5" dir="ltr">
+					{date.replace(/[./-]/g, " · ")}
+				</p>
+			)}
 		</div>
 	);
 }
@@ -766,111 +754,101 @@ export default function WeddingPage() {
 	const langToggle = (
 		<button
 			onClick={() => setLocale(locale === "he" ? "en" : "he")}
-			className="text-sm font-medium px-3 min-h-11 rounded-full"
+			className="text-sm font-medium px-3 min-h-11"
 		>
 			{locale === "he" ? "EN" : "עברית"}
 		</button>
 	);
 
 	if (!session) {
-		const hasCover = Boolean(info.coverUrl);
+		const dateMeta = info.eventDate.replace(/[./-]/g, " · ");
 		return (
-			<div className="min-h-[100svh] flex flex-col bg-zinc-50">
-				{/* The couple's invitation: their photo, their names. Moments stays in the credit. */}
-				<section
-					className={`relative flex-1 flex flex-col justify-end overflow-hidden ${hasCover ? "min-h-[100svh] text-white" : "min-h-[70svh] text-zinc-900"}`}
-				>
-					{hasCover && (
-						<>
-							{/* eslint-disable-next-line @next/next/no-img-element */}
-							<img
-								src={info.coverUrl!}
-								alt=""
-								className="absolute inset-0 w-full h-full object-cover"
-							/>
-							<div
-								aria-hidden
-								className="absolute inset-0 bg-gradient-to-t from-zinc-950/85 via-zinc-950/35 to-zinc-950/10"
-							/>
-						</>
-					)}
-					<div className={`absolute top-3 end-3 z-10 ${hasCover ? "text-white/90" : "text-zinc-600"}`}>
-						{langToggle}
-					</div>
-					<div className="relative z-10 w-full max-w-md mx-auto px-7 pb-12 pt-24 text-center">
-						<p className="lp-rise text-sm opacity-80" dir="ltr" style={{ animationDelay: "100ms" }}>
-							{info.eventDate}
-						</p>
-						<h1
-							className="lp-rise mt-3 text-5xl sm:text-6xl leading-[1.05]"
-							style={{ fontFamily: "var(--font-display)", animationDelay: "200ms" }}
-						>
-							{info.eventName}
-						</h1>
-						<p
-							className={`lp-rise mt-5 text-lg ${hasCover ? "text-white/85" : "text-zinc-600"}`}
-							style={{ animationDelay: "350ms" }}
-						>
-							{t("guest.landing.tagline")}
-						</p>
+			<div className="min-h-[100svh] bg-[#fbfaf7] flex flex-col">
+				{/* The couple's album cover, set like a magazine: their names lead, Moments is only the credit. */}
+				<div className="flex items-center justify-between px-6 pt-5 text-zinc-500">
+					<p className="meta" dir="ltr">{dateMeta}</p>
+					{langToggle}
+				</div>
 
-						<form
-							onSubmit={(e) => {
-								e.preventDefault();
-								handleStart("selfie");
-							}}
-							className="lp-rise mt-9 space-y-3"
-							style={{ animationDelay: "500ms" }}
-						>
-							{info.passwordRequired && (
-								<div className="text-start">
-									<label htmlFor="lp-password" className="block text-sm mb-1.5 opacity-90">
-										{t("guest.join.passwordLabel")}
-									</label>
-									<input
-										id="lp-password"
-										type="password"
-										value={password}
-										onChange={(e) => setPassword(e.target.value)}
-										required
-										autoComplete="current-password"
-										className="w-full min-h-12 rounded bg-white px-4 text-base text-zinc-900 border border-zinc-300 focus:outline-none focus:ring-2 focus:ring-violet-600"
-									/>
-									<p className="mt-1.5 text-sm opacity-80">{t("guest.join.passwordHint")}</p>
-								</div>
-							)}
-							{joinError && (
-								<p role="alert" className={`text-sm ${hasCover ? "text-white" : "text-red-700"}`}>
-									{joinError}
-								</p>
-							)}
-							<button
-								type="submit"
-								disabled={isJoining}
-								className={`w-full min-h-14 rounded-full text-lg font-medium flex items-center justify-center gap-2.5 transition-opacity hover:opacity-90 disabled:opacity-60 ${hasCover ? "bg-white text-zinc-900" : "bg-zinc-900 text-zinc-50"}`}
-							>
-								{isJoining ? (
-									<Loader2 className="w-5 h-5 animate-spin" />
-								) : (
-									<>
-										<UserSearch className="w-5 h-5" />
-										{t("guest.landing.findPhotos")}
-									</>
-								)}
-							</button>
-							<button
-								type="button"
-								onClick={() => handleStart("album")}
-								disabled={isJoining}
-								className="w-full min-h-11 text-base underline underline-offset-4 opacity-90 hover:opacity-100"
-							>
-								{t("guest.landing.seeAlbum")}
-							</button>
-						</form>
+				<main className="flex-1 w-full max-w-xl mx-auto px-6">
+					<h1
+						className="lp-rise mt-4 text-[clamp(3.2rem,15vw,6rem)] leading-[0.9] tracking-[-0.035em] text-zinc-900"
+						style={{ fontFamily: "var(--font-display)", animationDelay: "200ms" }}
+					>
+						{info.eventName}
+					</h1>
+
+					{info.coverUrl && (
+						<div className="crop mt-7">
+							<div className="overflow-hidden aspect-[4/5] bg-zinc-100">
+								{/* eslint-disable-next-line @next/next/no-img-element */}
+								<img src={info.coverUrl} alt="" className="develop w-full h-full object-cover grayscale contrast-[1.05]" />
+							</div>
+						</div>
+					)}
+
+					<div className="mt-6 flex items-baseline justify-between gap-4 border-b border-zinc-300 pb-3">
+						<p className="meta text-zinc-900" dir="ltr">{info.eventName}</p>
+						<p className="meta text-zinc-500">{t("guest.landing.ourWedding")}</p>
 					</div>
-				</section>
-				<footer className="py-6 px-7 text-center">
-					<p className="text-sm text-zinc-500 max-w-xs mx-auto">{t("guest.selfieSearch.privacyNote")}</p>
+
+					<p className="lp-rise mt-6 text-lg text-zinc-600" style={{ animationDelay: "500ms" }}>
+						{t("guest.landing.tagline")}
+					</p>
+
+					<form
+						onSubmit={(e) => {
+							e.preventDefault();
+							handleStart("selfie");
+						}}
+						className="lp-rise mt-7 space-y-3"
+						style={{ animationDelay: "650ms" }}
+					>
+						{info.passwordRequired && (
+							<div>
+								<label htmlFor="lp-password" className="block text-sm text-zinc-600 mb-1.5">
+									{t("guest.join.passwordLabel")}
+								</label>
+								<input
+									id="lp-password"
+									type="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+									required
+									autoComplete="current-password"
+									className="w-full h-[52px] rounded-[2px] bg-white px-4 text-base text-zinc-900 border border-zinc-300 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
+								/>
+								<p className="mt-1.5 text-sm text-zinc-500">{t("guest.join.passwordHint")}</p>
+							</div>
+						)}
+						{joinError && <p role="alert" className="text-sm text-red-700">{joinError}</p>}
+						<button
+							type="submit"
+							disabled={isJoining}
+							className="w-full h-14 rounded-[2px] bg-zinc-900 text-zinc-50 text-base font-medium flex items-center justify-between px-5 transition-colors hover:bg-violet-600 disabled:opacity-60"
+						>
+							{isJoining ? (
+								<Loader2 className="w-5 h-5 animate-spin mx-auto" />
+							) : (
+								<>
+									<span>{t("guest.landing.findPhotos")}</span>
+									<span aria-hidden className="rtl:-scale-x-100">→</span>
+								</>
+							)}
+						</button>
+						<button
+							type="button"
+							onClick={() => handleStart("album")}
+							disabled={isJoining}
+							className="min-h-11 text-zinc-700 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900"
+						>
+							{t("guest.landing.seeAlbum")}
+						</button>
+					</form>
+				</main>
+
+				<footer className="px-6 pt-10 pb-8 flex items-end justify-between gap-6 text-zinc-500 max-w-xl w-full mx-auto">
+					<p className="text-sm max-w-[16rem]">{t("guest.selfieSearch.privacyNote")}</p>
 					<Credit />
 				</footer>
 			</div>
@@ -882,17 +860,10 @@ export default function WeddingPage() {
 
 	return (
 		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-			<header className="sticky top-0 z-30 bg-zinc-50/90 dark:bg-zinc-950/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
-				<div className="max-w-[1440px] mx-auto px-3 sm:px-5 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
-					<div className="flex items-center gap-2 sm:gap-3 shrink-0">
-						<Wordmark name={info.eventName} date={info.eventDate} size="sm" />
-						<button
-							onClick={() => setLocale(locale === "he" ? "en" : "he")}
-							className="shrink-0 text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white px-2 py-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-						>
-							{locale === "he" ? "EN" : "עברית"}
-						</button>
-					</div>
+			<header className="sticky top-0 z-30 bg-zinc-50 border-b border-zinc-200">
+				<div className="max-w-[1440px] mx-auto px-5 sm:px-8 py-4 flex items-center justify-between gap-4">
+					<Wordmark name={info.eventName} date={info.eventDate} />
+					<div className="text-zinc-500 shrink-0">{langToggle}</div>
 				</div>
 			</header>
 
@@ -946,7 +917,7 @@ export default function WeddingPage() {
 								onClick={() => chooseGalleryLayout("masonry")}
 								title={t("guest.gallery.layoutMasonry")}
 								aria-label={t("guest.gallery.layoutMasonry")}
-								className={`p-2 mb-1.5 rounded-lg transition-colors ${galleryLayout === "masonry" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
+								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "masonry" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
 							>
 								<Columns3 className="w-5 h-5" />
 							</button>
@@ -954,14 +925,14 @@ export default function WeddingPage() {
 								onClick={() => chooseGalleryLayout("grid")}
 								title={t("guest.gallery.layoutGrid")}
 								aria-label={t("guest.gallery.layoutGrid")}
-								className={`p-2 mb-1.5 rounded-lg transition-colors ${galleryLayout === "grid" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
+								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "grid" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
 							>
 								<LayoutGrid className="w-5 h-5" />
 							</button>
 						<DropdownMenu.Root dir={dir}>
 							<DropdownMenu.Trigger asChild>
 								<button
-									className="p-2 mb-1.5 rounded-lg text-zinc-500 hover:text-violet-700 hover:bg-zinc-100 shrink-0"
+									className="p-2 mb-1.5 rounded-[2px] text-zinc-500 hover:text-violet-700 hover:bg-zinc-100 shrink-0"
 									aria-label={t("guest.gallery.moreActions")}
 								>
 									<MoreVertical className="w-5 h-5" />
@@ -972,12 +943,12 @@ export default function WeddingPage() {
 									align="end"
 									sideOffset={6}
 									collisionPadding={12}
-									className="z-40 min-w-48 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg p-1.5 space-y-0.5"
+									className="z-40 min-w-48 rounded-[2px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg p-1.5 space-y-0.5"
 								>
 									<DropdownMenu.Item
 										onSelect={() => withName(() => uploadInputRef.current?.click())}
 										disabled={uploadProgress !== null}
-										className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-lg outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
+										className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-[2px] outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
 									>
 										{uploadProgress ? (
 											<Loader2 className="w-4 h-4 animate-spin" />
@@ -989,7 +960,7 @@ export default function WeddingPage() {
 									<DropdownMenu.Item
 										onSelect={() => setIsSelecting(true)}
 										disabled={photos.length === 0}
-										className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-lg outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
+										className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-[2px] outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
 									>
 										<CheckSquare className="w-4 h-4" />
 										{t("guest.gallery.selectionMode")}
@@ -998,7 +969,7 @@ export default function WeddingPage() {
 										<DropdownMenu.Item
 											onSelect={() => handleDownloadZip(photos)}
 											disabled={isZipping}
-											className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-lg outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
+											className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-[2px] outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer"
 										>
 											{isZipping ? (
 												<Loader2 className="w-4 h-4 animate-spin" />
@@ -1079,7 +1050,7 @@ export default function WeddingPage() {
 								onPointerUp={cancelLongPress}
 								onPointerLeave={cancelLongPress}
 								onPointerCancel={cancelLongPress}
-								className={`group relative block w-full cursor-pointer bg-zinc-200 rounded-lg overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-3 sm:mb-4 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
+								className={`group relative block w-full cursor-pointer bg-zinc-200 rounded-[2px] overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-3 sm:mb-4 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
 							>
 								{isSelecting && (
 									<span
@@ -1145,7 +1116,7 @@ export default function WeddingPage() {
 							(h, i) => (
 								<div
 									key={i}
-									className="mb-3 sm:mb-4 w-full break-inside-avoid rounded-lg bg-zinc-200/70 animate-pulse"
+									className="mb-3 sm:mb-4 w-full break-inside-avoid rounded-[2px] bg-zinc-200/70 animate-pulse"
 									style={{ height: `${h}px` }}
 								/>
 							),
@@ -1160,7 +1131,11 @@ export default function WeddingPage() {
 				)}
 
 				{canLoadMore && <div ref={loadMoreRef} className="h-1" aria-hidden />}
-				{!canLoadMore && photos.length > 0 && <Credit />}
+				{!canLoadMore && photos.length > 0 && (
+					<div className="flex justify-center py-10">
+						<Credit />
+					</div>
+				)}
 			</main>
 
 			{/* ---------------------------------------- floating actions */}
@@ -1168,7 +1143,7 @@ export default function WeddingPage() {
 				<div className="fixed bottom-5 end-4 sm:end-6 z-40 flex flex-col items-end gap-3">
 					<button
 						onClick={() => setIsSearchOpen(true)}
-						className="flex items-center gap-2.5 h-14 px-5 rounded-full bg-violet-600 hover:bg-violet-700 text-white font-medium shadow-xl transition-colors"
+						className="flex items-center gap-2.5 h-14 px-6 rounded-[2px] bg-violet-600 hover:bg-violet-700 text-zinc-50 font-medium shadow-[0_12px_30px_-12px_rgba(25,25,23,0.55)] transition-colors"
 					>
 						<UserSearch className="w-5 h-5" />
 						<span className="hidden sm:inline">{t("guest.selfieSearch.title")}</span>
@@ -1180,13 +1155,13 @@ export default function WeddingPage() {
 			{/* ---------------------------------------- selection action bar */}
 			{isSelecting && (
 				<div
-					className="fixed bottom-2 inset-x-2 sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2 sm:min-w-[26rem] z-40 rounded-2xl px-3 py-2.5 shadow-2xl space-y-2"
+					className="fixed bottom-2 inset-x-2 sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2 sm:min-w-[26rem] z-40 rounded-[2px] px-3 py-2.5 shadow-2xl space-y-2"
 					style={{ background: "#171311f0" }}
 				>
 					<div className="flex items-center gap-2">
 						<button
 							onClick={exitSelection}
-							className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10"
+							className="p-1.5 rounded-[2px] text-white/60 hover:text-white hover:bg-white/10"
 							title={t("guest.selection.exitTitle")}
 						>
 							<X className="w-4 h-4" />
@@ -1200,7 +1175,7 @@ export default function WeddingPage() {
 									selectedIds.length === photos.length ? [] : photos.map((p) => p.id),
 								)
 							}
-							className="ms-auto px-3 py-1.5 rounded-lg text-sm text-white/75 hover:text-white hover:bg-white/10"
+							className="ms-auto px-3 py-1.5 rounded-[2px] text-sm text-white/75 hover:text-white hover:bg-white/10"
 						>
 							{selectedIds.length === photos.length ? t("guest.selection.clearAll") : t("guest.selection.selectAll")}
 						</button>
@@ -1212,7 +1187,7 @@ export default function WeddingPage() {
 								handleDownloadZip(photos.filter((p) => selectedIds.includes(p.id)))
 							}
 							disabled={selectedIds.length === 0 || isZipping}
-							className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-40 transition-colors"
+							className="flex flex-col items-center gap-1 py-2.5 rounded-[2px] text-xs bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-40 transition-colors"
 						>
 							{isZipping ? (
 								<Loader2 className="w-4 h-4 animate-spin" />
@@ -1224,7 +1199,7 @@ export default function WeddingPage() {
 						<button
 							onClick={handleBatchClaim}
 							disabled={selectedIds.length === 0 || isBatchWorking}
-							className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs bg-white/10 text-white/85 hover:bg-white/15 disabled:opacity-40 transition-colors"
+							className="flex flex-col items-center gap-1 py-2.5 rounded-[2px] text-xs bg-white/10 text-white/85 hover:bg-white/15 disabled:opacity-40 transition-colors"
 						>
 							{isBatchWorking ? (
 								<Loader2 className="w-4 h-4 animate-spin" />
@@ -1321,7 +1296,7 @@ export default function WeddingPage() {
 							<button
 								onClick={() => withName(() => toggleSelfTag(viewerPhoto))}
 								disabled={isTagging}
-								className={`flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs transition-colors ${viewerPhoto.tags.some((tag) => tag.guestId === session.guest.id) ? "bg-violet-600 text-white" : "bg-white/10 text-white/85 hover:bg-white/15"}`}
+								className={`flex flex-col items-center gap-1 py-2.5 rounded-[2px] text-xs transition-colors ${viewerPhoto.tags.some((tag) => tag.guestId === session.guest.id) ? "bg-violet-600 text-white" : "bg-white/10 text-white/85 hover:bg-white/15"}`}
 							>
 								<Check className="w-4 h-4" />
 								{viewerPhoto.tags.some((tag) => tag.guestId === session.guest.id) ? t("guest.tag.markedMine") : t("guest.tag.markMe")}
@@ -1330,7 +1305,7 @@ export default function WeddingPage() {
 								onClick={() =>
 									downloadImage(viewerPhoto.viewUrl, `wedding-${viewerPhoto.id}.jpg`)
 								}
-								className="flex flex-col items-center gap-1 py-2.5 rounded-xl text-xs bg-white/10 text-white/85 hover:bg-white/15 transition-colors"
+								className="flex flex-col items-center gap-1 py-2.5 rounded-[2px] text-xs bg-white/10 text-white/85 hover:bg-white/15 transition-colors"
 							>
 								<Download className="w-4 h-4" />
 								{t("guest.gallery.saveButton")}
@@ -1343,7 +1318,7 @@ export default function WeddingPage() {
 			{/* -------------------------------------------------- selfie search */}
 			{isSearchOpen && (
 				<div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-					<div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-5 relative">
+					<div className="bg-white dark:bg-zinc-900 rounded-[2px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-5 relative">
 						<button
 							onClick={closeSearch}
 							className="absolute top-4 end-4 p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
@@ -1367,7 +1342,7 @@ export default function WeddingPage() {
 							<>
 								{isCameraOpen && !selfie ? (
 									<div className="space-y-3">
-										<div className="relative w-full aspect-square rounded-2xl overflow-hidden bg-black">
+										<div className="relative w-full aspect-square rounded-[2px] overflow-hidden bg-black">
 											<video
 												ref={videoRef}
 												autoPlay
@@ -1380,13 +1355,13 @@ export default function WeddingPage() {
 											<Button
 												variant="outline"
 												onClick={stopCamera}
-												className="flex-1 min-h-11 rounded-lg"
+												className="flex-1 min-h-11 rounded-[2px]"
 											>
 												{t("guest.selfieSearch.cancelButton")}
 											</Button>
 											<Button
 												onClick={takeDesktopPhoto}
-												className="flex-1 min-h-11 bg-violet-600 hover:bg-violet-700 text-white rounded-lg"
+												className="flex-1 min-h-11 bg-violet-600 hover:bg-violet-700 text-white rounded-[2px]"
 											>
 												{t("guest.selfieSearch.captureButton")}
 											</Button>
@@ -1429,7 +1404,7 @@ export default function WeddingPage() {
 												className="absolute inset-0 w-full h-full z-10"
 											/>
 										)}
-										<div className="border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-2xl p-10 flex flex-col items-center gap-3 hover:bg-violet-50 dark:hover:bg-violet-950 transition-colors">
+										<div className="border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-[2px] p-10 flex flex-col items-center gap-3 hover:bg-violet-50 dark:hover:bg-violet-950 transition-colors">
 											<div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full text-violet-600 dark:text-violet-400">
 												{isMobile ? (
 													<Camera className="w-6 h-6" />
@@ -1467,7 +1442,7 @@ export default function WeddingPage() {
 								<Button
 									onClick={handleSearch}
 									disabled={!selfie || isSearching}
-									className="w-full min-h-12 bg-violet-600 hover:bg-violet-700 text-white text-base font-medium rounded-lg"
+									className="w-full min-h-12 bg-violet-600 hover:bg-violet-700 text-white text-base font-medium rounded-[2px]"
 								>
 									{isSearching ? (
 										<>
@@ -1499,7 +1474,7 @@ export default function WeddingPage() {
 										setMatches(null);
 										setSelfie(null);
 									}}
-									className="rounded-lg min-h-11"
+									className="rounded-[2px] min-h-11"
 								>
 									{t("guest.selfieSearch.tryAgainButton")}
 								</Button>
@@ -1510,7 +1485,7 @@ export default function WeddingPage() {
 									{t("guest.selfieSearch.foundCount").replace("{count}", String(matches.length))}
 								</p>
 								{needsSecondSelfie && (
-									<div className="text-center text-sm bg-violet-50 text-violet-800 rounded-xl px-4 py-3">
+									<div className="text-center text-sm bg-violet-50 text-violet-800 rounded-[2px] px-4 py-3">
 										{t("guest.selfieSearch.needsSecondSelfieHint")}
 										<button
 											onClick={() => {
@@ -1530,7 +1505,7 @@ export default function WeddingPage() {
 											key={photo.id}
 											src={photo.thumbUrl || photo.viewUrl}
 											alt=""
-											className="w-full aspect-square object-cover rounded-lg"
+											className="w-full aspect-square object-cover rounded-[2px]"
 										/>
 									))}
 								</div>

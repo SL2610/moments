@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import {
-	Instrument_Serif,
+	Bodoni_Moda,
 	Frank_Ruhl_Libre,
-	Archivo,
+	Hanken_Grotesk,
 	Assistant,
 } from "next/font/google";
 import "./globals.css";
@@ -12,11 +12,13 @@ import { I18nProvider } from "@/lib/i18n/I18nProvider";
 import { LOCALE_COOKIE, DEFAULT_LOCALE, dirFor, isLocale } from "@/lib/i18n/locale";
 
 // Latin display face for the event wordmark.
-const displayFont = Instrument_Serif({
+const displayFont = Bodoni_Moda({
 	variable: "--font-display-face",
 	subsets: ["latin"],
-	weight: "400",
+	weight: ["400", "500"],
 	style: ["normal", "italic"],
+	// Its Times metric fallback has Hebrew glyphs and would shadow Frank Ruhl in mixed text.
+	adjustFontFallback: false,
 });
 
 // Hebrew display face for headings.
@@ -27,7 +29,7 @@ const hebrewDisplayFont = Frank_Ruhl_Libre({
 });
 
 // Latin UI face; Hebrew pages switch to Assistant in globals.css.
-const uiFont = Archivo({
+const uiFont = Hanken_Grotesk({
 	variable: "--font-ui-face",
 	subsets: ["latin"],
 	weight: ["400", "500", "600"],

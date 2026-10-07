@@ -49,6 +49,7 @@ const en = {
 	"guest.join.errors.wrongPassword": "Wrong password, please try again",
 	"guest.join.errors.generic": "Something went wrong, please try again",
 	"guest.landing.tagline": "One selfie, and you'll see every photo you're in.",
+	"guest.landing.ourWedding": "Our wedding",
 	"guest.landing.findPhotos": "Find my photos",
 	"guest.landing.seeAlbum": "Or browse the whole album",
 	"guest.landing.notFoundTitle": "This gallery link doesn't work",

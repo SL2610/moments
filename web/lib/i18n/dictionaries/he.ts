@@ -47,6 +47,7 @@ const he = {
 	"guest.join.errors.wrongPassword": "הסיסמה שגויה, נסו שוב",
 	"guest.join.errors.generic": "משהו השתבש, נסו שוב",
 	"guest.landing.tagline": "סלפי אחד, וכל התמונות שאתם מופיעים בהן לפניכם.",
+	"guest.landing.ourWedding": "החתונה שלנו",
 	"guest.landing.findPhotos": "מצאו את התמונות שלי",
 	"guest.landing.seeAlbum": "או לכל האלבום",
 	"guest.landing.notFoundTitle": "הקישור לגלריה לא עובד",
