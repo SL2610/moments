@@ -41,46 +41,12 @@ const hebrewUiFont = Assistant({
 
 const PUBLIC_URL =
 	process.env.NEXT_PUBLIC_PUBLIC_URL || "https://your-domain.example.com";
-const EVENT_NAME = process.env.NEXT_PUBLIC_EVENT_NAME || "Your Names Here";
-
-export async function generateMetadata(): Promise<Metadata> {
-	const cookieStore = await cookies();
-	const locale = cookieStore.get(LOCALE_COOKIE)?.value;
-	const isHebrew = !isLocale(locale) || locale === "he";
-
-	const title = isHebrew
-		? `${EVENT_NAME} · התמונות מהחתונה`
-		: `${EVENT_NAME} · Wedding Photos`;
-	const description = isHebrew
-		? `מצאו את התמונות שלכם מהחתונה של ${EVENT_NAME}`
-		: `Find your photos from ${EVENT_NAME}'s wedding`;
-	const ogDescription = isHebrew
-		? "תודה שחגגתם איתנו! היכנסו למצוא את התמונות שלכם מהחתונה."
-		: "Thank you for celebrating with us! Find your photos from the wedding.";
-
-	return {
-		metadataBase: new URL(PUBLIC_URL),
-		title: { default: title, template: `%s | ${EVENT_NAME}` },
-		description,
-		// Share preview (WhatsApp reads these Open Graph tags). The actual
-		// image comes from app/opengraph-image.tsx via Next's file convention,
-		// which auto-injects the og:image / twitter:image tags.
-		openGraph: {
-			title,
-			description: ogDescription,
-			url: PUBLIC_URL,
-			siteName: EVENT_NAME,
-			locale: isHebrew ? "he_IL" : "en_US",
-			type: "website",
-		},
-		twitter: {
-			card: "summary_large_image",
-			title,
-			description: ogDescription,
-		},
-		robots: { index: false, follow: false },
-	};
-}
+export const metadata: Metadata = {
+	metadataBase: new URL(PUBLIC_URL),
+	title: { default: "Moments", template: "%s" },
+	description: "Find your wedding photos with one selfie.",
+	robots: { index: false, follow: false },
+};
 
 export default async function RootLayout({
 	children,

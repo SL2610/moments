@@ -6,17 +6,12 @@ services:
         NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
         NEXT_PUBLIC_DEMO_SELFIE_UPLOAD: ${DEMO_SELFIE_UPLOAD:-false}
         NEXT_PUBLIC_MAX_PHOTO_MB: ${PHOTO_MAX_SIZE_MB:-30}
-        NEXT_PUBLIC_EVENT_NAME: ${EVENT_NAME:-Your Names Here}
-        NEXT_PUBLIC_EVENT_DATE: ${EVENT_DATE:-DD.MM.YYYY}
         NEXT_PUBLIC_PUBLIC_URL: ${PUBLIC_URL:-https://your-domain.example.com}
         NEXT_PUBLIC_SHOW_CREDIT: ${SHOW_CREDIT:-true}
     restart: unless-stopped
     # Bound to localhost only; the public entry point is the Cloudflare Tunnel.
     ports:
       - "127.0.0.1:${WEB_PORT:-2610}:3000"
-    volumes:
-      # Landing-page wedding photo: put your photo at data/branding/hero.jpg
-      - ./data/branding:/app/public/branding:ro
     depends_on:
       - api
       - ai-search

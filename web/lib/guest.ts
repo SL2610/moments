@@ -1,64 +1,98 @@
 "use client";
 
-/** Wedding guest session: name + shared password -> 30-day guest token. */
+/**
+ * Wedding guest session, one per wedding link (/w/<publicId>): an anonymous
+ * 30-day guest token, plus a display name once the guest picks one.
+ */
 
 export interface GuestSession {
 	token: string;
-	guest: { id: string; name: string };
+	guest: { id: string; name: string | null };
 	albumId: string;
-	eventName: string;
 }
 
-const STORAGE_KEY = "wedding.guest";
+export interface WeddingInfo {
+	eventName: string;
+	eventDate: string;
+	passwordRequired: boolean;
+	coverUrl: string | null;
+}
+
+// A browser can hold sessions for several weddings; guestFetch uses the open one.
+let activeWedding = "";
+const storageKey = (publicId: string) => `wedding.guest.${publicId}`;
+
+export function setActiveWedding(publicId: string) {
+	activeWedding = publicId;
+}
 
 export function getGuestSession(): GuestSession | null {
-	if (typeof window === "undefined") return null;
+	if (typeof window === "undefined" || !activeWedding) return null;
 	try {
-		const raw = localStorage.getItem(STORAGE_KEY);
+		const raw = localStorage.getItem(storageKey(activeWedding));
 		return raw ? (JSON.parse(raw) as GuestSession) : null;
 	} catch {
 		return null;
 	}
 }
 
+function saveGuestSession(session: GuestSession) {
+	localStorage.setItem(storageKey(activeWedding), JSON.stringify(session));
+}
+
 export function clearGuestSession() {
-	localStorage.removeItem(STORAGE_KEY);
+	localStorage.removeItem(storageKey(activeWedding));
+}
+
+export async function fetchWeddingInfo(publicId: string): Promise<WeddingInfo | null> {
+	try {
+		const res = await fetch(`/api/w/${encodeURIComponent(publicId)}`);
+		return res.ok ? ((await res.json()) as WeddingInfo) : null;
+	} catch {
+		return null;
+	}
 }
 
 export async function joinWedding(
-	name: string,
-	phone: string,
 	password: string,
-): Promise<{
-	session: GuestSession | null;
-	error: string | null;
-	existingName?: string;
-}> {
+): Promise<{ session: GuestSession | null; error: string | null }> {
 	try {
-		const res = await fetch("/api/wedding/join", {
+		const res = await fetch(`/api/w/${encodeURIComponent(activeWedding)}/join`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ name, phone, password }),
+			body: JSON.stringify({ password }),
 		});
 		const data = await res.json().catch(() => ({}));
-		if (!res.ok) {
-			return {
-				session: null,
-				error: data?.error || "server-error",
-				existingName: data?.existingName,
-			};
-		}
+		if (!res.ok) return { session: null, error: data?.error || "server-error" };
 		const session: GuestSession = {
 			token: data.accessToken,
-			guest: data.guest,
+			guest: { id: data.guest.id, name: null },
 			albumId: data.albumId,
-			eventName: data.eventName,
 		};
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+		saveGuestSession(session);
 		return { session, error: null };
 	} catch {
 		return { session: null, error: "network-error" };
 	}
+}
+
+/** Sets the guest's display name (asked only before uploading or tagging). */
+export async function setGuestName(name: string): Promise<GuestSession | null> {
+	const res = await guestFetch("/api/wedding/me", {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ name }),
+	});
+	const current = getGuestSession();
+	if (!res.ok || !current) return null;
+	const data = await res.json();
+	const session: GuestSession = {
+		...current,
+		token: data.accessToken,
+		guest: { ...current.guest, name: data.name },
+	};
+	saveGuestSession(session);
+	return session;
 }
 
 export async function guestFetch(endpoint: string, options: RequestInit = {}) {

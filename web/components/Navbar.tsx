@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useI18n, setLocale } from "@/lib/i18n/I18nProvider";
 
-const EVENT_NAME = process.env.NEXT_PUBLIC_EVENT_NAME || "Moments";
+const EVENT_NAME = "Moments";
 
 export default function Navbar() {
 	const router = useRouter();
@@ -61,7 +61,7 @@ export default function Navbar() {
 	};
 
 	// The guest experience carries the wedding identity, not app navigation.
-	if (pathname === "/" || pathname?.includes("/guest")) return null;
+	if (pathname === "/" || pathname?.startsWith("/w/")) return null;
 
 	return (
 		<nav
