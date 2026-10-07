@@ -46,8 +46,23 @@ public class GuestEntryController {
         body.put("eventName", album.getTitle());
         body.put("eventDate", album.getEventDate() == null ? "" : album.getEventDate());
         body.put("passwordRequired", album.getGuestPasswordHash() != null);
-        body.put("coverUrl", album.getCoverKey() == null ? null : storage.generateViewUrl(album.getCoverKey()));
+        // A stable URL: link previews (og:image) are fetched days after sharing.
+        body.put("coverUrl", album.getCoverKey() == null ? null : "/api/w/" + album.getPublicId() + "/cover");
         return ResponseEntity.ok(body);
+    }
+
+    /** The couple's cover, public like the names: it is what the shared link previews. */
+    @GetMapping("/cover")
+    public ResponseEntity<?> cover(@PathVariable String publicId) throws java.io.IOException {
+        Optional<SharedAlbum> albumOpt = albumRepository.findByPublicId(publicId);
+        if (albumOpt.isEmpty() || albumOpt.get().getCoverKey() == null) return ResponseEntity.notFound().build();
+        java.nio.file.Path path = storage.resolve(albumOpt.get().getCoverKey());
+        if (!java.nio.file.Files.isRegularFile(path)) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.IMAGE_JPEG)
+                .cacheControl(org.springframework.http.CacheControl.maxAge(java.time.Duration.ofHours(1)))
+                .contentLength(java.nio.file.Files.size(path))
+                .body(new org.springframework.core.io.FileSystemResource(path));
     }
 
     public record JoinRequest(String password) {}

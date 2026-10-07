@@ -23,7 +23,7 @@ Open source and self-hostable, so the couple owns the photos and the face data; 
 
 - The photographer's photos are the main source and drive selfie search. Guest uploads are secondary ("From guests").
 - On a CPU server, photos are indexed in the hours after the wedding, so the main visit is the morning after, from a WhatsApp link.
-- Each wedding runs as its own Docker stack behind a Cloudflare Tunnel.
+- One server holds many weddings; each album is reached only through its unguessable link, `/w/<id>`, behind a Cloudflare Tunnel.
 
 ## Capabilities and Constraints
 
@@ -31,7 +31,7 @@ Open source and self-hostable, so the couple owns the photos and the face data; 
 - Guest identity is anonymous, held by the browser; on a new device a new selfie brings the photos back. No phone or other contact detail is collected.
 - After a selfie, the guest's own photos are the home screen, with "save all" up front; the full album is one tap away.
 - Hebrew/RTL is the default; English is complete.
-- Per-event identity comes from env (`EVENT_NAME`, `EVENT_DATE`) and `data/branding/` images.
+- Each couple sets their names, date, cover photo and optional guest password on their album page in the admin.
 - The guest pages belong to the couple: their cover photo and names lead, styled as their own invitation. The Moments mark never appears there; Moments is only the small "Made with Moments" credit.
 
 ## Brand Commitments

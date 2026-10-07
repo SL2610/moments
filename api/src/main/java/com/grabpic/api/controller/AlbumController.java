@@ -84,7 +84,7 @@ public class AlbumController {
     }
 
     /** A guest may read only their own wedding; an admin only albums they host. */
-    private static boolean canReadAsGuest(SharedAlbum album, Jwt jwt) {
+    static boolean canReadAsGuest(SharedAlbum album, Jwt jwt) {
         String typ = jwt.getClaimAsString("typ");
         if ("guest".equals(typ)) return album.getId().toString().equals(jwt.getClaimAsString("album"));
         return "access".equals(typ) && album.getHostId().equals(jwt.getSubject());

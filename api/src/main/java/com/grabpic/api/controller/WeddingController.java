@@ -54,7 +54,7 @@ public class WeddingController {
     }
 
     /** The wedding this guest token belongs to; null for any other token. */
-    private static UUID albumOf(Jwt jwt) {
+    static UUID albumOf(Jwt jwt) {
         if (!"guest".equals(jwt.getClaimAsString("typ"))) return null;
         String album = jwt.getClaimAsString("album");
         return album == null ? null : UUID.fromString(album);
@@ -247,16 +247,13 @@ public class WeddingController {
         }
     }
 
-    /** Guests may only remove their own tag; admins can remove any. */
+    /** Guests may only remove their own tag. */
     @DeleteMapping("/photos/{photoId}/tags/{guestId}")
     public ResponseEntity<?> removeTag(@PathVariable UUID photoId,
                                        @PathVariable UUID guestId,
                                        @AuthenticationPrincipal Jwt jwt) {
-        String typ = jwt.getClaimAsString("typ");
-        boolean isAdmin = "access".equals(typ) && photoRepository.findById(photoId)
-                .map(p -> p.getAlbum().getHostId().equals(jwt.getSubject())).orElse(false);
-        boolean isSelf = "guest".equals(typ) && guestId.toString().equals(jwt.getSubject());
-        if (!isAdmin && !isSelf) {
+        boolean isSelf = albumOf(jwt) != null && guestId.toString().equals(jwt.getSubject());
+        if (!isSelf) {
             return ResponseEntity.status(403).body(Map.of("error", "can-only-untag-self"));
         }
         tagRepository.findByPhotoIdAndGuestId(photoId, guestId).ifPresent(tagRepository::delete);

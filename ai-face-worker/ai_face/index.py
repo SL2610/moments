@@ -7,6 +7,7 @@ album has processed photos but no current-version embeddings, the album needs
 a reindex and search must say so loudly instead of returning empty results.
 """
 
+from collections import OrderedDict
 import threading
 import time
 
@@ -103,10 +104,14 @@ class AlbumFaceIndex:
 
 
 class IndexCache:
-    """Per-album cache with staleness revalidation."""
+    """Per-album cache with staleness revalidation, keeping the most recently searched albums."""
+
+    # ponytail: an LRU of whole albums; one shared server holds many weddings but
+    # only a few are being searched at once. Raise if evictions show up in latency.
+    MAX_ALBUMS = 20
 
     def __init__(self, revalidate_secs: float = 20.0):
-        self._indexes: dict[str, AlbumFaceIndex] = {}
+        self._indexes: OrderedDict[str, AlbumFaceIndex] = OrderedDict()
         self._checked_at: dict[str, float] = {}
         self._lock = threading.Lock()
         self._revalidate_secs = revalidate_secs
@@ -117,6 +122,7 @@ class IndexCache:
             now = time.monotonic()
             needs_check = index is None or (now - self._checked_at.get(album_id, 0)) > self._revalidate_secs
             if index is not None and not needs_check:
+                self._indexes.move_to_end(album_id)
                 return index
         # Load/refresh outside the lock (DB roundtrip).
         if index is None or index.is_stale():
@@ -125,7 +131,11 @@ class IndexCache:
             index = fresh
         with self._lock:
             self._indexes[album_id] = index
+            self._indexes.move_to_end(album_id)
             self._checked_at[album_id] = time.monotonic()
+            while len(self._indexes) > self.MAX_ALBUMS:
+                evicted, _ = self._indexes.popitem(last=False)
+                self._checked_at.pop(evicted, None)
         return index
 
     def invalidate(self, album_id: str | None = None) -> None:
