@@ -24,8 +24,7 @@ cd moments
 ./setup.sh
 ```
 
-That's it: `setup.sh` asks a few questions (your names, wedding date, guest
-password) and brings the whole thing up with Docker. Full details, hosting
+That's it: `setup.sh` asks for your admin login and brings the whole thing up with Docker. Full details, hosting
 options, and bulk photo import: **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 
 ## Hosted for you
@@ -39,10 +38,9 @@ you: **[sagi-lior-wedding.com](https://sagi-lior-wedding.com)**.
    thousands of files from a folder.
 2. **AI scans every face.** A background worker detects faces and stores a
    fingerprint for each one, nothing leaves your machine.
-3. **Guests find themselves.** Share one link. A guest opens it, joins with
-   their phone number and the shared password, and can browse everything,
-   add their own photos, or hit "find my photos" to selfie-search and
-   download just the ones they're in.
+3. **Guests find themselves.** Share your link or QR code. A guest opens it,
+   takes one selfie, and gets just the photos they're in, ready to save. No
+   app, no sign-up. They can also browse everything and add their own photos.
 
 Guests get Hebrew (default) or English, with a language toggle right on the
 page.
@@ -81,7 +79,7 @@ cd moments
 ./setup.sh
 ```
 
-הסקריפט שואל כמה שאלות (השמות שלכם, תאריך החתונה, סיסמת האורחים) ומרים הכל
-עם Docker. פרטים מלאים: [SELF_HOSTING.md](SELF_HOSTING.md).
+הסקריפט שואל על פרטי הכניסה שלכם ומרים הכל עם Docker. את השמות, התאריך ותמונת
+השער מגדירים אחר כך בעמוד האלבום, ושם גם הקישור וה-QR לאורחים. פרטים מלאים: [SELF_HOSTING.md](SELF_HOSTING.md).
 
 </div>

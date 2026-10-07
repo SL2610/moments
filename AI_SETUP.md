@@ -3,7 +3,7 @@
 If you're not a developer, this is the easiest way to get your gallery
 online: you don't type any commands yourself. You hand the box below to an
 AI assistant that can actually run commands on a computer, and it does the
-setup for you, then tells you your gallery link and password.
+setup for you, then tells you how to open your gallery.
 
 **This needs an AI tool with real terminal access to the computer that will
 run the gallery.** [Claude Code](https://claude.com/product/claude-code) is
@@ -25,7 +25,7 @@ pay someone else to do this entirely.
 2. Open a terminal, run `claude`, and paste the entire box below as your
    first message.
 3. Answer the couple of plain-language questions it asks you.
-4. Wait. It'll tell you when your gallery link and password are ready.
+4. Wait. It'll tell you when your gallery is ready.
 
 ## The prompt
 
@@ -41,11 +41,6 @@ server). Everything below is free unless noted.
    for their OS, waiting for them to confirm it's installed, before continuing.
 
 2. Ask the couple, one question at a time, in plain language (no jargon):
-   - Their names, the way they want guests to see them (e.g. "Dana & Yossi").
-   - Their wedding date.
-   - A guest password guests will type to get in (offer to generate a simple
-     memorable one if they don't want to pick one, it goes on their invite/QR
-     code, so it should be easy to say out loud).
    - An email + password for their own admin login (to manage the gallery).
    - Whether this will run on the computer you're working on right now (they
      need to leave it powered on and connected to the internet), or on a
@@ -60,9 +55,7 @@ server). Everything below is free unless noted.
 
 4. Run `./setup.sh` inside the cloned repo, non-interactively, using their
    answers, e.g.:
-     ./setup.sh --event-name "Dana & Yossi" --event-date 12.06.2027 \
-       --guest-password sunflower22 --admin-email dana@example.com \
-       --admin-password <their password>
+     ./setup.sh --admin-email dana@example.com --admin-password <their password>
    This builds and starts everything with Docker Compose. The first build
    downloads AI models and can take several minutes: say so, don't go quiet.
 
@@ -81,8 +74,9 @@ server). Everything below is free unless noted.
 
 7. Once it's reachable, report back ONLY this, in plain language, no logs, no
    jargon, no command output:
-   - Their gallery link (the one guests will actually use).
-   - The guest password.
+   - Where to sign in (their public address + /login) and that, once signed
+     in, they create their album and add their names, date and cover photo.
+     The album page shows the guest link and QR code to share.
    - Their admin email (remind them they set their own password).
    - One line on how to keep it running (leave the computer on / keep the
      tunnel process running) and where to find more detail if something

@@ -13,8 +13,7 @@ cd moments
 ./setup.sh
 ```
 
-`setup.sh` asks for your names, wedding date, guest password, and admin
-login, generates the random secrets, writes `.env`, and starts everything.
+`setup.sh` asks for your admin login, generates the random secrets, writes `.env`, and starts everything.
 (Prefer to do it by hand? `cp .env.example .env`, fill in the `CHANGE ME`
 lines (`openssl rand -base64 48` for `JWT_SECRET`/`VIEW_URL_SECRET`), then
 `docker compose up -d`.)
@@ -24,31 +23,26 @@ Then:
 1. Once you've created your own admin account (`setup.sh` does this, or open
    http://localhost:2610/signup by hand), set `ALLOW_REGISTRATION=false` in
    `.env` and `docker compose up -d api` to stop anyone else from signing up.
-2. Add photos: bulk import (below) or the admin upload page.
-3. Guests open http://localhost:2610 (or your public URL), enter their phone
-   number, full name, and `GUEST_PASSWORD`, and get the shared gallery.
-4. Guests outside your own Wi-Fi need a public URL: see **Hosting options**
+2. Sign in at http://localhost:2610/login and create your album. On the
+   album page, add your names, date, cover photo and (optionally) a guest
+   password. The same page shows your guest link and its QR code.
+3. Add photos: bulk import (below) or the admin upload page.
+4. Guests open the link (`/w/<id>`), take a selfie, and see their photos.
+5. Guests outside your own Wi-Fi need a public URL: see **Hosting options**
    below.
 
 ## The guest experience (Hebrew + English)
 
-The landing page opens with a thank-you note, an optional hero photo, a short
-how-to, and the join form. Guests can switch language (Hebrew is the
-default) with the toggle on the page. Put your own photo at
-`./data/branding/hero.jpg` on the host to replace the default, and an
-invitation graphic at `./data/branding/invite-card.png` if you have one
-(both served live, no rebuild, skipped cleanly if you don't provide them).
+Each album has its own guest link, `/w/<id>`, with a random id nobody can
+guess: with no guest password, the link is the key. It opens on your cover
+photo, names and date with one "Find my photos" button. Guests type nothing
+before their first result: a selfie shows the photos they're in, ready to
+save or share on WhatsApp. They're asked for a name only when they upload
+photos or tag themselves. Hebrew is the default; the page has an English
+toggle. The admin area (`/login`, `/dashboard`, English-only for now) keeps
+album settings, folder import, privacy, and processing status.
 
-The root page is the wedding app: guests join with their phone number, full
-name, and the shared password (the phone number is the stable identity; the
-name is locked on first join), browse the full photo pool, upload their own
-photos into it, find themselves with a selfie, and confirm it's them to
-self-tag. There's no tagging other guests by name. A person view has a
-download-all ZIP. The admin area (`/login`, `/dashboard`, English-only for
-now) keeps album management, folder import, privacy, and processing status.
-
-The wedding album is the oldest album in the database, auto-created for the
-first admin account. Imported and guest-uploaded photos are PUBLIC (visible
+One server can hold several weddings; each album is separate. Imported and guest-uploaded photos are PUBLIC (visible
 to every logged-in guest); photos an admin marks PROTECTED only surface
 through a face match.
 
@@ -125,10 +119,23 @@ Raise `AI_WORKER_CONCURRENCY` in `.env` (e.g. 4) when on GPU.
 
 ## Configuration notes
 
-- `PHOTO_MAX_SIZE_MB`, `TURNSTILE_SITE_KEY`, `DEMO_SELFIE_UPLOAD`, `EVENT_NAME`, `EVENT_DATE` are baked into the web image at build time: run `docker compose build web` after changing them.
+- `PHOTO_MAX_SIZE_MB`, `TURNSTILE_SITE_KEY`, `DEMO_SELFIE_UPLOAD`, `SHOW_CREDIT` are baked into the web image at build time: run `docker compose build web` after changing them.
 - Turnstile bot protection is off when `TURNSTILE_SECRET`/`TURNSTILE_SITE_KEY` are blank.
 - Photo processing jobs live in the `processing_jobs` table (PENDING → PROCESSING → COMPLETED/FAILED, `JOB_MAX_ATTEMPTS` retries, crashed jobs are reclaimed after 15 minutes).
 - Photos are served through short-lived HMAC-signed URLs; protected originals are never enumerable by URL.
+
+## Upgrading an existing install
+
+Database changes ship as `db/migrations/*.sql`. Apply any new ones once, in
+order, then rebuild:
+
+```bash
+docker compose exec -T postgres psql -U grabpic -d grabpic < db/migrations/003_multi_wedding.sql
+docker compose build && docker compose up -d
+```
+
+After 003, set your names, date, cover and password on the album page; the
+old `EVENT_NAME`, `EVENT_DATE` and `GUEST_PASSWORD` settings are no longer read.
 
 ## Operations
 

@@ -4,17 +4,13 @@
 # brings the stack up with docker compose.
 #
 # Interactive:      ./setup.sh
-# Non-interactive:  ./setup.sh --event-name "Dana & Yossi" --event-date 12.06.2027 \
-#                     --guest-password sunflower22 --admin-email dana@example.com \
+# Non-interactive:  ./setup.sh --admin-email dana@example.com \
 #                     --admin-password s0mething-strong
 # Flags not given fall back to prompts (interactive) or generated/blank
 # defaults (non-interactive, when stdin isn't a TTY).
 set -euo pipefail
 cd "$(dirname "$0")"
 
-EVENT_NAME=""
-EVENT_DATE=""
-GUEST_PASSWORD=""
 ADMIN_EMAIL=""
 ADMIN_PASSWORD=""
 PUBLIC_URL=""
@@ -22,9 +18,6 @@ SKIP_UP=""
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	--event-name) EVENT_NAME="$2"; shift 2 ;;
-	--event-date) EVENT_DATE="$2"; shift 2 ;;
-	--guest-password) GUEST_PASSWORD="$2"; shift 2 ;;
 	--admin-email) ADMIN_EMAIL="$2"; shift 2 ;;
 	--admin-password) ADMIN_PASSWORD="$2"; shift 2 ;;
 	--public-url) PUBLIC_URL="$2"; shift 2 ;;
@@ -54,30 +47,20 @@ ask() {
 	echo "$answer"
 }
 
-EVENT_NAME=$(ask "Couple's names, as guests should see them (e.g. Dana & Yossi)" "$EVENT_NAME")
-EVENT_DATE=$(ask "Wedding date (e.g. 12.06.2027)" "$EVENT_DATE")
-GUEST_PASSWORD=$(ask "Shared guest password (guests type this, with their phone + name, to get in)" "$GUEST_PASSWORD")
 ADMIN_EMAIL=$(ask "Your (the couple's) admin login email" "$ADMIN_EMAIL")
 ADMIN_PASSWORD=$(ask "Your admin login password" "$ADMIN_PASSWORD")
 PUBLIC_URL=$(ask "Public URL guests will use, if you already know it (blank is fine, edit .env later)" "$PUBLIC_URL")
 
-[ -n "$EVENT_NAME" ] || EVENT_NAME="Your Names Here"
-[ -n "$EVENT_DATE" ] || EVENT_DATE="DD.MM.YYYY"
-[ -n "$GUEST_PASSWORD" ] || GUEST_PASSWORD="$(openssl rand -hex 4)"
 [ -n "$PUBLIC_URL" ] || PUBLIC_URL="https://your-domain.example.com"
 
 JWT_SECRET="$(openssl rand -base64 48)"
 VIEW_URL_SECRET="$(openssl rand -base64 48)"
 POSTGRES_PASSWORD="$(openssl rand -base64 24)"
 
-# Plain bash line rewriting (not sed) because couple names routinely contain
-# "&" (e.g. "Dana & Yossi"), which sed's replacement syntax treats specially.
+# Plain bash line rewriting (not sed): values may contain characters sed treats specially.
 : > .env
 while IFS= read -r line || [ -n "$line" ]; do
 	case "$line" in
-	EVENT_NAME=*) line="EVENT_NAME=${EVENT_NAME}" ;;
-	EVENT_DATE=*) line="EVENT_DATE=${EVENT_DATE}" ;;
-	GUEST_PASSWORD=*) line="GUEST_PASSWORD=${GUEST_PASSWORD}" ;;
 	PUBLIC_URL=*) line="PUBLIC_URL=${PUBLIC_URL}" ;;
 	CORS_ALLOWED_ORIGINS=*) line="CORS_ALLOWED_ORIGINS=${PUBLIC_URL},http://localhost:2610" ;;
 	TURNSTILE_ALLOWED_HOSTNAMES=*) line="TURNSTILE_ALLOWED_HOSTNAMES=localhost" ;;
@@ -105,7 +88,9 @@ cat <<EOF
 
 Done. The app is starting at http://localhost:2610
 
-Guest password: ${GUEST_PASSWORD}
+Next: sign in at http://localhost:2610/login, create your album, and add your
+names, date and cover photo. The album page shows your guests' link and QR.
+
 Admin login:    ${ADMIN_EMAIL}
 
 To share it outside your own network, see SELF_HOSTING.md for the Cloudflare
