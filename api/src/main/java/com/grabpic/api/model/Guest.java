@@ -15,11 +15,14 @@ public class Guest {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
-    @Column(nullable = false)
+    /** Null until the guest chooses a name (to upload or tag). */
     private String name;
 
+    @Column(nullable = false)
+    private UUID albumId;
+
     // Unique identity key; null for guests created by name-tagging only.
-    @Column(unique = true)
+    /** Legacy: phone-based joins are gone; kept so old rows still load. */
     private String phone;
 
     private LocalDateTime createdAt;

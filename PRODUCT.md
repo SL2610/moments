@@ -32,6 +32,7 @@ Open source and self-hostable, so the couple owns the photos and the face data; 
 - After a selfie, the guest's own photos are the home screen, with "save all" up front; the full album is one tap away.
 - Hebrew/RTL is the default; English is complete.
 - Per-event identity comes from env (`EVENT_NAME`, `EVENT_DATE`) and `data/branding/` images.
+- The guest pages belong to the couple: their cover photo and names lead, styled as their own invitation. The Moments mark never appears there; Moments is only the small "Made with Moments" credit.
 
 ## Brand Commitments
 

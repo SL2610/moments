@@ -10,10 +10,15 @@ CREATE TABLE users (
 );
 
 CREATE TABLE shared_albums (
-    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    title      varchar(255) NOT NULL,
-    host_id    varchar(255) NOT NULL,
-    created_at timestamp
+    id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    title               varchar(255) NOT NULL,
+    host_id             varchar(255) NOT NULL,
+    -- Unguessable id in the guest URL (/w/<public_id>); the link is the key.
+    public_id           varchar(16) NOT NULL UNIQUE,
+    event_date          varchar(32),
+    guest_password_hash varchar(100),
+    cover_key           varchar(512),
+    created_at          timestamp
 );
 CREATE INDEX idx_shared_albums_host_id ON shared_albums (host_id);
 
@@ -41,13 +46,16 @@ CREATE INDEX idx_photos_album_hash ON photos (album_id, content_hash);
 
 -- Wedding guests: lightweight name-based identities (no passwords; entry is
 -- gated by the shared GUEST_PASSWORD).
+-- Guests are anonymous until they choose a name (to upload or tag).
 CREATE TABLE guests (
     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    name       varchar(80) NOT NULL,
-    phone      varchar(32) UNIQUE,
+    album_id   uuid REFERENCES shared_albums (id) ON DELETE CASCADE,
+    name       varchar(80),
+    phone      varchar(32),
     created_at timestamp
 );
 CREATE INDEX idx_guests_name_lower ON guests (lower(name));
+CREATE INDEX idx_guests_album_id ON guests (album_id);
 
 -- "This is me" / "that's them" name tags on photos.
 CREATE TABLE photo_tags (

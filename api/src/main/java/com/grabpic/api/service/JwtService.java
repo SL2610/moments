@@ -41,13 +41,15 @@ public class JwtService {
     }
 
     /** Wedding guest token: sub = guest id, "name" claim, 30-day validity. */
-    public String issueGuestToken(String guestId, String name) {
+    /** Guest tokens are scoped to one album: every guest endpoint checks the "album" claim. */
+    public String issueGuestToken(String guestId, String name, String albumId) {
         try {
             Instant now = Instant.now();
             JWTClaimsSet claims = new JWTClaimsSet.Builder()
                     .subject(guestId)
                     .issuer(issuer)
                     .claim("name", name)
+                    .claim("album", albumId)
                     .claim("typ", "guest")
                     .issueTime(Date.from(now))
                     .expirationTime(Date.from(now.plus(Duration.ofDays(30))))

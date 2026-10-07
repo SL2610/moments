@@ -59,11 +59,7 @@ public class AlbumController {
         album.setHostId(jwt.getSubject());
 
         SharedAlbum savedAlbum = albumRepository.save(album);
-        return ResponseEntity.ok(new com.grabpic.api.dto.AlbumResponse(
-                savedAlbum.getId().toString(),
-                savedAlbum.getTitle(),
-                savedAlbum.getCreatedAt().toString()
-        ));
+        return ResponseEntity.ok(toAlbumResponse(savedAlbum));
     }
 
     @GetMapping
@@ -71,13 +67,89 @@ public class AlbumController {
         String hostId = jwt.getSubject();
         List<SharedAlbum> albums = albumRepository.findByHostId(hostId);
         List<com.grabpic.api.dto.AlbumResponse> response = albums.stream()
-                .map(a -> new com.grabpic.api.dto.AlbumResponse(
-                        a.getId().toString(),
-                        a.getTitle(),
-                        a.getCreatedAt().toString()
-                ))
+                .map(this::toAlbumResponse)
                 .toList();
         return ResponseEntity.ok(response);
+    }
+
+    private com.grabpic.api.dto.AlbumResponse toAlbumResponse(SharedAlbum a) {
+        return new com.grabpic.api.dto.AlbumResponse(
+                a.getId().toString(),
+                a.getTitle(),
+                a.getCreatedAt().toString(),
+                a.getPublicId(),
+                a.getEventDate(),
+                a.getGuestPasswordHash() != null,
+                a.getCoverKey() == null ? null : storageService.generateViewUrl(a.getCoverKey()));
+    }
+
+    /** A guest may read only their own wedding; an admin only albums they host. */
+    private static boolean canReadAsGuest(SharedAlbum album, Jwt jwt) {
+        String typ = jwt.getClaimAsString("typ");
+        if ("guest".equals(typ)) return album.getId().toString().equals(jwt.getClaimAsString("album"));
+        return "access".equals(typ) && album.getHostId().equals(jwt.getSubject());
+    }
+
+    private Optional<SharedAlbum> ownedAlbum(UUID albumId, Jwt jwt) {
+        return albumRepository.findById(albumId).filter(a -> a.getHostId().equals(jwt.getSubject()));
+    }
+
+    public record AlbumSettingsRequest(String title, String eventDate, String guestPassword) {}
+
+    /**
+     * Names, date and the optional guest password. guestPassword: null keeps
+     * the current one, "" removes it (the link alone opens the gallery).
+     */
+    @PutMapping("/{albumId}/settings")
+    public ResponseEntity<?> updateSettings(@PathVariable UUID albumId,
+                                            @RequestBody AlbumSettingsRequest request,
+                                            @AuthenticationPrincipal Jwt jwt) {
+        Optional<SharedAlbum> albumOpt = ownedAlbum(albumId, jwt);
+        if (albumOpt.isEmpty()) return ResponseEntity.notFound().build();
+        SharedAlbum album = albumOpt.get();
+        if (request.title() != null) {
+            String title = request.title().trim();
+            if (title.isEmpty() || title.length() > 120) {
+                return ResponseEntity.badRequest().body(Map.of("error", "invalid-title"));
+            }
+            album.setTitle(title);
+        }
+        if (request.eventDate() != null) {
+            String date = request.eventDate().trim();
+            if (date.length() > 32) return ResponseEntity.badRequest().body(Map.of("error", "invalid-date"));
+            album.setEventDate(date.isEmpty() ? null : date);
+        }
+        if (request.guestPassword() != null) {
+            String password = request.guestPassword().trim();
+            if (password.length() > 72) return ResponseEntity.badRequest().body(Map.of("error", "invalid-password"));
+            album.setGuestPasswordHash(password.isEmpty() ? null
+                    : new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(password));
+        }
+        return ResponseEntity.ok(toAlbumResponse(albumRepository.save(album)));
+    }
+
+    /** The couple's cover photo, shown full-bleed on their guest page. */
+    @PutMapping("/{albumId}/cover")
+    public ResponseEntity<?> uploadCover(@PathVariable UUID albumId,
+                                         @RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                         @AuthenticationPrincipal Jwt jwt) throws java.io.IOException {
+        Optional<SharedAlbum> albumOpt = ownedAlbum(albumId, jwt);
+        if (albumOpt.isEmpty()) return ResponseEntity.notFound().build();
+        if (file.isEmpty() || file.getSize() > storageService.maxPhotoBytes()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "file-too-large"));
+        }
+        String type = file.getContentType() == null ? "" : file.getContentType();
+        if (!type.startsWith("image/")) return ResponseEntity.badRequest().body(Map.of("error", "invalid-image"));
+        SharedAlbum album = albumOpt.get();
+        String oldKey = album.getCoverKey();
+        String key = storageService.newOriginalKey(albumId);
+        try (java.io.InputStream in = file.getInputStream()) {
+            storageService.save(key, in);
+        }
+        album.setCoverKey(key);
+        albumRepository.save(album);
+        if (oldKey != null) storageService.deleteObject(oldKey);
+        return ResponseEntity.ok(toAlbumResponse(album));
     }
 
     private static final int MAX_UPLOAD_BATCH = 50;
@@ -293,8 +365,9 @@ public class AlbumController {
     }
 
     @GetMapping("/{albumId}/guest/details")
-    public ResponseEntity<?> getGuestAlbumDetails(@PathVariable UUID albumId) {
-        Optional<SharedAlbum> albumOpt = albumRepository.findById(albumId);
+    public ResponseEntity<?> getGuestAlbumDetails(@PathVariable UUID albumId,
+                                                  @AuthenticationPrincipal Jwt jwt) {
+        Optional<SharedAlbum> albumOpt = albumRepository.findById(albumId).filter(a -> canReadAsGuest(a, jwt));
 
         if (albumOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -360,7 +433,8 @@ public class AlbumController {
     }
 
     @PostMapping("/{albumId}/guest/search-results")
-    public ResponseEntity<?> getGuestSearchResults(@PathVariable UUID albumId, @RequestBody List<UUID> photoIds) {
+    public ResponseEntity<?> getGuestSearchResults(@PathVariable UUID albumId, @RequestBody List<UUID> photoIds,
+                                                   @AuthenticationPrincipal Jwt jwt) {
         if (photoIds == null || photoIds.isEmpty()) {
             return ResponseEntity.badRequest().body("No photo IDs provided.");
         }
@@ -369,7 +443,7 @@ public class AlbumController {
                     .body("Too many photo IDs. Maximum is " + MAX_GUEST_SEARCH_RESULTS_IDS + ".");
         }
 
-        Optional<SharedAlbum> albumOpt = albumRepository.findById(albumId);
+        Optional<SharedAlbum> albumOpt = albumRepository.findById(albumId).filter(a -> canReadAsGuest(a, jwt));
         if (albumOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }

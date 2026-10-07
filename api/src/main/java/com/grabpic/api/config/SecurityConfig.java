@@ -1,5 +1,7 @@
 package com.grabpic.api.config;
 
+import org.springframework.http.HttpMethod;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,11 +55,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // Signed view URLs carry their own HMAC authorization.
                         .requestMatchers("/api/photos/view").permitAll()
-                        .requestMatchers("/api/wedding", "/api/wedding/join").permitAll()
-                        // Photo listings require at least a joined guest, so the
-                        // shared GUEST_PASSWORD really gates the gallery.
+                        // Wedding entry by unguessable id: info and join only. The
+                        // couple's optional password is checked in join.
+                        .requestMatchers(HttpMethod.GET, "/api/w/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/w/*/join").permitAll()
+                        // Controllers further scope guests to the album in their token.
                         .requestMatchers("/api/albums/*/guest/**").hasAnyRole("GUEST", "ADMIN")
-                        .requestMatchers("/api/wedding/**").hasAnyRole("GUEST", "ADMIN")
+                        .requestMatchers("/api/wedding/**").hasRole("GUEST")
                         .anyRequest().hasRole("ADMIN")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
