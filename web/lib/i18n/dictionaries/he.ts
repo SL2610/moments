@@ -18,7 +18,7 @@ const he = {
 	"authError.unreachable": "אין חיבור לשרת. נסו שוב.",
 
 	// Login page
-	"login.welcomeBack": "ברוכים השבים! היכנסו לניהול אלבום החתונה.",
+	"login.title": "ניהול האלבום",
 	"login.email": "אימייל",
 	"login.password": "סיסמה",
 	"login.signingIn": "מתחברים...",

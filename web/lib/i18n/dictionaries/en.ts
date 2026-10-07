@@ -20,7 +20,7 @@ const en = {
 	"authError.unreachable": "Unable to reach the server. Please try again.",
 
 	// Login page
-	"login.welcomeBack": "Welcome back! Sign in to manage your wedding album.",
+	"login.title": "Album admin",
 	"login.email": "Email",
 	"login.password": "Password",
 	"login.signingIn": "Signing in...",

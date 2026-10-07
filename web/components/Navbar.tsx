@@ -6,9 +6,8 @@ import { auth } from "@/lib/auth";
 import { LogOut, LayoutDashboard, LogIn, Menu, X, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Mark from "@/components/Mark";
 import { useI18n, setLocale } from "@/lib/i18n/I18nProvider";
-
-const EVENT_NAME = "Moments";
 
 export default function Navbar() {
 	const router = useRouter();
@@ -66,29 +65,26 @@ export default function Navbar() {
 	return (
 		<nav
 			ref={menuRef}
-			className="sticky top-0 z-40 w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl"
+			className="sticky top-0 z-40 w-full border-b border-zinc-200 bg-zinc-50"
 		>
-			<div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
+			<div className="max-w-7xl mx-auto flex items-center justify-between h-14 px-6 lg:px-8">
 				<Link
 					href={isLoggedIn ? "/dashboard" : "/"}
-					className="group transition-transform hover:scale-[1.02] active:scale-[0.98]"
+					className="flex items-center gap-2.5 text-zinc-900"
 					dir="ltr"
+					aria-label="Moments"
 				>
-					<span
-						className="text-xl lowercase text-zinc-900 dark:text-zinc-50"
-						style={{ fontFamily: "var(--font-display)" }}
-					>
-						{EVENT_NAME}
-					</span>
-					<span className="text-[10px] tracking-[0.3em] text-zinc-400 ms-3">
-						{t("nav.admin")}
+					<Mark className="h-3.5 w-auto" />
+					<span className="text-[1.45rem] leading-none" style={{ fontFamily: "var(--font-display-face), serif" }}>
+						Moments
 					</span>
 				</Link>
 
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-1">
 					<button
 						onClick={() => setLocale(locale === "he" ? "en" : "he")}
-						className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white px-2 py-1 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+						lang={locale === "he" ? "en" : "he"}
+						className="min-h-11 px-2 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
 					>
 						{locale === "he" ? "EN" : "עברית"}
 					</button>
@@ -97,7 +93,7 @@ export default function Navbar() {
 						{isLoggedIn ? (
 							<>
 								{userEmail && (
-								<span className="text-xs text-zinc-500 dark:text-zinc-400 font-medium truncate max-w-44 bg-zinc-100 dark:bg-zinc-800/60 px-3 py-1.5 rounded-full">
+								<span className="text-sm text-zinc-500 truncate max-w-44 px-2">
 									{userEmail}
 								</span>
 							)}
@@ -165,34 +161,34 @@ export default function Navbar() {
 						</>
 					)}
 					</div>
+					<button
+						onClick={() => setMobileOpen((prev) => !prev)}
+						className="sm:hidden min-h-11 min-w-11 -me-2.5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
+						aria-label={t("nav.menu")}
+					>
+						{mobileOpen ? (
+							<X className="w-5 h-5" />
+						) : (
+							<Menu className="w-5 h-5" />
+						)}
+					</button>
 				</div>
 
-				<button
-					onClick={() => setMobileOpen((prev) => !prev)}
-					className="sm:hidden p-2 -me-2 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors"
-					aria-label={t("nav.menu")}
-				>
-					{mobileOpen ? (
-						<X className="w-5 h-5" />
-					) : (
-						<Menu className="w-5 h-5" />
-					)}
-				</button>
 			</div>
 
 			{mobileOpen && (
-				<div className="sm:hidden border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 px-4 pb-4 pt-3 space-y-2">
+				<div className="sm:hidden border-t border-zinc-200 bg-zinc-50 px-4 pb-4 pt-2 space-y-1">
 					{isLoggedIn ? (
 						<>
 							{userEmail && (
-								<p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium truncate px-3 py-2 bg-zinc-100 dark:bg-zinc-800/60 rounded-xl">
+								<p className="text-sm text-zinc-500 truncate px-3 py-2">
 									{userEmail}
 								</p>
 							)}
 
 							<button
 								onClick={() => navigate("/")}
-								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-[8px] transition-colors"
 							>
 								<Home className="w-4 h-4" />
 								{t("nav.home")}
@@ -200,7 +196,7 @@ export default function Navbar() {
 
 							<button
 								onClick={() => navigate("/dashboard")}
-								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-[8px] transition-colors"
 							>
 								<LayoutDashboard className="w-4 h-4" />
 								{t("nav.dashboard")}
@@ -208,7 +204,7 @@ export default function Navbar() {
 
 							<button
 								onClick={handleLogout}
-								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-colors"
+								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-[8px] transition-colors"
 							>
 								<LogOut className="w-4 h-4" />
 								{t("nav.logout")}
@@ -219,7 +215,7 @@ export default function Navbar() {
 						<>
 							<button
 								onClick={() => navigate("/")}
-								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-[8px] transition-colors"
 							>
 								<Home className="w-4 h-4" />
 								{t("nav.home")}
@@ -227,14 +223,14 @@ export default function Navbar() {
 
 							<button
 								onClick={() => navigate("/login")}
-								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+								className="flex items-center gap-2 w-full text-start px-3 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-[8px] transition-colors"
 							>
 								<LogIn className="w-4 h-4" />
 								{t("nav.login")}
 							</button>
 							<Button
 								onClick={() => navigate("/signup")}
-								className="w-full bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2.5"
+								className="w-full h-11 rounded-[8px] bg-violet-600 hover:bg-violet-700 text-zinc-50 font-medium"
 							>
 								{t("nav.signup")}
 							</Button>

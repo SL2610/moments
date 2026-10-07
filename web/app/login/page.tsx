@@ -2,17 +2,16 @@
 
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/auth";
 import { useRedirectIfAuth } from "@/lib/useRequireAuth";
 import Link from "next/link";
-import { LogIn, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { TranslationKey } from "@/lib/i18n/locale";
 
-const EVENT_NAME = "Moments";
+// Fine hairline field on the paper ground; 52px tall, 8px corners.
+const field =
+	"w-full h-[52px] rounded-[8px] border border-zinc-300 bg-white px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-colors focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600";
 
 const AUTH_ERROR_KEYS: Record<string, TranslationKey> = {
 	"Invalid email or password.": "authError.invalidCredentials",
@@ -69,77 +68,69 @@ function LoginContent() {
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
-			<div className="w-full max-w-md p-8 space-y-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
-				<div className="flex flex-col items-center text-center space-y-3">
-					<div dir="ltr" className="text-center">
-						<p className="text-3xl lowercase text-zinc-900 dark:text-zinc-50" style={{ fontFamily: "var(--font-display)" }}>{EVENT_NAME}</p>
-						<p className="text-[10px] tracking-[0.3em] text-zinc-400 mt-1">ADMIN</p>
-					</div>
-					<p className="text-zinc-500 dark:text-zinc-400 max-w-72 text-sm">
-						{t("login.welcomeBack")}
-					</p>
-				</div>
+		<main className="min-h-[calc(100svh-3.5rem)] bg-zinc-50 px-6 pt-[11svh] pb-16">
+			<div className="mx-auto w-full max-w-sm">
+				<h1 className="text-xl font-medium text-zinc-900">{t("login.title")}</h1>
 
-				<form onSubmit={handleEmailLogin} className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="email">{t("login.email")}</Label>
-						<Input
+				<form onSubmit={handleEmailLogin} className="mt-7 space-y-5">
+					<div className="space-y-1.5">
+						<label htmlFor="email" className="block text-sm text-zinc-600">
+							{t("login.email")}
+						</label>
+						<input
 							id="email"
 							type="text"
-							placeholder="owner@example.com" dir="ltr"
+							inputMode="email"
+							autoComplete="username"
+							dir="ltr"
+							placeholder="name@example.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
-							className="rounded-xl"
+							className={field}
 						/>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="password">{t("login.password")}</Label>
-						<Input
+					<div className="space-y-1.5">
+						<label htmlFor="password" className="block text-sm text-zinc-600">
+							{t("login.password")}
+						</label>
+						<input
 							id="password"
 							type="password"
+							autoComplete="current-password"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
-							className="rounded-xl"
+							className={field}
 						/>
 					</div>
 
 					{message && (
-						<div
-							className={`text-sm p-3 rounded-xl border ${message.type === "error" ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800" : "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800"}`}
+						<p
+							role={message.type === "error" ? "alert" : "status"}
+							className={`text-sm ${message.type === "error" ? "text-red-700" : "text-zinc-600"}`}
 						>
 							{message.text}
-						</div>
+						</p>
 					)}
 
-					<Button
+					<button
 						type="submit"
-						className="w-full h-11 rounded-xl font-semibold flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white"
 						disabled={loading}
+						className="w-full h-[54px] rounded-[8px] bg-violet-600 text-base font-medium text-zinc-50 transition-colors hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 disabled:opacity-70"
 					>
-						{loading ? (
-							t("login.signingIn")
-						) : (
-							<>
-								<LogIn className="w-4 h-4" /> {t("login.submit")}
-							</>
-						)}
-					</Button>
+						{loading ? t("login.signingIn") : t("login.submit")}
+					</button>
 				</form>
 
-				<div className="text-center text-sm text-zinc-500">
+				<p className="mt-8 text-sm text-zinc-500">
 					{t("login.noAccount")}{" "}
-					<Link
-						href="/signup"
-						className="font-bold text-zinc-900 dark:text-zinc-50 hover:underline"
-					>
+					<Link href="/signup" className="text-zinc-700 underline underline-offset-4 hover:text-zinc-900">
 						{t("login.signupLink")}
 					</Link>
-				</div>
+				</p>
 			</div>
-		</div>
+		</main>
 	);
 }
 
