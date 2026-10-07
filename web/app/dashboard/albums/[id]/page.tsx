@@ -22,6 +22,11 @@ import {
 import Image from "next/image";
 import { apiFetch } from "@/lib/api";
 import AlbumSettings from "@/components/AlbumSettings";
+import { useAlbumFeatures } from "@/features";
+
+function AlbumFeatureSettings({ albumId }: { albumId: string }) {
+	return <>{useAlbumFeatures(albumId, "").settings}</>;
+}
 
 interface UploadPhoto {
 	id: string;
@@ -319,6 +324,7 @@ export default function AlbumUploadPage() {
 						</Button>
 					</div>
 					<AlbumSettings albumId={albumId} />
+					<AlbumFeatureSettings albumId={albumId} />
 
 					<div className="bg-violet-50 dark:bg-violet-950 border border-violet-100 dark:border-violet-900 rounded-2xl p-6 flex gap-4 items-start">
 						<Info className="w-6 h-6 text-violet-600 mt-1 shrink-0" />

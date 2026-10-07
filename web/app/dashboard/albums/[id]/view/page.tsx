@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { apiFetch } from "@/lib/api";
+import { useAlbumFeatures } from "@/features";
 import { useRequireAuth } from "@/lib/useRequireAuth";
 import JSZip from "jszip";
 import { fetchImageAsBlob, downloadImage } from "@/lib/download";
@@ -90,13 +91,20 @@ export default function AlbumViewPage() {
 	}, [albumId]);
 
 	const [publicId, setPublicId] = useState("");
+	const [albumTitle, setAlbumTitle] = useState("");
 	useEffect(() => {
 		apiFetch("/api/albums")
 			.then((res) => (res.ok ? res.json() : []))
-			.then((albums: { id: string; publicId: string }[]) =>
-				setPublicId(albums.find((a) => a.id === albumId)?.publicId ?? ""),
-			);
+			.then((albums: { id: string; publicId: string; title: string }[]) => {
+				const album = albums.find((a) => a.id === albumId);
+				setPublicId(album?.publicId ?? "");
+				setAlbumTitle(album?.title ?? "");
+			});
 	}, [albumId]);
+
+	const features = useAlbumFeatures(albumId, albumTitle);
+	const [view, setView] = useState("photos");
+	const isPhotoView = view === "photos";
 	const shareUrl = publicId ? guestLink(publicId) : "";
 
 	const handleShareClick = () => {
@@ -431,13 +439,32 @@ export default function AlbumViewPage() {
 					)}
 				</div>
 
-				{photos.length === 0 ? (
+				{features.tabs.length > 0 && (
+					<div role="tablist" aria-label="Album view" className="flex gap-6 border-b border-zinc-200">
+						{[{ key: "photos", label: "Photos" }, ...features.tabs].map((tab) => (
+							<button
+								key={tab.key}
+								role="tab"
+								aria-selected={view === tab.key}
+								onClick={() => setView(tab.key)}
+								className={`pb-3 -mb-px text-sm border-b-2 transition-colors ${view === tab.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
+							>
+								{tab.label}
+							</button>
+						))}
+					</div>
+				)}
+
+				{!isPhotoView ? (
+					features.panel(view)
+				) : photos.length === 0 ? (
 					<div className="text-center py-20 text-zinc-500">
 						No photos found. Upload some to get started!
 					</div>
 				) : (
 					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-						{photos.map((photo) => (
+						{photos.map((photo, index) => [
+							<Fragment key={`insert-${index}`}>{features.gridInsert(view, index)}</Fragment>,
 							<div
 								key={photo.id}
 								onClick={() => {
@@ -517,7 +544,7 @@ export default function AlbumViewPage() {
 									)}
 								</div>
 							</div>
-						))}
+						])}
 					</div>
 				)}
 			</div>

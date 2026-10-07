@@ -37,6 +37,7 @@ import {
 	setGuestName,
 } from "@/lib/guest";
 import { useI18n, setLocale } from "@/lib/i18n/I18nProvider";
+import { useGuestFeatures } from "@/features";
 import type { TranslationKey } from "@/lib/i18n/locale";
 
 interface PhotoTag {
@@ -297,7 +298,7 @@ export default function WeddingPage() {
 	}, [session, personFilter, sourceView, loadPhotos, loadPeople]);
 
 	/** Joins anonymously (plus the couple's password, if set), then goes on to the selfie or the album. */
-	const handleStart = async (next: "selfie" | "album") => {
+	const handleStart = async (next: "selfie" | "album" | (() => void)) => {
 		setJoinError("");
 		let current = session;
 		if (!current) {
@@ -317,6 +318,7 @@ export default function WeddingPage() {
 		}
 		window.scrollTo(0, 0);
 		if (next === "selfie") setIsSearchOpen(true);
+		if (typeof next === "function") next();
 	};
 
 	/** Runs the action once the guest has a display name, asking for one first if needed. */
@@ -731,6 +733,15 @@ export default function WeddingPage() {
 
 	// ---------------------------------------------------------------- render
 
+	const features = useGuestFeatures({
+		info: info || null,
+		session,
+		start: (then) => handleStart(then),
+		withName,
+		matchedPhotoIds: matches?.map((p) => p.id) ?? [],
+		closeSearch,
+	});
+
 	if (!sessionChecked || info === null) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-zinc-50">
@@ -845,6 +856,7 @@ export default function WeddingPage() {
 							{t("guest.landing.seeAlbum")}
 						</button>
 					</form>
+					{features.landing}
 				</main>
 
 				<footer className="px-6 pt-10 pb-8 flex items-end justify-between gap-6 text-zinc-500 max-w-xl w-full mx-auto">
@@ -877,6 +889,7 @@ export default function WeddingPage() {
 			/>
 
 			<main className="max-w-[1440px] mx-auto px-5 py-6 space-y-6">
+				{features.galleryTop}
 				<div className="flex items-end justify-between gap-3 border-b border-zinc-200 -mt-1">
 					<nav className="flex gap-6 sm:gap-9 overflow-x-auto" aria-label={t("guest.gallery.tabsAriaLabel")}>
 						{(
@@ -979,6 +992,7 @@ export default function WeddingPage() {
 											{t("guest.gallery.downloadAll")}
 										</DropdownMenu.Item>
 									)}
+									{features.menuItems}
 								</DropdownMenu.Content>
 							</DropdownMenu.Portal>
 						</DropdownMenu.Root>
@@ -1546,11 +1560,13 @@ export default function WeddingPage() {
 								>
 									{t("guest.selfieSearch.searchAgainButton")}
 								</button>
+								{features.results}
 							</div>
 						)}
 					</div>
 				</div>
 			)}
+			{features.overlays}
 			{namePrompt && (
 				<div
 					role="dialog"
