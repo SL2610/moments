@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import {
-	Cormorant_Garamond,
+	Instrument_Serif,
 	Frank_Ruhl_Libre,
+	Archivo,
 	Assistant,
 } from "next/font/google";
 import "./globals.css";
@@ -11,10 +12,11 @@ import { I18nProvider } from "@/lib/i18n/I18nProvider";
 import { LOCALE_COOKIE, DEFAULT_LOCALE, dirFor, isLocale } from "@/lib/i18n/locale";
 
 // Latin display face for the event wordmark.
-const displayFont = Cormorant_Garamond({
+const displayFont = Instrument_Serif({
 	variable: "--font-display-face",
 	subsets: ["latin"],
-	weight: ["400", "500", "600"],
+	weight: "400",
+	style: ["normal", "italic"],
 });
 
 // Hebrew display face for headings.
@@ -24,10 +26,16 @@ const hebrewDisplayFont = Frank_Ruhl_Libre({
 	weight: ["400", "500", "600"],
 });
 
-// Hebrew-capable UI face.
-const uiFont = Assistant({
+// Latin UI face; Hebrew pages switch to Assistant in globals.css.
+const uiFont = Archivo({
 	variable: "--font-ui-face",
-	subsets: ["hebrew", "latin"],
+	subsets: ["latin"],
+	weight: ["400", "500", "600"],
+});
+
+const hebrewUiFont = Assistant({
+	variable: "--font-ui-he-face",
+	subsets: ["hebrew"],
 	weight: ["400", "500", "600"],
 });
 
@@ -84,10 +92,14 @@ export default async function RootLayout({
 	const locale = isLocale(cookieLocale) ? cookieLocale : DEFAULT_LOCALE;
 
 	return (
-		<html lang={locale} dir={dirFor(locale)} suppressHydrationWarning>
-			<body
-				className={`${displayFont.variable} ${hebrewDisplayFont.variable} ${uiFont.variable} antialiased`}
-			>
+		<html
+			lang={locale}
+			dir={dirFor(locale)}
+			suppressHydrationWarning
+			// On <html>, not <body>: Tailwind resolves --font-sans there.
+			className={`${displayFont.variable} ${hebrewDisplayFont.variable} ${uiFont.variable} ${hebrewUiFont.variable}`}
+		>
+			<body className="antialiased">
 				<I18nProvider locale={locale}>
 					<Navbar />
 					{children}

@@ -5,35 +5,34 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Default gold/ivory wedding palette. Remapping the Tailwind color ramps
- * re-themes every existing utility class: violet -> gold/bronze accent,
- * zinc -> warm ivory neutrals, emerald/red/amber -> muted.
- * Swap these values to re-brand.
+ * "Editorial Invitation" palette (shared with the Moments site). Remapping the
+ * Tailwind ramps re-themes every existing utility class: violet -> forest
+ * accent, zinc -> paper-to-ink neutrals, emerald/red/amber -> muted.
  */
 @theme {
-	--color-violet-50: #faf7f0;
-	--color-violet-100: #f3ecdd;
-	--color-violet-200: #e7d9bc;
-	--color-violet-300: #d4bd8e;
-	--color-violet-400: #bf9d5e;
-	--color-violet-500: #a67f38;
-	--color-violet-600: #8a6220;
-	--color-violet-700: #6f4e18;
-	--color-violet-800: #5a3f14;
-	--color-violet-900: #46310f;
-	--color-violet-950: #2b1d08;
+	--color-violet-50: #f3f6f3;
+	--color-violet-100: #e3ebe5;
+	--color-violet-200: #c6d6cb;
+	--color-violet-300: #9fb8a8;
+	--color-violet-400: #6f927d;
+	--color-violet-500: #4a6f5a;
+	--color-violet-600: #2f4b3c;
+	--color-violet-700: #263e31;
+	--color-violet-800: #1e3227;
+	--color-violet-900: #17261e;
+	--color-violet-950: #0e1812;
 
-	--color-zinc-50: #f8f4ee;
-	--color-zinc-100: #f1ebe2;
-	--color-zinc-200: #e5dcd2;
-	--color-zinc-300: #d5c9bd;
-	--color-zinc-400: #a99c92;
-	--color-zinc-500: #746963;
-	--color-zinc-600: #5c534e;
-	--color-zinc-700: #463f3a;
-	--color-zinc-800: #332c28;
-	--color-zinc-900: #231d1a;
-	--color-zinc-950: #171311;
+	--color-zinc-50: #faf7f1;
+	--color-zinc-100: #f1eae0;
+	--color-zinc-200: #e4dccf;
+	--color-zinc-300: #d0c6b6;
+	--color-zinc-400: #7d7365;
+	--color-zinc-500: #6b6255;
+	--color-zinc-600: #574f44;
+	--color-zinc-700: #433d34;
+	--color-zinc-800: #2e2a24;
+	--color-zinc-900: #1c1a16;
+	--color-zinc-950: #12110e;
 
 	--color-emerald-50: #eff2ee;
 	--color-emerald-100: #dfe5dd;
@@ -75,9 +74,9 @@
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
-	--font-sans: var(--font-ui-face), "Assistant", Arial, sans-serif;
-	--font-display: var(--font-display-face), "Cormorant Garamond", "Times New Roman", serif;
-	--font-display-he: var(--font-display-he-face), "Frank Ruhl Libre", "Times New Roman", serif;
+	--font-sans: var(--font-ui-stack);
+	--font-display: var(--font-display-stack);
+	--font-display-he: var(--font-display-he-face), ui-serif, Georgia, serif;
 	--font-mono: ui-monospace, monospace;
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
@@ -118,25 +117,25 @@
 }
 
 :root {
-	--radius: 0.625rem;
-	--background: oklch(1 0 0);
-	--foreground: oklch(0.141 0.005 285.823);
-	--card: oklch(1 0 0);
-	--card-foreground: oklch(0.141 0.005 285.823);
-	--popover: oklch(1 0 0);
-	--popover-foreground: oklch(0.141 0.005 285.823);
-	--primary: oklch(0.21 0.006 285.885);
-	--primary-foreground: oklch(0.985 0 0);
-	--secondary: oklch(0.967 0.001 286.375);
-	--secondary-foreground: oklch(0.21 0.006 285.885);
-	--muted: oklch(0.967 0.001 286.375);
-	--muted-foreground: oklch(0.552 0.016 285.938);
-	--accent: oklch(0.967 0.001 286.375);
-	--accent-foreground: oklch(0.21 0.006 285.885);
-	--destructive: oklch(0.577 0.245 27.325);
-	--border: oklch(0.92 0.004 286.32);
-	--input: oklch(0.92 0.004 286.32);
-	--ring: oklch(0.705 0.015 286.067);
+	--radius: 0.25rem;
+	--background: #faf7f1;
+	--foreground: #1c1a16;
+	--card: #ffffff;
+	--card-foreground: #1c1a16;
+	--popover: #ffffff;
+	--popover-foreground: #1c1a16;
+	--primary: #1c1a16;
+	--primary-foreground: #faf7f1;
+	--secondary: #f1eae0;
+	--secondary-foreground: #1c1a16;
+	--muted: #f1eae0;
+	--muted-foreground: #6b6255;
+	--accent: #f1eae0;
+	--accent-foreground: #1c1a16;
+	--destructive: #9a3038;
+	--border: rgba(28, 26, 22, 0.14);
+	--input: rgba(28, 26, 22, 0.22);
+	--ring: #2f4b3c;
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -186,17 +185,38 @@
 	--sidebar-ring: oklch(0.552 0.016 285.938);
 }
 
+/* Latin faces carry Times/Arial metric fallbacks that include Hebrew glyphs,
+ * so Hebrew pages must lead with the Hebrew faces, not fall through to them. */
+html {
+	--font-ui-stack: var(--font-ui-face), ui-sans-serif, system-ui, sans-serif;
+	--font-display-stack: var(--font-display-face), ui-serif, Georgia, serif;
+}
+html:lang(he) {
+	--font-ui-stack: var(--font-ui-he-face), ui-sans-serif, system-ui, sans-serif;
+	--font-display-stack: var(--font-display-he-face), ui-serif, Georgia, serif;
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply bg-background text-foreground antialiased;
+		@apply bg-background text-foreground font-sans antialiased;
+	}
+	::selection {
+		background: #c6d6cb;
+		color: #1c1a16;
 	}
 }
 
 button {
 	cursor: pointer;
+}
+
+/* Hebrew has no capitals and breaks apart when letter-spaced; the guest page
+ * sets tracking-[...] on labels written for Latin. */
+:lang(he) [class*="tracking-"] {
+	letter-spacing: 0;
 }
 
 main,

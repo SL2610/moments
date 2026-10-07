@@ -27,7 +27,8 @@ Open source and self-hostable, so the couple owns the photos and the face data; 
 
 ## Capabilities and Constraints
 
-- Guest entry is selfie first: the link is the key, the shared password is optional, and a name is asked only when the guest uploads.
+- Guest entry is selfie first: the link is the key, the shared password is optional, and a name is asked only when the guest uploads or tags.
+- Guest identity is anonymous, held by the browser; on a new device a new selfie brings the photos back. No phone or other contact detail is collected.
 - After a selfie, the guest's own photos are the home screen, with "save all" up front; the full album is one tap away.
 - Hebrew/RTL is the default; English is complete.
 - Per-event identity comes from env (`EVENT_NAME`, `EVENT_DATE`) and `data/branding/` images.
