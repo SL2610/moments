@@ -104,7 +104,8 @@ export default function AlbumViewPage() {
 
 	const features = useAlbumFeatures(albumId, albumTitle);
 	const [view, setView] = useState("photos");
-	const isPhotoView = view === "photos";
+	// A tab whose panel is empty shows the photo grid (with any grid inserts for that tab).
+	const featurePanel = view === "photos" ? null : features.panel(view);
 	const shareUrl = publicId ? guestLink(publicId) : "";
 
 	const handleShareClick = () => {
@@ -455,8 +456,8 @@ export default function AlbumViewPage() {
 					</div>
 				)}
 
-				{!isPhotoView ? (
-					features.panel(view)
+				{featurePanel ? (
+					featurePanel
 				) : photos.length === 0 ? (
 					<div className="text-center py-20 text-zinc-500">
 						No photos found. Upload some to get started!
