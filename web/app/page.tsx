@@ -57,6 +57,19 @@ interface Person {
 
 const EVENT_NAME = process.env.NEXT_PUBLIC_EVENT_NAME || "Your Names Here";
 const EVENT_DATE = process.env.NEXT_PUBLIC_EVENT_DATE || "DD.MM.YYYY";
+const SHOW_CREDIT = process.env.NEXT_PUBLIC_SHOW_CREDIT !== "false";
+
+// Small "Made with Moments" line; self-hosters can hide it with SHOW_CREDIT=false.
+function Credit() {
+	if (!SHOW_CREDIT) return null;
+	return (
+		<p className="mt-6 text-center text-sm text-zinc-500">
+			<a href="https://sagi-lior-wedding.com" className="underline underline-offset-4 hover:text-zinc-900">
+				Made with Moments
+			</a>
+		</p>
+	);
+}
 
 function landingSteps(t: (key: TranslationKey) => string) {
 	return [
@@ -1129,6 +1142,7 @@ export default function WeddingPage() {
 					>
 						{EVENT_NAME} · {EVENT_DATE}
 					</p>
+					<Credit />
 				</footer>
 			</div>
 		);
@@ -1431,6 +1445,7 @@ export default function WeddingPage() {
 				)}
 
 				{canLoadMore && <div ref={loadMoreRef} className="h-1" aria-hidden />}
+				{!canLoadMore && photos.length > 0 && <Credit />}
 			</main>
 
 			{/* ---------------------------------------- floating actions */}
