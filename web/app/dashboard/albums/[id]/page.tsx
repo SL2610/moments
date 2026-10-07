@@ -1,0 +1,597 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Turnstile } from "@marsidev/react-turnstile";
+import { Button } from "@/components/ui/button";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import {
+	UploadCloud,
+	Lock,
+	Globe,
+	Maximize2,
+	X,
+	Info,
+	CheckCircle2,
+	Image as ImageIcon,
+	AlertCircle,
+	Loader2,
+	ArrowLeft,
+	Eye,
+} from "lucide-react";
+import Image from "next/image";
+import { apiFetch } from "@/lib/api";
+
+interface UploadPhoto {
+	id: string;
+	file: File;
+	previewUrl: string;
+	isPublic: boolean;
+	status: "idle" | "uploading" | "success" | "error";
+}
+
+interface ImportStatus {
+	state: "NONE" | "RUNNING" | "COMPLETED" | "FAILED";
+	total?: number;
+	imported?: number;
+	duplicates?: number;
+	failed?: number;
+	failures?: { file: string; error: string }[];
+	error?: string;
+}
+
+export default function AlbumUploadPage() {
+	const { isLoading: isAuthLoading, isAuthenticated } = useRequireAuth();
+	const params = useParams<{ id: string }>();
+	const router = useRouter();
+	const albumId = params?.id || "unknown-album";
+	const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+	const isTurnstileEnabled = Boolean(turnstileSiteKey);
+
+	const [photos, setPhotos] = useState<UploadPhoto[]>([]);
+	const [isUploading, setIsUploading] = useState(false);
+	const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+	const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+	const [turnstileWidgetKey, setTurnstileWidgetKey] = useState(0);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const [importPath, setImportPath] = useState("/import");
+	const [importStatus, setImportStatus] = useState<ImportStatus | null>(null);
+	const [isImportPolling, setIsImportPolling] = useState(false);
+
+	useEffect(() => {
+		if (!albumId || albumId === "unknown-album" || !isAuthenticated) return;
+		let cancelled = false;
+
+		const poll = async () => {
+			try {
+				const res = await apiFetch(`/api/albums/${albumId}/import/status`);
+				if (!res.ok || cancelled) return;
+				const status: ImportStatus = await res.json();
+				setImportStatus(status.state === "NONE" ? null : status);
+				if (status.state === "RUNNING") setIsImportPolling(true);
+				else setIsImportPolling(false);
+			} catch {
+				/* ignore */
+			}
+		};
+
+		poll();
+		const interval = setInterval(() => {
+			if (isImportPolling) poll();
+		}, 2000);
+		return () => {
+			cancelled = true;
+			clearInterval(interval);
+		};
+	}, [albumId, isAuthenticated, isImportPolling]);
+
+	const handleStartImport = async () => {
+		try {
+			const res = await apiFetch(`/api/albums/${albumId}/import`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ path: importPath }),
+			});
+			if (!res.ok) {
+				const data = await res.json().catch(() => ({}));
+				alert(data.error || "Failed to start import.");
+				return;
+			}
+			setImportStatus({ state: "RUNNING" });
+			setIsImportPolling(true);
+		} catch {
+			alert("Unable to reach the server.");
+		}
+	};
+
+	if (isAuthLoading || !isAuthenticated) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+				<Loader2 className="w-10 h-10 animate-spin text-violet-600" />
+			</div>
+		);
+	}
+
+	const MAX_PHOTO_MB = Number(process.env.NEXT_PUBLIC_MAX_PHOTO_MB || "30");
+	const MAX_PHOTO_SIZE = MAX_PHOTO_MB * 1024 * 1024;
+
+	const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+		if (!e.target.files) return;
+
+		const selected = Array.from(e.target.files);
+		const oversized = selected.filter((f) => f.size > MAX_PHOTO_SIZE);
+		if (oversized.length > 0) {
+			alert(
+				`${oversized.length} photo(s) exceed the ${MAX_PHOTO_MB} MB limit and were skipped.`,
+			);
+		}
+
+		const newFiles = selected
+			.filter((f) => f.size <= MAX_PHOTO_SIZE)
+			.map((file) => ({
+				id: Math.random().toString(36).substring(7),
+				file,
+				previewUrl: URL.createObjectURL(file),
+				isPublic: false,
+				status: "idle" as const,
+			}));
+
+		setPhotos((prev) => [...prev, ...newFiles]);
+		if (fileInputRef.current) fileInputRef.current.value = "";
+	};
+
+	const togglePrivacy = (id: string) => {
+		setPhotos((prev) =>
+			prev.map((p) => (p.id === id ? { ...p, isPublic: !p.isPublic } : p)),
+		);
+	};
+
+	const setAllPrivacy = (makePublic: boolean) => {
+		setPhotos((prev) => prev.map((p) => ({ ...p, isPublic: makePublic })));
+	};
+
+	const removePhoto = (id: string) => {
+		setPhotos((prev) => prev.filter((p) => p.id !== id));
+	};
+
+	const resetTurnstile = () => {
+		setTurnstileToken(null);
+		setTurnstileWidgetKey((prev) => prev + 1);
+	};
+
+	const handleUploadToS3 = async () => {
+		const pendingPhotos = photos.filter(
+			(p) => p.status === "idle" || p.status === "error",
+		);
+		if (pendingPhotos.length === 0) return;
+		if (isTurnstileEnabled && !turnstileToken) {
+			alert("Please complete the bot check before uploading.");
+			return;
+		}
+
+		setIsUploading(true);
+		let turnstileWasUsed = false;
+		let didRedirectToAlbum = false;
+
+		try {
+			const fileSizes = pendingPhotos.map((p) => p.file.size);
+			const headers: Record<string, string> = {
+				"Content-Type": "application/json",
+			};
+			if (turnstileToken) {
+				headers["X-Turnstile-Token"] = turnstileToken;
+			}
+
+			const response = await apiFetch(`/api/albums/${albumId}/upload-urls`, {
+				method: "POST",
+				headers,
+				body: JSON.stringify({ fileSizes }),
+			});
+			turnstileWasUsed = isTurnstileEnabled && Boolean(turnstileToken);
+
+			if (!response.ok) {
+				const errorMsg = await response.text();
+				if (response.status === 405) {
+					throw new Error(
+						"Upload endpoint rejected the HTTP method (405). Check backend deployment and NEXT_PUBLIC_API_URL format.",
+					);
+				}
+				throw new Error(
+					errorMsg || "Unable to prepare your upload. Please try again.",
+				);
+			}
+
+			const uploadTargets: { key: string; uploadUrl: string }[] =
+				await response.json();
+			const uploadPromises = pendingPhotos.map(async (photo, index) => {
+				setPhotos((prev) =>
+					prev.map((p) =>
+						p.id === photo.id ? { ...p, status: "uploading" } : p,
+					),
+				);
+
+				try {
+					const target = uploadTargets[index];
+					if (!target) throw new Error("No upload slot (quota reached)");
+
+					const uploadRes = await apiFetch(target.uploadUrl, {
+						method: "PUT",
+						body: photo.file,
+						headers: {
+							"Content-Type": photo.file.type || "image/jpeg",
+						},
+					});
+
+					if (uploadRes.ok) {
+						setPhotos((prev) =>
+							prev.map((p) =>
+								p.id === photo.id ? { ...p, status: "success" } : p,
+							),
+						);
+
+						return { ...photo, status: "success", actualS3Key: target.key };
+					} else {
+						throw new Error("Upload failed");
+					}
+				} catch {
+					setPhotos((prev) =>
+						prev.map((p) =>
+							p.id === photo.id ? { ...p, status: "error" } : p,
+						),
+					);
+					return null;
+				}
+			});
+
+			const results = await Promise.all(uploadPromises);
+			const successfulPhotos = results.filter((p) => p !== null);
+
+			if (successfulPhotos.length > 0) {
+				const payload = {
+					photos: successfulPhotos.map((p) => ({
+						storageUrl: p.actualS3Key,
+						isPublic: p.isPublic,
+						public: p.isPublic,
+					})),
+				};
+
+				const dbResponse = await apiFetch(`/api/albums/${albumId}/photos`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload),
+				});
+
+				if (!dbResponse.ok) {
+					const errorMsg = await dbResponse.text();
+					console.error("AWS Upload succeeded, but Database save failed.");
+					alert(
+						errorMsg ||
+							"Photos uploaded to cloud, but failed to save to album.",
+					);
+				} else {
+					console.log("Successfully saved to database!");
+					setPhotos([]);
+					didRedirectToAlbum = true;
+					router.push(`/dashboard/albums/${albumId}/view`);
+					return;
+				}
+			}
+		} catch (error) {
+			console.error("Upload process failed:", error);
+			const message =
+				error instanceof Error && error.message
+					? error.message
+					: "Something went wrong while uploading. Please try again.";
+			alert(message);
+		} finally {
+			if (turnstileWasUsed && !didRedirectToAlbum) {
+				resetTurnstile();
+			}
+			setIsUploading(false);
+		}
+	};
+
+	return (
+		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 lg:p-10">
+			<div className="max-w-6xl mx-auto space-y-6">
+				<button
+					onClick={() => router.push("/dashboard")}
+					className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
+				>
+					<ArrowLeft className="w-4 h-4" />
+					Back to Dashboard
+				</button>
+
+				<div className="space-y-4">
+					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+						<h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+							Add Photos to Album
+						</h1>
+						<Button
+							variant="outline"
+							onClick={() => router.push(`/dashboard/albums/${albumId}/view`)}
+							className="w-full sm:w-auto"
+						>
+							<Eye className="w-4 h-4 mr-2" />
+							View Album
+						</Button>
+					</div>
+
+					<div className="bg-violet-50 dark:bg-violet-950 border border-violet-100 dark:border-violet-900 rounded-2xl p-6 flex gap-4 items-start">
+						<Info className="w-6 h-6 text-violet-600 mt-1 shrink-0" />
+							<div className="space-y-2 text-sm text-violet-900 dark:text-violet-200">
+								<h3 className="font-bold text-base">How Album Privacy Works</h3>
+								<p>
+									<strong className="text-zinc-900 dark:text-white">
+										<Lock className="w-3 h-3 inline pb-0.5" /> Protected
+									</strong>{" "}
+									(default) &mdash; These photos are only shown to the specific
+									people in them, matched by facial recognition. Guests take a
+									selfie and only see photos that match their face. If you later
+									switch a photo from public to protected, the gallery will
+									automatically queue it for AI scanning.
+								</p>
+							<p>
+								<strong className="text-emerald-600 dark:text-emerald-400">
+									<Globe className="w-3 h-3 inline pb-0.5" /> Public
+								</strong>{" "}
+								&mdash; Visible to anyone who has the album link. Great for
+								landscape shots, venue pictures, or group photos you want
+								everyone to see.
+							</p>
+						</div>
+					</div>
+
+					<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-4">
+						<div>
+							<h3 className="font-bold text-base text-zinc-900 dark:text-zinc-50">
+								Import Local Folder
+							</h3>
+							<p className="text-sm text-zinc-500 mt-1">
+								For thousands of photographer files, skip the browser: put them
+								in <code className="font-mono">./data/import</code> on the
+								server and import the mounted folder directly. Duplicates are
+								skipped, so re-running an import retries failed files.
+							</p>
+						</div>
+						<div className="flex flex-col sm:flex-row gap-3">
+							<input
+								type="text"
+								value={importPath}
+								onChange={(e) => setImportPath(e.target.value)}
+								placeholder="/import"
+								className="flex-1 text-sm px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:text-white font-mono"
+							/>
+							<Button
+								onClick={handleStartImport}
+								disabled={importStatus?.state === "RUNNING"}
+								className="bg-violet-600 hover:bg-violet-700 text-white font-semibold"
+							>
+								{importStatus?.state === "RUNNING" ? (
+									<>
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+										Importing...
+									</>
+								) : (
+									"Import Folder"
+								)}
+							</Button>
+						</div>
+
+						{importStatus && importStatus.state !== "NONE" && (
+							<div className="text-sm space-y-2">
+								<div className="flex flex-wrap gap-x-6 gap-y-1 text-zinc-600 dark:text-zinc-300">
+									<span>{importStatus.total ?? 0} found</span>
+									<span className="text-emerald-600 dark:text-emerald-400">
+										{importStatus.imported ?? 0} imported
+									</span>
+									<span>{importStatus.duplicates ?? 0} duplicates skipped</span>
+									<span className={(importStatus.failed ?? 0) > 0 ? "text-red-600 dark:text-red-400" : ""}>
+										{importStatus.failed ?? 0} failed
+									</span>
+								</div>
+								{importStatus.state === "COMPLETED" && (
+									<p className="text-emerald-600 dark:text-emerald-400 font-medium">
+										Import complete. Face scanning continues in the background.
+									</p>
+								)}
+								{importStatus.state === "FAILED" && (
+									<p className="text-red-600 dark:text-red-400 font-medium">
+										Import failed: {importStatus.error || "unknown error"}
+									</p>
+								)}
+								{(importStatus.failures?.length ?? 0) > 0 && (
+									<details className="text-xs text-zinc-500">
+										<summary className="cursor-pointer">
+											Failed files (re-run the import to retry)
+										</summary>
+										<ul className="mt-1 space-y-0.5 font-mono">
+											{importStatus.failures!.map((f, i) => (
+												<li key={i}>
+													{f.file}: {f.error}
+												</li>
+											))}
+										</ul>
+									</details>
+								)}
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm gap-4">
+					<div className="flex gap-2 w-full sm:w-auto">
+						<input
+							type="file"
+							multiple
+							accept="image/*"
+							className="hidden"
+							ref={fileInputRef}
+							onChange={handleFileSelect}
+						/>
+						<Button
+							onClick={() => fileInputRef.current?.click()}
+							variant="outline"
+							className="w-full sm:w-auto border-zinc-300 dark:border-zinc-700"
+						>
+							<UploadCloud className="w-4 h-4 mr-2" />
+							Select Photos
+						</Button>
+						<Button
+							onClick={() => setAllPrivacy(true)}
+							variant="secondary"
+							className="hidden sm:flex text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200"
+						>
+							<Globe className="w-4 h-4 mr-2" /> Mark All Public
+						</Button>
+						<Button
+							onClick={() => setAllPrivacy(false)}
+							variant="secondary"
+							className="hidden sm:flex text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200"
+						>
+							<Lock className="w-4 h-4 mr-2" /> Mark All Protected
+						</Button>
+					</div>
+
+					<div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
+						{isTurnstileEnabled && (
+							<div className="w-full sm:w-auto flex justify-center">
+								<Turnstile
+									key={turnstileWidgetKey}
+									siteKey={turnstileSiteKey!}
+									onSuccess={(token) => setTurnstileToken(token)}
+									onExpire={() => setTurnstileToken(null)}
+									onError={() => setTurnstileToken(null)}
+								/>
+							</div>
+						)}
+
+						<Button
+							onClick={handleUploadToS3}
+							disabled={
+								photos.length === 0 ||
+								isUploading ||
+								(isTurnstileEnabled && !turnstileToken)
+							}
+							className="w-full sm:w-auto bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 shadow-md transition-all"
+						>
+							{isUploading
+								? "Uploading..."
+								: `Upload ${photos.length} Photos`}
+						</Button>
+					</div>
+				</div>
+
+				{photos.length === 0 && (
+					<div className="border-2 border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl p-20 flex flex-col items-center justify-center text-center bg-white dark:bg-zinc-900">
+						<ImageIcon className="w-12 h-12 text-zinc-300 mb-4" />
+						<h3 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">
+							No photos selected
+						</h3>
+						<p className="text-zinc-500 mt-2 max-w-sm">
+							Click the button above to select images from your computer to add
+							to this album.
+						</p>
+					</div>
+				)}
+
+				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+					{photos.map((photo) => (
+						<div
+							key={photo.id}
+							className="group relative aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm"
+						>
+							<Image
+								src={photo.previewUrl}
+								alt="Preview"
+								fill
+								unoptimized
+								className={`object-cover transition-all duration-300 ${photo.status === "uploading" ? "opacity-50 grayscale scale-105" : ""}`}
+							/>
+
+							{photo.status === "uploading" && (
+								<div className="absolute inset-0 flex items-center justify-center bg-zinc-900/20 backdrop-blur-[2px]">
+									<div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
+								</div>
+							)}
+							{photo.status === "success" && (
+								<div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center backdrop-blur-sm transition-all">
+									<CheckCircle2 className="w-10 h-10 text-emerald-500 bg-white rounded-full shadow-sm" />
+								</div>
+							)}
+							{photo.status === "error" && (
+								<div className="absolute inset-0 bg-red-500/20 flex items-center justify-center backdrop-blur-sm">
+									<AlertCircle className="w-10 h-10 text-red-500 bg-white rounded-full shadow-sm" />
+								</div>
+							)}
+
+							{photo.status === "idle" && (
+								<>
+									<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+										<button
+											onClick={() => setFullScreenImage(photo.previewUrl)}
+											className="p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-md backdrop-blur-md transition-colors"
+											title="Full Screen"
+										>
+											<Maximize2 className="w-4 h-4" />
+										</button>
+										<button
+											onClick={() => removePhoto(photo.id)}
+											className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-md backdrop-blur-md transition-colors"
+											title="Remove"
+										>
+											<X className="w-4 h-4" />
+										</button>
+									</div>
+
+									<div className="absolute bottom-2 left-2 right-2">
+										<button
+											onClick={() => togglePrivacy(photo.id)}
+											className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-bold transition-all backdrop-blur-md shadow-sm border
+                                                ${
+																									photo.isPublic
+																										? "bg-emerald-500/90 hover:bg-emerald-600 text-white border-emerald-400"
+																										: "bg-zinc-900/80 hover:bg-zinc-900 text-zinc-100 border-zinc-700"
+																								}`}
+										>
+											{photo.isPublic ? (
+												<>
+													<Globe className="w-3 h-3" /> Public
+												</>
+											) : (
+												<>
+													<Lock className="w-3 h-3" /> Protected
+												</>
+											)}
+										</button>
+									</div>
+								</>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+
+			{fullScreenImage && (
+				<div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+					<button
+						onClick={() => setFullScreenImage(null)}
+						className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
+					>
+						<X className="w-6 h-6" />
+					</button>
+					<div className="relative w-full max-w-5xl h-[85vh]">
+						<Image
+							src={fullScreenImage}
+							alt="Full Screen Preview"
+							fill
+							className="object-contain"
+								unoptimized
+						/>
+					</div>
+				</div>
+			)}
+		</div>
+	);
+}

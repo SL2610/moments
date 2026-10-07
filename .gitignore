@@ -1,0 +1,27 @@
+# Environments
+venv/
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# Test Images
+*.jpg
+*.jfif
+*.webp
+*.png
+
+# Environment Variables (for later when we add secrets)
+.env
+# Self-hosted local data (photos, database)
+data/photos/
+.env
+
+# Committed brand assets (exception to the global image ignore)
+!web/public/*.png
+!web/public/*.jpg
+
+# Evaluation data (generated / manually placed)
+ai-face-worker/eval/wedding/
+ai-face-worker/eval/datasets/
+ai-face-worker/eval/golden/
