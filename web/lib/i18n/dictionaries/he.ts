@@ -84,6 +84,7 @@ const he = {
 	"guest.gallery.selectionMode": "בחירה",
 	"guest.gallery.downloadAll": "הורדת הכל",
 	"guest.gallery.uploadProgress": "מעלים {current} מתוך {total}...",
+	"guest.gallery.uploadFailed": "{failed} מתוך {total} תמונות לא עלו. תמונות מעל {max} MB לא נתמכות, ואת השאר אפשר לנסות שוב עם חיבור טוב יותר.",
 	"guest.gallery.emptyTagged": "אין עדיין תמונות מתויגות כאן",
 	"guest.gallery.emptyAlbum": "עוד אין תמונות באלבום. היו הראשונים להוסיף!",
 	"guest.gallery.downloadTitle": "הורדה",

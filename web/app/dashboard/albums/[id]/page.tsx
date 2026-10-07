@@ -336,7 +336,7 @@ export default function AlbumUploadPage() {
 								<strong className="text-emerald-600 dark:text-emerald-400">
 									<Globe className="w-3 h-3 inline pb-0.5" /> Public
 								</strong>{" "}
-								&mdash; Visible to anyone who has the album link. Great for
+								&mdash; Visible to every guest in the gallery. Great for
 								landscape shots, venue pictures, or group photos you want
 								everyone to see.
 							</p>

@@ -193,6 +193,13 @@ export default function WeddingPage() {
 	// selfie search
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [selfie, setSelfie] = useState<File | null>(null);
+	const [selfiePreview, setSelfiePreview] = useState("");
+	useEffect(() => {
+		if (!selfie) return setSelfiePreview("");
+		const url = URL.createObjectURL(selfie);
+		setSelfiePreview(url);
+		return () => URL.revokeObjectURL(url);
+	}, [selfie]);
 	const [isSearching, setIsSearching] = useState(false);
 	const [searchError, setSearchError] = useState("");
 	const [matches, setMatches] = useState<Photo[] | null>(null);
@@ -207,6 +214,7 @@ export default function WeddingPage() {
 	// upload
 	const uploadInputRef = useRef<HTMLInputElement>(null);
 	const [uploadProgress, setUploadProgress] = useState<string | null>(null);
+	const [uploadNotice, setUploadNotice] = useState("");
 	const [isZipping, setIsZipping] = useState(false);
 
 	useEffect(() => {
@@ -605,11 +613,10 @@ export default function WeddingPage() {
 
 	const handleUploadFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		if (!e.target.files || e.target.files.length === 0) return;
-		const files = Array.from(e.target.files).filter(
-			(f) => f.size <= MAX_PHOTO_MB * 1024 * 1024,
-		);
+		const picked = Array.from(e.target.files);
+		const files = picked.filter((f) => f.size <= MAX_PHOTO_MB * 1024 * 1024);
 		e.target.value = "";
-		if (files.length === 0) return;
+		setUploadNotice("");
 
 		let done = 0;
 		let finished = 0;
@@ -646,6 +653,14 @@ export default function WeddingPage() {
 		await Promise.all(Array.from({ length: Math.min(3, files.length) }, worker));
 
 		setUploadProgress(null);
+		if (done < picked.length) {
+			setUploadNotice(
+				t("guest.gallery.uploadFailed")
+					.replace("{failed}", String(picked.length - done))
+					.replace("{total}", String(picked.length))
+					.replace("{max}", String(MAX_PHOTO_MB)),
+			);
+		}
 		if (done > 0) {
 			setPersonFilter(null);
 			setSourceView("guests");
@@ -1276,6 +1291,11 @@ export default function WeddingPage() {
 						{uploadProgress}
 					</p>
 				)}
+				{uploadNotice && (
+					<p role="alert" className="text-sm text-red-700 dark:text-red-400">
+						{uploadNotice}
+					</p>
+				)}
 
 				{photos.length === 0 && !isLoading ? (
 					<div className="text-center py-24">
@@ -1646,7 +1666,7 @@ export default function WeddingPage() {
 									<div className="text-center space-y-3">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img
-											src={URL.createObjectURL(selfie)}
+											src={selfiePreview}
 											alt=""
 											className="w-36 h-36 mx-auto rounded-full object-cover border-4 border-violet-100 dark:border-violet-900"
 										/>

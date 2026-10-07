@@ -28,6 +28,12 @@ import { useRequireAuth } from "@/lib/useRequireAuth";
 import JSZip from "jszip";
 import { fetchImageAsBlob, downloadImage } from "@/lib/download";
 
+// The guest gallery is the site root. Prefer the public URL so a QR made from
+// localhost still works, unless setup.sh left the example placeholder.
+const PUBLIC_URL = process.env.NEXT_PUBLIC_PUBLIC_URL ?? "";
+const guestUrl = () =>
+	PUBLIC_URL && !PUBLIC_URL.includes("example.com") ? PUBLIC_URL : window.location.origin;
+
 interface Photo {
 	id: string;
 	viewUrl: string;
@@ -93,7 +99,7 @@ export default function AlbumViewPage() {
 	};
 
 	const handleCopyLink = () => {
-		const url = `${window.location.origin}/albums/${albumId}/guest`;
+		const url = guestUrl();
 		navigator.clipboard.writeText(url);
 		setIsCopied(true);
 		setTimeout(() => setIsCopied(false), 2000);
@@ -535,11 +541,11 @@ export default function AlbumViewPage() {
 
 						<div className="flex flex-col items-center gap-3 p-5 bg-white rounded-xl border border-zinc-200 dark:border-zinc-700">
 							<QRCodeSVG
-								value={`${window.location.origin}/albums/${albumId}/guest`}
+								value={guestUrl()}
 								size={180}
 								level="H"
 								marginSize={2}
-								fgColor="#7c3aed"
+								fgColor="#1c1a16"
 								bgColor="#ffffff"
 							/>
 							<p className="text-xs text-zinc-400">
@@ -549,7 +555,7 @@ export default function AlbumViewPage() {
 
 						<div className="flex items-center space-x-2 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-xl border border-zinc-200 dark:border-zinc-700">
 							<div className="flex-1 truncate text-sm text-zinc-600 dark:text-zinc-300 px-2 font-mono">
-								{`${window.location.origin}/albums/${albumId}/guest`}
+								{guestUrl()}
 							</div>
 							<Button
 								onClick={handleCopyLink}

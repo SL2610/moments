@@ -89,7 +89,8 @@ public class ImportService {
         try {
             String raw = (requestedPath == null || requestedPath.isBlank())
                     ? importRoot.toString() : requestedPath.trim();
-            dir = Path.of(raw).toAbsolutePath().normalize().toRealPath();
+            // A bare folder name means a folder under the import root.
+            dir = importRoot.resolve(raw).normalize().toRealPath();
         } catch (IOException e) {
             return "Import folder not found. Put photos under ./data/import on the host (mounted as /import).";
         }

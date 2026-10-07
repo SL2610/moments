@@ -86,6 +86,7 @@ const en = {
 	"guest.gallery.selectionMode": "Select",
 	"guest.gallery.downloadAll": "Download all",
 	"guest.gallery.uploadProgress": "Uploading {current} of {total}...",
+	"guest.gallery.uploadFailed": "{failed} of {total} photos didn't upload. Photos over {max} MB are skipped; try the rest again on a better connection.",
 	"guest.gallery.emptyTagged": "No photos tagged here yet",
 	"guest.gallery.emptyAlbum": "No photos in the album yet. Be the first to add some!",
 	"guest.gallery.downloadTitle": "Download",
