@@ -13,7 +13,7 @@ web
 
 ## Product Purpose
 
-A self-hostable wedding gallery where each guest finds their own photos with one selfie. Success: a guest goes from scanning to saving their photos without typing anything.
+The free, self-hostable core of WED: each guest finds their own photos with one selfie. Success: a guest goes from scanning to saving their photos without typing anything.
 
 ## Positioning
 
@@ -32,11 +32,11 @@ Open source and self-hostable, so the couple owns the photos and the face data; 
 - After a selfie, the guest's own photos are the home screen, with "save all" up front; the full album is one tap away.
 - Hebrew/RTL is the default; English is complete.
 - Each couple sets their names, date, cover photo and optional guest password on their album page in the admin.
-- The guest pages belong to the couple: their cover photo and names lead, styled as their own invitation. The Moments mark never appears there; Moments is only the small "Made with Moments" credit.
+- The guest pages belong to the couple: their cover photo and names lead, styled as their own invitation. The WED mark never appears there; WED is only the small "Made with WED" credit.
 
 ## Brand Commitments
 
-Name: **Moments**. Visual identity follows the "Editorial Invitation" direction shared with the product site (ivory paper, ink, forest and oxblood accents, Instrument Serif/Archivo with Frank Ruhl Libre/Assistant). It must never read as a generic AI-generated wedding template.
+Name: **WED Faces**, the free face-recognition core of **WED** (the hosted AI wedding album). Visual identity is WED's album look: ivory and white paper, charcoal, forest, Bodoni Moda/Hanken Grotesk with Frank Ruhl Libre/Assistant, crop marks and caption metadata. It must never read as a generic AI-generated wedding template.
 
 ## Evidence on Hand
 

@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Moments album palette (shared with the site): ivory, charcoal, forest. Remapping the
+ * WED album palette (shared with the site): ivory, charcoal, forest. Remapping the
  * Tailwind ramps re-themes every existing utility class: violet -> forest
  * accent, zinc -> paper-to-ink neutrals, emerald/red/amber -> muted.
  */
@@ -356,7 +356,7 @@ section {
 }
 
 /* ------------------------------------------------------------------
- * Album signatures (shared with the Moments site).
+ * Album signatures (shared with the WED site).
  * .crop: forest printer's crop marks at two opposite corners, outside the box.
  * .meta: caption metadata, small tracked caps like a photo book's captions.
  * ------------------------------------------------------------------ */

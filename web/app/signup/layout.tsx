@@ -5,7 +5,7 @@ export const metadata: Metadata = {
 	description:
 		"Create a free wedding gallery account to start sharing event photos with AI facial recognition. Sign up with email, Google, or GitHub.",
 	openGraph: {
-		title: "Sign Up | " + ("Moments"),
+		title: "Sign Up | " + ("WED"),
 		description:
 			"Create a free wedding gallery account to start sharing event photos with AI facial recognition.",
 	},

@@ -8,7 +8,7 @@ const API_URL = (process.env.API_INTERNAL_URL || "http://api:8080").replace(/\/+
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
 	const { id } = await params;
 	const res = await fetch(`${API_URL}/api/w/${encodeURIComponent(id)}`, { cache: "no-store" }).catch(() => null);
-	if (!res?.ok) return { title: "Moments" };
+	if (!res?.ok) return { title: "WED" };
 	const info: { eventName: string; coverUrl: string | null } = await res.json();
 	const locale = (await cookies()).get(LOCALE_COOKIE)?.value;
 	const isHebrew = !isLocale(locale) || locale === "he";

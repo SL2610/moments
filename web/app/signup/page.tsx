@@ -11,7 +11,7 @@ import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { TranslationKey } from "@/lib/i18n/locale";
 
-const EVENT_NAME = "Moments";
+const EVENT_NAME = "WED";
 
 const AUTH_ERROR_KEYS: Record<string, TranslationKey> = {
 	"Invalid email or password.": "authError.invalidCredentials",

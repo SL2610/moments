@@ -1,4 +1,4 @@
-# Self-Hosting Moments
+# Self-Hosting WED Faces
 
 Everything runs on one machine through Docker Compose. No cloud accounts required.
 
@@ -8,8 +8,8 @@ prompt you hand to an AI assistant that does this for you.
 ## Quick start
 
 ```bash
-git clone https://github.com/SL2610/moments
-cd moments
+git clone https://github.com/SL2610/wed-faces
+cd wed-faces
 ./setup.sh
 ```
 

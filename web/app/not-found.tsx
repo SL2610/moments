@@ -13,7 +13,7 @@ export default function NotFound() {
 						className="text-4xl text-zinc-900 dark:text-zinc-50"
 						style={{ fontFamily: "var(--font-display)" }}
 					>
-						Moments
+						WED
 					</p>
 				</div>
 				<p className="text-zinc-500">{t("notFound.message")}</p>

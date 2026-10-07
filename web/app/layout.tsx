@@ -45,7 +45,7 @@ const PUBLIC_URL =
 	process.env.NEXT_PUBLIC_PUBLIC_URL || "https://your-domain.example.com";
 export const metadata: Metadata = {
 	metadataBase: new URL(PUBLIC_URL),
-	title: { default: "Moments", template: "%s" },
+	title: { default: "WED", template: "%s" },
 	description: "Find your wedding photos with one selfie.",
 	robots: { index: false, follow: false },
 };

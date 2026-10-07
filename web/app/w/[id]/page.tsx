@@ -62,13 +62,13 @@ interface Person {
 
 const SHOW_CREDIT = process.env.NEXT_PUBLIC_SHOW_CREDIT !== "false";
 
-// Small "Made with Moments" line; self-hosters can hide it with SHOW_CREDIT=false.
+// Small "Made with WED" line; self-hosters can hide it with SHOW_CREDIT=false.
 function Credit() {
 	if (!SHOW_CREDIT) return null;
 	return (
 		<p className="meta text-zinc-500 shrink-0" dir="ltr">
 			<a href="https://sagi-lior-wedding.com" className="hover:text-zinc-900">
-				Made with Moments
+				Made with WED
 			</a>
 		</p>
 	);
@@ -775,7 +775,7 @@ export default function WeddingPage() {
 		const dateMeta = info.eventDate.replace(/[./-]/g, " · ");
 		return (
 			<div className="min-h-[100svh] bg-[#fbfaf7] flex flex-col">
-				{/* The couple's album cover, set like a magazine: their names lead, Moments is only the credit. */}
+				{/* The couple's album cover, set like a magazine: their names lead, WED is only the credit. */}
 				<div className="flex items-center justify-between px-6 pt-5 text-zinc-500">
 					<p className="meta" dir="ltr">{dateMeta}</p>
 					{langToggle}

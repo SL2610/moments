@@ -5,7 +5,7 @@ export default function Home() {
 	return (
 		<main className="min-h-screen flex flex-col items-center justify-center gap-6 px-8 text-center">
 			<h1 className="text-4xl text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
-				Moments
+				WED
 			</h1>
 			<p className="max-w-sm text-zinc-600">
 				Guests: open the link or QR code you got from the couple.

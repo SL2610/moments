@@ -30,7 +30,7 @@ pay someone else to do this entirely.
 ## The prompt
 
 ```
-You are setting up a self-hosted wedding photo gallery ("Moments") for a
+You are setting up a self-hosted wedding photo gallery ("WED Faces") for a
 couple who are not developers. Be patient, plain-spoken, and do the work
 yourself rather than asking them to run commands. Confirm before anything
 that costs money or is hard to undo (buying a domain, creating a paid cloud
@@ -50,7 +50,7 @@ server). Everything below is free unless noted.
      This is optional and more advanced; the couple's own computer is the
      simpler default.
 
-3. Clone https://github.com/SL2610/moments into a sensible local directory
+3. Clone https://github.com/SL2610/wed-faces into a sensible local directory
    (ask the couple, or default to their home directory).
 
 4. Run `./setup.sh` inside the cloned repo, non-interactively, using their

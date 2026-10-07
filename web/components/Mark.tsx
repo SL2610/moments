@@ -1,4 +1,4 @@
-// Halftone Guest: one dot printed large among the crowd (the Moments mark).
+// Halftone Guest: one dot printed large among the crowd (the WED mark).
 const DOTS = [
 	[4.6, 4.6, 4.6],
 	[23.6, 4.6, 4.6],

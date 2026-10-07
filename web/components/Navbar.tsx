@@ -72,11 +72,11 @@ export default function Navbar() {
 					href={isLoggedIn ? "/dashboard" : "/"}
 					className="flex items-center gap-2.5 text-zinc-900"
 					dir="ltr"
-					aria-label="Moments"
+					aria-label="WED"
 				>
 					<Mark className="h-3.5 w-auto" />
-					<span className="text-[1.45rem] leading-none" style={{ fontFamily: "var(--font-display-face), serif" }}>
-						Moments
+					<span className="text-[1.35rem] leading-none tracking-[0.14em]" style={{ fontFamily: "var(--font-display-face), serif" }}>
+						WED
 					</span>
 				</Link>
 

@@ -1,10 +1,11 @@
-# Moments
+# WED Faces
 
-**A wedding photo gallery your guests find themselves in: no accounts, no
-scrolling through hundreds of photos.** Upload the event photos, share one
-link. Each guest takes a selfie and instantly sees every photo they're in.
+**The free, open-source face-recognition core of [WED](https://sagi-lior-wedding.com).**
+Upload the wedding photos, share one link. Each guest takes a selfie and
+instantly sees every photo they're in: no accounts, no scrolling.
 
-Self-hosted, free, and open source. **Your photos and your guests' faces
+Self-hosted, free, and open source (MIT). WED, the hosted AI wedding album,
+adds the blessing book, Stories and more on top of this core. **Your photos and your guests' faces
 never leave your own machine** (there's no cloud service in the loop unless
 you choose to add one, e.g. Cloudflare Tunnel, just to expose the URL).
 
@@ -19,8 +20,8 @@ Not a developer? Two easier options first:
 Comfortable with a terminal:
 
 ```bash
-git clone https://github.com/SL2610/moments
-cd moments
+git clone https://github.com/SL2610/wed-faces
+cd wed-faces
 ./setup.sh
 ```
 
@@ -64,8 +65,8 @@ MIT, see [LICENSE](LICENSE). Built on the architecture of
 
 ## בעברית: התחלה מהירה
 
-גלריית תמונות לחתונה שבה כל אורח מוצא את עצמו לבד, עם סלפי, בלי לגלול באלפי
-תמונות. מתארחת על המחשב שלכם, בחינם, בקוד פתוח: התמונות והפרצופים לא
+הליבה החינמית וקוד הפתוח של WED: כל אורח מוצא את התמונות שלו מהחתונה עם סלפי,
+בלי לגלול באלפי תמונות. מתארחת על המחשב שלכם, בחינם: התמונות והפרצופים לא
 עוזבים את המכשיר שלכם.
 
 לא מפתחים? ראו [AI_SETUP.md](AI_SETUP.md), מעבירים פרומפט לעוזר AI והוא
@@ -74,8 +75,8 @@ MIT, see [LICENSE](LICENSE). Built on the architecture of
 נוח לכם עם טרמינל:
 
 ```bash
-git clone https://github.com/SL2610/moments
-cd moments
+git clone https://github.com/SL2610/wed-faces
+cd wed-faces
 ./setup.sh
 ```
 

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
 	description:
 		"Log in to the wedding gallery to manage your event photo albums. Sign in with email, Google, or GitHub.",
 	openGraph: {
-		title: "Log In | " + ("Moments"),
+		title: "Log In | " + ("WED"),
 		description:
 			"Log in to the wedding gallery to manage your event photo albums.",
 	},

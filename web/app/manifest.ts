@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
 	return {
-		name: "Moments",
-		short_name: "Moments",
+		name: "WED",
+		short_name: "WED",
 		description: "Find your wedding photos with one selfie.",
 		start_url: "/",
 		display: "standalone",
