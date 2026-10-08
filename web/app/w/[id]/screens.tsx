@@ -310,7 +310,7 @@ export function WeddingStory({
 					</>
 				}
 			/>
-			<main className="max-w-3xl mx-auto px-5 sm:px-8 pb-14">
+			<main className="max-w-3xl lg:max-w-5xl mx-auto px-5 sm:px-8 pb-14">
 				<h2 id="story-title" className="mt-6 text-[clamp(2.1rem,9vw,3.2rem)] leading-[1.08] tracking-[-0.02em] text-zinc-900" style={display}>
 					{open ? open.label : t("guest.story.title")}
 				</h2>
@@ -319,11 +319,12 @@ export function WeddingStory({
 				</p>
 
 				{!open ? (
-					<ul className="mt-8 border-t border-zinc-200">
-						{groups.map((g) => (
-							<li key={g.key} className="border-b border-zinc-200">
-								<button onClick={() => setOpen(g)} className="group w-full flex items-center gap-6 py-4 text-start">
-									<span className="w-32 sm:w-40 aspect-square shrink-0 overflow-hidden bg-[#f3efe9]">
+					// Phones: editorial rows. Wide screens: a magazine grid whose pictures alternate tall and wide.
+					<ul className="mt-8 border-t border-zinc-200 lg:border-0 lg:grid lg:grid-cols-2 lg:gap-x-12 lg:gap-y-14 lg:items-end">
+						{groups.map((g, i) => (
+							<li key={g.key} className="border-b border-zinc-200 lg:border-0">
+								<button onClick={() => setOpen(g)} className="group w-full flex items-center gap-6 py-4 text-start lg:flex-col lg:items-stretch lg:gap-4 lg:py-0">
+									<span className={`w-32 sm:w-40 aspect-square shrink-0 overflow-hidden bg-[#f3efe9] lg:w-full ${i % 4 === 0 || i % 4 === 3 ? "lg:aspect-[4/5]" : "lg:aspect-[4/3]"}`}>
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img src={g.coverThumbUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
 									</span>
@@ -331,7 +332,7 @@ export function WeddingStory({
 										<span className="block text-2xl text-zinc-900" style={display}>{g.label}</span>
 										<span className="block mt-1 text-sm text-zinc-500">{t("guest.story.count").replace("{count}", num(g.photoIds.length))}</span>
 									</span>
-									<ChevronRight className="w-5 h-5 text-zinc-500 rtl:rotate-180" strokeWidth={1.25} />
+									<ChevronRight className="w-5 h-5 text-zinc-500 rtl:rotate-180 lg:hidden" strokeWidth={1.25} />
 								</button>
 							</li>
 						))}
