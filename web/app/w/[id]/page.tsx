@@ -956,7 +956,7 @@ export default function WeddingPage() {
 									align="end"
 									sideOffset={6}
 									collisionPadding={12}
-									className="z-40 min-w-48 rounded-[2px] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-lg p-1.5 space-y-0.5"
+									className="z-40 min-w-52 bg-[#fbfaf7] border border-zinc-300 p-1.5 space-y-0.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
 								>
 									<DropdownMenu.Item
 										onSelect={() => withName(() => uploadInputRef.current?.click())}
@@ -1024,8 +1024,8 @@ export default function WeddingPage() {
 					<div
 						className={
 							galleryLayout === "masonry"
-								? "columns-2 sm:columns-3 lg:columns-4 gap-3 sm:gap-4"
-								: "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4"
+								? "columns-2 sm:columns-3 lg:columns-4 gap-2 sm:gap-3"
+								: "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-1.5 sm:gap-2"
 						}
 					>
 						{photos.map((photo, index) => (
@@ -1064,11 +1064,11 @@ export default function WeddingPage() {
 								onPointerUp={cancelLongPress}
 								onPointerLeave={cancelLongPress}
 								onPointerCancel={cancelLongPress}
-								className={`group relative block w-full cursor-pointer bg-zinc-200 rounded-[2px] overflow-hidden border focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-3 sm:mb-4 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
+								className={`group relative block w-full cursor-pointer bg-[#ebe3d6] overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-2 sm:mb-3 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
 							>
 								{isSelecting && (
 									<span
-										className={`absolute top-2 start-2 z-10 w-6 h-6 rounded-full border-2 flex items-center justify-center shadow ${selectedIds.includes(photo.id) ? "bg-violet-600 border-violet-600" : "bg-black/25 border-white/80"}`}
+										className={`absolute top-2 start-2 z-10 w-6 h-6 border flex items-center justify-center ${selectedIds.includes(photo.id) ? "bg-zinc-900 border-zinc-900" : "bg-zinc-50/70 border-zinc-50"}`}
 									>
 										{selectedIds.includes(photo.id) && (
 											<Check className="w-4 h-4 text-white" />
@@ -1084,11 +1084,12 @@ export default function WeddingPage() {
 									alt=""
 									loading="lazy"
 									onLoad={() => markPhotoLoaded(photo.id)}
-									className={`img-fade object-cover transition-transform duration-500 group-hover:scale-105 ${loadedPhotoIds.has(photo.id) ? "img-loaded" : ""} ${galleryLayout === "masonry" ? "w-full h-auto" : "absolute inset-0 w-full h-full"}`}
+									className={`img-fade object-cover transition-transform duration-500 group-hover:scale-[1.03] ${loadedPhotoIds.has(photo.id) ? "img-loaded" : ""} ${galleryLayout === "masonry" ? "w-full h-auto" : "absolute inset-0 w-full h-full"}`}
 								/>
-								{photo.tags.length > 0 && (
-									<span className="absolute bottom-2 start-2 flex items-center gap-1 min-w-0 max-w-[70%] text-[10px] bg-black/50 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
-										<Tag className="w-2.5 h-2.5 shrink-0" />
+								{/* who is in it; redundant (so hidden) on the guest's own tab */}
+								{photo.tags.length > 0 && personFilter !== session.guest.id && (
+									<span className="absolute bottom-0 inset-x-0 flex items-center gap-1 min-w-0 px-2 pt-6 pb-1.5 text-xs text-zinc-50 bg-gradient-to-t from-zinc-950/55 to-transparent">
+										<Tag className="w-3 h-3 shrink-0" />
 										<span className="truncate">
 											{photo.tags.map((t) => t.name).join(", ")}
 										</span>
@@ -1331,25 +1332,26 @@ export default function WeddingPage() {
 
 			{/* -------------------------------------------------- selfie search */}
 			{isSearchOpen && (
-				<div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-					<div className="bg-white dark:bg-zinc-900 rounded-[2px] border border-zinc-200 dark:border-zinc-800 w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 space-y-5 relative">
-						<button
-							onClick={closeSearch}
-							className="absolute top-4 end-4 p-2 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
-						>
-							<X className="w-5 h-5" />
-						</button>
-
-						<div className="text-center">
-							<h2
-								className="text-2xl text-zinc-900 dark:text-zinc-50"
-								style={{ fontFamily: "var(--font-display-he)" }}
+				<div role="dialog" aria-modal="true" aria-labelledby="search-title" className="fixed inset-0 z-50 bg-zinc-950/55 sm:flex sm:items-center sm:justify-center sm:p-6">
+					<div className="relative h-full sm:h-auto w-full sm:max-w-lg sm:max-h-[92vh] overflow-y-auto bg-[#fbfaf7] px-6 pt-6 pb-8 space-y-6">
+						<div className="flex items-start justify-between gap-4">
+							<div>
+								<p className="meta text-zinc-500" dir="ltr">{info.eventName}</p>
+								<h2
+									id="search-title"
+									className="mt-2 text-[2.1rem] leading-tight text-zinc-900"
+									style={{ fontFamily: "var(--font-display)" }}
+								>
+									{t("guest.selfieSearch.title")}
+								</h2>
+							</div>
+							<button
+								onClick={closeSearch}
+								aria-label={t("guest.selfieSearch.cancelButton")}
+								className="p-2 -m-2 text-zinc-500 hover:text-zinc-900"
 							>
-								{t("guest.selfieSearch.title")}
-							</h2>
-							<p className="text-sm text-zinc-500 mt-2">
-								{t("guest.selfieSearch.subtitle")}
-							</p>
+								<X className="w-5 h-5" />
+							</button>
 						</div>
 
 						{matches === null ? (
@@ -1418,24 +1420,30 @@ export default function WeddingPage() {
 												className="absolute inset-0 w-full h-full z-10"
 											/>
 										)}
-										<div className="border-2 border-dashed border-violet-200 dark:border-violet-800 rounded-[2px] p-10 flex flex-col items-center gap-3 hover:bg-violet-50 dark:hover:bg-violet-950 transition-colors">
-											<div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full text-violet-600 dark:text-violet-400">
-												{isMobile ? (
-													<Camera className="w-6 h-6" />
-												) : (
-													<Video className="w-6 h-6" />
-												)}
+										{/* a viewfinder: crop marks around a face guide */}
+										<div className="crop mx-2 my-3">
+											<div className="aspect-[4/5] bg-[#ebe3d6] flex flex-col items-center justify-center gap-5 transition-colors hover:bg-[#e4dccf]">
+												<div aria-hidden className="h-[46%] aspect-[3/4] rounded-[50%] border border-dashed border-zinc-500/60" />
+												<p className="flex items-center gap-2 text-base text-zinc-800">
+													{isMobile ? <Camera className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+													{isMobile ? t("guest.selfieSearch.tapToCapture") : t("guest.selfieSearch.clickToCapture")}
+												</p>
 											</div>
-											<p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
-												{isMobile ? t("guest.selfieSearch.tapToCapture") : t("guest.selfieSearch.clickToCapture")}
-											</p>
 										</div>
 									</div>
 								)}
 
-								{!isMobile && !isCameraOpen && !selfie && (
-									<label className="block text-center text-xs text-zinc-500 cursor-pointer underline">
-										{t("guest.selfieSearch.uploadFromComputer")}
+								{!isCameraOpen && !selfie && (
+									<ul className="grid grid-cols-3 gap-3 text-center text-sm text-zinc-600">
+										<li>{t("guest.selfieSearch.tipLight")}</li>
+										<li>{t("guest.selfieSearch.tipLook")}</li>
+										<li>{t("guest.selfieSearch.tipAlone")}</li>
+									</ul>
+								)}
+
+								{!isCameraOpen && !selfie && (
+									<label className="block text-center text-sm text-zinc-700 cursor-pointer underline decoration-zinc-300 underline-offset-[6px]">
+										{isMobile ? t("guest.selfieSearch.choosePhoto") : t("guest.selfieSearch.uploadFromComputer")}
 										<input
 											type="file"
 											accept="image/*"
@@ -1591,7 +1599,7 @@ export default function WeddingPage() {
 							maxLength={80}
 							autoComplete="name"
 							aria-labelledby="name-title"
-							className="w-full min-h-12 rounded border border-zinc-300 px-4 text-base focus:outline-none focus:ring-2 focus:ring-violet-600"
+							className="w-full h-12 rounded-[2px] border border-zinc-300 bg-[#fbfaf7] px-4 text-base focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
 						/>
 						<div className="flex gap-2">
 							<Button type="submit" disabled={isSavingName || !nameInput.trim()} className="flex-1 min-h-12">
