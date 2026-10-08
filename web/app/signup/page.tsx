@@ -1,9 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { auth } from "@/lib/auth";
 import { useRedirectIfAuth } from "@/lib/useRequireAuth";
 import Link from "next/link";
@@ -11,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 import type { TranslationKey } from "@/lib/i18n/locale";
 
-const EVENT_NAME = "WED";
+import { field } from "@/components/admin/Kit";
 
 const AUTH_ERROR_KEYS: Record<string, TranslationKey> = {
 	"Invalid email or password.": "authError.invalidCredentials",
@@ -59,77 +56,67 @@ export default function SignUpPage() {
 
 	if (isAuthChecking || isAuthenticated) {
 		return (
-			<div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-				<Loader2 className="w-10 h-10 animate-spin text-violet-600" />
+			<div className="min-h-screen flex items-center justify-center bg-zinc-50">
+				<Loader2 className="w-8 h-8 animate-spin text-violet-600" />
 			</div>
 		);
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-4">
-			<div className="w-full max-w-md p-8 space-y-8 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800">
-				<div className="flex flex-col items-center text-center space-y-3">
-					<div dir="ltr" className="text-center">
-						<p className="text-3xl lowercase text-zinc-900 dark:text-zinc-50" style={{ fontFamily: "var(--font-display)" }}>{EVENT_NAME}</p>
-						<p className="text-[10px] tracking-[0.3em] text-zinc-400 mt-1">ADMIN</p>
-					</div>
-					<p className="text-zinc-500 dark:text-zinc-400 max-w-72 text-sm">
-						{t("signup.intro")}
-					</p>
-				</div>
+		<main className="min-h-[calc(100svh-3.5rem)] bg-zinc-50 px-6 pt-[11svh] pb-16">
+			<div className="mx-auto w-full max-w-sm">
+				<h1 className="text-xl font-medium text-zinc-900">{t("login.title")}</h1>
+				<p className="mt-2 text-zinc-600">{t("signup.intro")}</p>
 
-				<form onSubmit={handleEmailSignUp} className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="email">{t("signup.email")}</Label>
-						<Input
+				<form onSubmit={handleEmailSignUp} className="mt-7 space-y-5">
+					<div className="space-y-1.5">
+						<label htmlFor="email" className="block text-sm text-zinc-600">{t("signup.email")}</label>
+						<input
 							id="email"
-							type="email"
-							placeholder="owner@example.com" dir="ltr"
+							type="text"
+							inputMode="email"
+							autoComplete="username"
+							dir="ltr"
+							placeholder="name@example.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
-							className="rounded-xl"
+							className={field}
 						/>
 					</div>
-					<div className="space-y-2">
-						<Label htmlFor="password">{t("signup.password")}</Label>
-						<Input
+					<div className="space-y-1.5">
+						<label htmlFor="password" className="block text-sm text-zinc-600">{t("signup.password")}</label>
+						<input
 							id="password"
 							type="password"
+							autoComplete="new-password"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
-							className="rounded-xl"
+							className={field}
 						/>
 					</div>
-
 					{message && (
-						<div
-							className={`text-sm p-3 rounded-xl border ${message.type === "error" ? "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800" : "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-200 dark:border-green-800"}`}
-						>
+						<p role={message.type === "error" ? "alert" : "status"} className={`text-sm ${message.type === "error" ? "text-red-700" : "text-zinc-600"}`}>
 							{message.text}
-						</div>
+						</p>
 					)}
-
-					<Button
+					<button
 						type="submit"
-						className="w-full h-11 rounded-xl font-semibold bg-violet-600 hover:bg-violet-700 text-white"
 						disabled={loading}
+						className="w-full h-[54px] rounded-[2px] bg-zinc-900 text-base font-medium text-zinc-50 transition-colors hover:bg-violet-600 disabled:opacity-70"
 					>
 						{loading ? t("signup.creating") : t("signup.submit")}
-					</Button>
+					</button>
 				</form>
 
-				<div className="text-center text-sm text-zinc-500">
+				<p className="mt-8 text-sm text-zinc-500">
 					{t("signup.haveAccount")}{" "}
-					<Link
-						href="/login"
-						className="font-bold text-zinc-900 dark:text-zinc-50 hover:underline"
-					>
+					<Link href="/login" className="text-zinc-700 underline underline-offset-4 hover:text-zinc-900">
 						{t("signup.loginLink")}
 					</Link>
-				</div>
+				</p>
 			</div>
-		</div>
+		</main>
 	);
 }

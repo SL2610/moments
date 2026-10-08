@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
 import { guestLink } from "@/lib/guestLink";
+import { useAdminText } from "@/lib/i18n/admin";
+import { Section, btnInk, btnLine, field, linkQuiet } from "@/components/admin/Kit";
 
-interface Album {
+export interface Album {
 	id: string;
 	title: string;
 	publicId: string;
@@ -16,46 +16,30 @@ interface Album {
 	coverUrl: string | null;
 }
 
-const field =
-	"w-full min-h-11 rounded border border-zinc-300 bg-white px-3 text-base focus:outline-none focus:ring-2 focus:ring-violet-600";
-
 /** What guests see: names, date, cover, optional password, and the link itself. */
-export default function AlbumSettings({ albumId }: { albumId: string }) {
-	const [album, setAlbum] = useState<Album | null>(null);
-	const [title, setTitle] = useState("");
-	const [eventDate, setEventDate] = useState("");
+export default function AlbumSettings({ album, onChange }: { album: Album; onChange: (a: Album) => void }) {
+	const tx = useAdminText();
+	// Local edits start from the saved album; a fresh save replaces the album and resets them.
+	const [title, setTitle] = useState(album.title);
+	const [eventDate, setEventDate] = useState(album.eventDate ?? "");
 	const [password, setPassword] = useState("");
 	const [status, setStatus] = useState("");
 	const [isSaving, setIsSaving] = useState(false);
 	const [isUploading, setIsUploading] = useState(false);
-
-	const apply = (a: Album) => {
-		setAlbum(a);
-		setTitle(a.title);
-		setEventDate(a.eventDate ?? "");
-	};
-
-	useEffect(() => {
-		apiFetch("/api/albums")
-			.then((res) => (res.ok ? res.json() : []))
-			.then((albums: Album[]) => {
-				const found = albums.find((a) => a.id === albumId);
-				if (found) apply(found);
-			});
-	}, [albumId]);
+	const [copied, setCopied] = useState(false);
 
 	const save = async (guestPassword?: string) => {
 		setIsSaving(true);
 		setStatus("");
-		const res = await apiFetch(`/api/albums/${albumId}/settings`, {
+		const res = await apiFetch(`/api/albums/${album.id}/settings`, {
 			method: "PUT",
 			body: JSON.stringify({ title, eventDate, guestPassword }),
-		});
+		}).catch(() => null);
 		setIsSaving(false);
-		if (!res.ok) return setStatus("Couldn't save. Check the names aren't empty.");
-		apply(await res.json());
+		if (!res?.ok) return setStatus(tx("settings.saveError"));
+		onChange(await res.json());
 		setPassword("");
-		setStatus("Saved.");
+		setStatus(tx("settings.saved"));
 	};
 
 	const uploadCover = async (file: File | undefined) => {
@@ -64,83 +48,98 @@ export default function AlbumSettings({ albumId }: { albumId: string }) {
 		setStatus("");
 		const body = new FormData();
 		body.append("file", file);
-		const res = await apiFetch(`/api/albums/${albumId}/cover`, { method: "PUT", body });
+		const res = await apiFetch(`/api/albums/${album.id}/cover`, { method: "PUT", body }).catch(() => null);
 		setIsUploading(false);
-		if (!res.ok) return setStatus("That cover didn't upload. Try a JPG under the size limit.");
-		apply(await res.json());
+		if (!res?.ok) return setStatus(tx("settings.coverError"));
+		onChange(await res.json());
 	};
 
-	if (!album) return null;
 	const link = guestLink(album.publicId);
 
 	return (
-		<section className="bg-white rounded border border-zinc-200 p-6 grid gap-8 lg:grid-cols-[1fr_auto]">
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					save(password || undefined);
-				}}
-				className="space-y-5"
-			>
-				<h2 className="text-2xl text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
-					Your guest page
-				</h2>
-				<div>
-					<label htmlFor="s-title" className="block text-sm font-medium mb-1">Your names</label>
-					<input id="s-title" className={field} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-				</div>
-				<div>
-					<label htmlFor="s-date" className="block text-sm font-medium mb-1">Wedding date</label>
-					<input id="s-date" className={field} value={eventDate} onChange={(e) => setEventDate(e.target.value)} placeholder="14.06.2026" maxLength={32} />
-				</div>
-				<div>
-					<label htmlFor="s-cover" className="block text-sm font-medium mb-1">Cover photo</label>
-					<div className="flex items-center gap-4">
-						{album.coverUrl && (
-							/* eslint-disable-next-line @next/next/no-img-element */
-							<img src={album.coverUrl} alt="" className="w-20 h-20 object-cover rounded" />
-						)}
-						<input id="s-cover" type="file" accept="image/*" onChange={(e) => uploadCover(e.target.files?.[0])} className="text-sm" />
-						{isUploading && <Loader2 className="w-4 h-4 animate-spin" />}
+		<Section title={tx("settings.title")} body={tx("settings.body")}>
+			<div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_16rem]">
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						save(password || undefined);
+					}}
+					className="grid gap-6 sm:grid-cols-2"
+				>
+					<div className="sm:col-span-2">
+						<label htmlFor="s-title" className="block text-sm text-zinc-600 mb-1.5">{tx("settings.names")}</label>
+						<input id="s-title" dir="auto" className={field} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
 					</div>
-				</div>
-				<div>
-					<label htmlFor="s-password" className="block text-sm font-medium mb-1">
-						Guest password <span className="font-normal text-zinc-500">(optional)</span>
-					</label>
-					<input
-						id="s-password"
-						type="text"
-						className={field}
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder={album.passwordSet ? "Set. Type a new one to change it" : "None: the link alone opens the gallery"}
-						maxLength={72}
-						autoComplete="off"
-					/>
-					{album.passwordSet && (
-						<button type="button" onClick={() => save("")} className="mt-1.5 text-sm underline underline-offset-4">
-							Remove the password
+					<div>
+						<label htmlFor="s-date" className="block text-sm text-zinc-600 mb-1.5">{tx("settings.date")}</label>
+						<input id="s-date" dir="ltr" className={field} value={eventDate} onChange={(e) => setEventDate(e.target.value)} placeholder="14.06.2026" maxLength={32} />
+					</div>
+					<div>
+						<label htmlFor="s-password" className="block text-sm text-zinc-600 mb-1.5">
+							{tx("settings.password")} <span className="text-zinc-400">· {tx("settings.optional")}</span>
+						</label>
+						<input
+							id="s-password"
+							type="text"
+							className={field}
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder={album.passwordSet ? tx("settings.passwordSet") : tx("settings.passwordNone")}
+							maxLength={72}
+							autoComplete="off"
+						/>
+						{album.passwordSet && (
+							<button type="button" onClick={() => save("")} className={`${linkQuiet} text-sm`}>
+								{tx("settings.passwordRemove")}
+							</button>
+						)}
+					</div>
+					<div className="sm:col-span-2">
+						<p className="text-sm text-zinc-600 mb-2">{tx("settings.cover")}</p>
+						<div className="flex items-end gap-5">
+							<div className="crop w-28 shrink-0">
+								<div className="aspect-[4/5] overflow-hidden bg-[#ebe3d6]">
+									{album.coverUrl && (
+										// eslint-disable-next-line @next/next/no-img-element
+										<img src={album.coverUrl} alt="" className="h-full w-full object-cover grayscale" />
+									)}
+								</div>
+							</div>
+							<label className={`${btnLine} cursor-pointer`}>
+								{isUploading ? tx("loading") : album.coverUrl ? tx("settings.coverReplace") : tx("settings.coverChoose")}
+								<input type="file" accept="image/*" className="sr-only" onChange={(e) => uploadCover(e.target.files?.[0])} />
+							</label>
+						</div>
+					</div>
+					<div className="sm:col-span-2 flex items-center gap-4">
+						<button type="submit" disabled={isSaving} className={btnInk}>
+							{isSaving ? tx("loading") : tx("settings.save")}
 						</button>
-					)}
-				</div>
-				<div className="flex items-center gap-3">
-					<Button type="submit" disabled={isSaving} className="min-h-11 px-6">
-						{isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
-					</Button>
-					{status && <p role="status" className="text-sm text-zinc-600">{status}</p>}
-				</div>
-			</form>
+						{status && <p role="status" className="text-sm text-zinc-600">{status}</p>}
+					</div>
+				</form>
 
-			<div className="flex flex-col items-center gap-3 lg:w-64">
-				<QRCodeSVG value={link} size={200} level="M" marginSize={2} fgColor="#1c1a16" bgColor="#ffffff" />
-				<a href={link} target="_blank" rel="noreferrer" className="text-sm break-all text-center underline underline-offset-4" dir="ltr">
-					{link}
-				</a>
-				<Button type="button" variant="outline" onClick={() => navigator.clipboard.writeText(link)} className="min-h-11">
-					Copy link
-				</Button>
+				<aside className="lg:border-s lg:border-zinc-300 lg:ps-10">
+					<p className="meta text-zinc-500">{tx("settings.link")}</p>
+					<div className="mt-4 bg-white p-3 w-fit">
+						<QRCodeSVG value={link} size={168} level="M" marginSize={0} fgColor="#191917" bgColor="#ffffff" />
+					</div>
+					<a href={link} target="_blank" rel="noreferrer" dir="ltr" className="mt-4 block break-all text-sm text-zinc-700 underline decoration-zinc-300 underline-offset-4">
+						{link.replace(/^https?:\/\//, "")}
+					</a>
+					<button
+						type="button"
+						onClick={() => {
+							navigator.clipboard.writeText(link);
+							setCopied(true);
+							setTimeout(() => setCopied(false), 2000);
+						}}
+						className={`${btnLine} mt-4 w-full`}
+					>
+						{copied ? tx("settings.copied") : tx("settings.copy")}
+					</button>
+				</aside>
 			</div>
-		</section>
+		</Section>
 	);
 }

@@ -11,7 +11,7 @@ import type { TranslationKey } from "@/lib/i18n/locale";
 
 // Fine hairline field on the paper ground; 52px tall, 8px corners.
 const field =
-	"w-full h-[52px] rounded-[8px] border border-zinc-300 bg-white px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-colors focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600";
+	"w-full h-[52px] rounded-[2px] border border-zinc-300 bg-white px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 transition-colors focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600";
 
 const AUTH_ERROR_KEYS: Record<string, TranslationKey> = {
 	"Invalid email or password.": "authError.invalidCredentials",
@@ -117,7 +117,7 @@ function LoginContent() {
 					<button
 						type="submit"
 						disabled={loading}
-						className="w-full h-[54px] rounded-[8px] bg-violet-600 text-base font-medium text-zinc-50 transition-colors hover:bg-violet-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 disabled:opacity-70"
+						className="w-full h-[54px] rounded-[2px] bg-zinc-900 text-base font-medium text-zinc-50 transition-colors hover:bg-violet-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-50 disabled:opacity-70"
 					>
 						{loading ? t("login.signingIn") : t("login.submit")}
 					</button>

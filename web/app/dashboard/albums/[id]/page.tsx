@@ -3,26 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Turnstile } from "@marsidev/react-turnstile";
-import { Button } from "@/components/ui/button";
 import { useRequireAuth } from "@/lib/useRequireAuth";
-import {
-	UploadCloud,
-	Lock,
-	Globe,
-	Maximize2,
-	X,
-	Info,
-	CheckCircle2,
-	Image as ImageIcon,
-	AlertCircle,
-	Loader2,
-	ArrowLeft,
-	Eye,
-} from "lucide-react";
-import Image from "next/image";
+import { CheckCircle2, AlertCircle, Loader2, X } from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import AlbumSettings from "@/components/AlbumSettings";
+import AlbumSettings, { type Album } from "@/components/AlbumSettings";
 import { useAlbumFeatures } from "@/features";
+import { useAdminText } from "@/lib/i18n/admin";
+import { AdminPage, AlbumNav, Loading, PageHead, Section, btnInk, btnLine, field, formatDate, linkQuiet } from "@/components/admin/Kit";
 
 function AlbumFeatureSettings({ albumId }: { albumId: string }) {
 	return <>{useAlbumFeatures(albumId, "").settings}</>;
@@ -64,6 +51,17 @@ export default function AlbumUploadPage() {
 	const [importPath, setImportPath] = useState("/import");
 	const [importStatus, setImportStatus] = useState<ImportStatus | null>(null);
 	const [isImportPolling, setIsImportPolling] = useState(false);
+	const tx = useAdminText();
+	const [notice, setNotice] = useState("");
+	const [album, setAlbum] = useState<Album | null>(null);
+
+	useEffect(() => {
+		if (!isAuthenticated) return;
+		apiFetch("/api/albums")
+			.then((res) => (res.ok ? res.json() : []))
+			.then((albums: Album[]) => setAlbum(albums.find((a) => a.id === albumId) ?? null))
+			.catch(() => setAlbum(null));
+	}, [albumId, isAuthenticated]);
 
 	useEffect(() => {
 		if (!albumId || albumId === "unknown-album" || !isAuthenticated) return;
@@ -101,23 +99,17 @@ export default function AlbumUploadPage() {
 			});
 			if (!res.ok) {
 				const data = await res.json().catch(() => ({}));
-				alert(data.error || "Failed to start import.");
+				setNotice(data.error || tx("genericError"));
 				return;
 			}
 			setImportStatus({ state: "RUNNING" });
 			setIsImportPolling(true);
 		} catch {
-			alert("Unable to reach the server.");
+			setNotice(tx("offline"));
 		}
 	};
 
-	if (isAuthLoading || !isAuthenticated) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-				<Loader2 className="w-10 h-10 animate-spin text-violet-600" />
-			</div>
-		);
-	}
+	if (isAuthLoading || !isAuthenticated) return <Loading />;
 
 	const MAX_PHOTO_MB = Number(process.env.NEXT_PUBLIC_MAX_PHOTO_MB || "30");
 	const MAX_PHOTO_SIZE = MAX_PHOTO_MB * 1024 * 1024;
@@ -128,9 +120,7 @@ export default function AlbumUploadPage() {
 		const selected = Array.from(e.target.files);
 		const oversized = selected.filter((f) => f.size > MAX_PHOTO_SIZE);
 		if (oversized.length > 0) {
-			alert(
-				`${oversized.length} photo(s) exceed the ${MAX_PHOTO_MB} MB limit and were skipped.`,
-			);
+			setNotice(tx("add.tooBig", { n: oversized.length, max: MAX_PHOTO_MB }));
 		}
 
 		const newFiles = selected
@@ -172,7 +162,7 @@ export default function AlbumUploadPage() {
 		);
 		if (pendingPhotos.length === 0) return;
 		if (isTurnstileEnabled && !turnstileToken) {
-			alert("Please complete the bot check before uploading.");
+			setNotice(tx("add.botCheck"));
 			return;
 		}
 
@@ -271,10 +261,7 @@ export default function AlbumUploadPage() {
 				if (!dbResponse.ok) {
 					const errorMsg = await dbResponse.text();
 					console.error("AWS Upload succeeded, but Database save failed.");
-					alert(
-						errorMsg ||
-							"Photos uploaded to cloud, but failed to save to album.",
-					);
+					setNotice(errorMsg || tx("add.saveError"));
 				} else {
 					console.log("Successfully saved to database!");
 					setPhotos([]);
@@ -289,7 +276,7 @@ export default function AlbumUploadPage() {
 				error instanceof Error && error.message
 					? error.message
 					: "Something went wrong while uploading. Please try again.";
-			alert(message);
+			setNotice(message || tx("add.uploadError"));
 		} finally {
 			if (turnstileWasUsed && !didRedirectToAlbum) {
 				resetTurnstile();
@@ -298,308 +285,171 @@ export default function AlbumUploadPage() {
 		}
 	};
 
+	const pending = photos.filter((p) => p.status === "idle" || p.status === "error").length;
+
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 lg:p-10">
-			<div className="max-w-6xl mx-auto space-y-6">
-				<button
-					onClick={() => router.push("/dashboard")}
-					className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
-				>
-					<ArrowLeft className="w-4 h-4" />
-					Back to Dashboard
-				</button>
+		<AdminPage>
+			<PageHead
+				back
+				meta={formatDate(album?.eventDate) || tx("meta")}
+				title={<span dir="auto">{album?.title ?? "…"}</span>}
+			/>
+			<AlbumNav albumId={albumId} current="page" />
 
-				<div className="space-y-4">
-					<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-						<h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-							Add Photos to Album
-						</h1>
-						<Button
-							variant="outline"
-							onClick={() => router.push(`/dashboard/albums/${albumId}/view`)}
-							className="w-full sm:w-auto"
-						>
-							<Eye className="w-4 h-4 mr-2" />
-							View Album
-						</Button>
-					</div>
-					<AlbumSettings albumId={albumId} />
-					<AlbumFeatureSettings albumId={albumId} />
-
-					<div className="bg-violet-50 dark:bg-violet-950 border border-violet-100 dark:border-violet-900 rounded-2xl p-6 flex gap-4 items-start">
-						<Info className="w-6 h-6 text-violet-600 mt-1 shrink-0" />
-							<div className="space-y-2 text-sm text-violet-900 dark:text-violet-200">
-								<h3 className="font-bold text-base">How Album Privacy Works</h3>
-								<p>
-									<strong className="text-zinc-900 dark:text-white">
-										<Lock className="w-3 h-3 inline pb-0.5" /> Protected
-									</strong>{" "}
-									(default) &mdash; These photos are only shown to the specific
-									people in them, matched by facial recognition. Guests take a
-									selfie and only see photos that match their face. If you later
-									switch a photo from public to protected, the gallery will
-									automatically queue it for AI scanning.
-								</p>
-							<p>
-								<strong className="text-emerald-600 dark:text-emerald-400">
-									<Globe className="w-3 h-3 inline pb-0.5" /> Public
-								</strong>{" "}
-								&mdash; Visible to every guest in the gallery. Great for
-								landscape shots, venue pictures, or group photos you want
-								everyone to see.
-							</p>
-						</div>
-					</div>
-
-					<div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 space-y-4">
-						<div>
-							<h3 className="font-bold text-base text-zinc-900 dark:text-zinc-50">
-								Import Local Folder
-							</h3>
-							<p className="text-sm text-zinc-500 mt-1">
-								For thousands of photographer files, skip the browser: put them
-								in <code className="font-mono">./data/import</code> on the
-								server and import the mounted folder directly. Duplicates are
-								skipped, so re-running an import retries failed files.
-							</p>
-						</div>
-						<div className="flex flex-col sm:flex-row gap-3">
-							<input
-								type="text"
-								value={importPath}
-								onChange={(e) => setImportPath(e.target.value)}
-								placeholder="/import"
-								className="flex-1 text-sm px-4 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:text-white font-mono"
-							/>
-							<Button
-								onClick={handleStartImport}
-								disabled={importStatus?.state === "RUNNING"}
-								className="bg-violet-600 hover:bg-violet-700 text-white font-semibold"
-							>
-								{importStatus?.state === "RUNNING" ? (
-									<>
-										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-										Importing...
-									</>
-								) : (
-									"Import Folder"
-								)}
-							</Button>
-						</div>
-
-						{importStatus && importStatus.state !== "NONE" && (
-							<div className="text-sm space-y-2">
-								<div className="flex flex-wrap gap-x-6 gap-y-1 text-zinc-600 dark:text-zinc-300">
-									<span>{importStatus.total ?? 0} found</span>
-									<span className="text-emerald-600 dark:text-emerald-400">
-										{importStatus.imported ?? 0} imported
-									</span>
-									<span>{importStatus.duplicates ?? 0} duplicates skipped</span>
-									<span className={(importStatus.failed ?? 0) > 0 ? "text-red-600 dark:text-red-400" : ""}>
-										{importStatus.failed ?? 0} failed
-									</span>
-								</div>
-								{importStatus.state === "COMPLETED" && (
-									<p className="text-emerald-600 dark:text-emerald-400 font-medium">
-										Import complete. Face scanning continues in the background.
-									</p>
-								)}
-								{importStatus.state === "FAILED" && (
-									<p className="text-red-600 dark:text-red-400 font-medium">
-										Import failed: {importStatus.error || "unknown error"}
-									</p>
-								)}
-								{(importStatus.failures?.length ?? 0) > 0 && (
-									<details className="text-xs text-zinc-500">
-										<summary className="cursor-pointer">
-											Failed files (re-run the import to retry)
-										</summary>
-										<ul className="mt-1 space-y-0.5 font-mono">
-											{importStatus.failures!.map((f, i) => (
-												<li key={i}>
-													{f.file}: {f.error}
-												</li>
-											))}
-										</ul>
-									</details>
-								)}
-							</div>
-						)}
-					</div>
-				</div>
-
-				<div className="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm gap-4">
-					<div className="flex gap-2 w-full sm:w-auto">
-						<input
-							type="file"
-							multiple
-							accept="image/*"
-							className="hidden"
-							ref={fileInputRef}
-							onChange={handleFileSelect}
-						/>
-						<Button
-							onClick={() => fileInputRef.current?.click()}
-							variant="outline"
-							className="w-full sm:w-auto border-zinc-300 dark:border-zinc-700"
-						>
-							<UploadCloud className="w-4 h-4 mr-2" />
-							Select Photos
-						</Button>
-						<Button
-							onClick={() => setAllPrivacy(true)}
-							variant="secondary"
-							className="hidden sm:flex text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200"
-						>
-							<Globe className="w-4 h-4 mr-2" /> Mark All Public
-						</Button>
-						<Button
-							onClick={() => setAllPrivacy(false)}
-							variant="secondary"
-							className="hidden sm:flex text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200"
-						>
-							<Lock className="w-4 h-4 mr-2" /> Mark All Protected
-						</Button>
-					</div>
-
-					<div className="w-full sm:w-auto flex flex-col sm:flex-row items-center gap-3">
-						{isTurnstileEnabled && (
-							<div className="w-full sm:w-auto flex justify-center">
-								<Turnstile
-									key={turnstileWidgetKey}
-									siteKey={turnstileSiteKey!}
-									onSuccess={(token) => setTurnstileToken(token)}
-									onExpire={() => setTurnstileToken(null)}
-									onError={() => setTurnstileToken(null)}
-								/>
-							</div>
-						)}
-
-						<Button
-							onClick={handleUploadToS3}
-							disabled={
-								photos.length === 0 ||
-								isUploading ||
-								(isTurnstileEnabled && !turnstileToken)
-							}
-							className="w-full sm:w-auto bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 shadow-md transition-all"
-						>
-							{isUploading
-								? "Uploading..."
-								: `Upload ${photos.length} Photos`}
-						</Button>
-					</div>
-				</div>
-
-				{photos.length === 0 && (
-					<div className="border-2 border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl p-20 flex flex-col items-center justify-center text-center bg-white dark:bg-zinc-900">
-						<ImageIcon className="w-12 h-12 text-zinc-300 mb-4" />
-						<h3 className="text-xl font-semibold text-zinc-700 dark:text-zinc-300">
-							No photos selected
-						</h3>
-						<p className="text-zinc-500 mt-2 max-w-sm">
-							Click the button above to select images from your computer to add
-							to this album.
-						</p>
-					</div>
-				)}
-
-				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-					{photos.map((photo) => (
-						<div
-							key={photo.id}
-							className="group relative aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 shadow-sm"
-						>
-							<Image
-								src={photo.previewUrl}
-								alt="Preview"
-								fill
-								unoptimized
-								className={`object-cover transition-all duration-300 ${photo.status === "uploading" ? "opacity-50 grayscale scale-105" : ""}`}
-							/>
-
-							{photo.status === "uploading" && (
-								<div className="absolute inset-0 flex items-center justify-center bg-zinc-900/20 backdrop-blur-[2px]">
-									<div className="w-8 h-8 border-4 border-violet-600 border-t-transparent rounded-full animate-spin"></div>
-								</div>
-							)}
-							{photo.status === "success" && (
-								<div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center backdrop-blur-sm transition-all">
-									<CheckCircle2 className="w-10 h-10 text-emerald-500 bg-white rounded-full shadow-sm" />
-								</div>
-							)}
-							{photo.status === "error" && (
-								<div className="absolute inset-0 bg-red-500/20 flex items-center justify-center backdrop-blur-sm">
-									<AlertCircle className="w-10 h-10 text-red-500 bg-white rounded-full shadow-sm" />
-								</div>
-							)}
-
-							{photo.status === "idle" && (
-								<>
-									<div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<button
-											onClick={() => setFullScreenImage(photo.previewUrl)}
-											className="p-1.5 bg-black/60 hover:bg-black/80 text-white rounded-md backdrop-blur-md transition-colors"
-											title="Full Screen"
-										>
-											<Maximize2 className="w-4 h-4" />
-										</button>
-										<button
-											onClick={() => removePhoto(photo.id)}
-											className="p-1.5 bg-red-500/80 hover:bg-red-600 text-white rounded-md backdrop-blur-md transition-colors"
-											title="Remove"
-										>
-											<X className="w-4 h-4" />
-										</button>
-									</div>
-
-									<div className="absolute bottom-2 left-2 right-2">
-										<button
-											onClick={() => togglePrivacy(photo.id)}
-											className={`w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-bold transition-all backdrop-blur-md shadow-sm border
-                                                ${
-																									photo.isPublic
-																										? "bg-emerald-500/90 hover:bg-emerald-600 text-white border-emerald-400"
-																										: "bg-zinc-900/80 hover:bg-zinc-900 text-zinc-100 border-zinc-700"
-																								}`}
-										>
-											{photo.isPublic ? (
-												<>
-													<Globe className="w-3 h-3" /> Public
-												</>
-											) : (
-												<>
-													<Lock className="w-3 h-3" /> Protected
-												</>
-											)}
-										</button>
-									</div>
-								</>
-							)}
-						</div>
-					))}
-				</div>
-			</div>
-
-			{fullScreenImage && (
-				<div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-					<button
-						onClick={() => setFullScreenImage(null)}
-						className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-					>
-						<X className="w-6 h-6" />
+			{notice && (
+				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#fbfaf7] px-4 py-3 text-red-800">
+					<p>{notice}</p>
+					<button onClick={() => setNotice("")} aria-label={tx("photo.close")} className="p-1 text-red-800/70 hover:text-red-900">
+						<X className="w-4 h-4" />
 					</button>
-					<div className="relative w-full max-w-5xl h-[85vh]">
-						<Image
-							src={fullScreenImage}
-							alt="Full Screen Preview"
-							fill
-							className="object-contain"
-								unoptimized
-						/>
-					</div>
 				</div>
 			)}
-		</div>
+
+			{album && <AlbumSettings album={album} onChange={setAlbum} />}
+
+			<AlbumFeatureSettings albumId={albumId} />
+
+			<Section
+				id="add"
+				title={tx("add.title")}
+				body={tx("add.body")}
+				aside={
+					photos.length > 0 && (
+						<div className="flex flex-wrap gap-x-5">
+							<button onClick={() => setAllPrivacy(true)} className={linkQuiet}>{tx("add.allPublic")}</button>
+							<button onClick={() => setAllPrivacy(false)} className={linkQuiet}>{tx("add.allProtected")}</button>
+						</div>
+					)
+				}
+			>
+				<input type="file" multiple accept="image/*" ref={fileInputRef} onChange={handleFileSelect} className="hidden" />
+				<div className="flex flex-wrap items-center gap-3">
+					<button onClick={() => fileInputRef.current?.click()} className={btnLine}>
+						{tx("add.select")}
+					</button>
+					{photos.length > 0 && (
+						<button
+							onClick={handleUploadToS3}
+							disabled={pending === 0 || isUploading || (isTurnstileEnabled && !turnstileToken)}
+							className={btnInk}
+						>
+							{isUploading ? (
+								<>
+									<Loader2 className="w-4 h-4 animate-spin" /> {tx("add.uploading")}
+								</>
+							) : (
+								tx("add.upload", { n: pending })
+							)}
+						</button>
+					)}
+					{isTurnstileEnabled && photos.length > 0 && (
+						<Turnstile
+							key={turnstileWidgetKey}
+							siteKey={turnstileSiteKey!}
+							onSuccess={(token) => setTurnstileToken(token)}
+							onExpire={() => setTurnstileToken(null)}
+							onError={() => setTurnstileToken(null)}
+						/>
+					)}
+				</div>
+
+				{photos.length === 0 ? (
+					<p className="mt-6 text-zinc-500">{tx("add.empty")}</p>
+				) : (
+					<ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
+						{photos.map((photo) => (
+							<li key={photo.id}>
+								<button type="button" onClick={() => setFullScreenImage(photo.previewUrl)} className="relative block w-full aspect-square overflow-hidden bg-[#ebe3d6]">
+									{/* eslint-disable-next-line @next/next/no-img-element */}
+									<img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
+									{photo.status === "uploading" && (
+										<span className="absolute inset-0 flex items-center justify-center bg-zinc-950/40">
+											<Loader2 className="w-6 h-6 animate-spin text-zinc-50" />
+										</span>
+									)}
+									{photo.status === "success" && <CheckCircle2 className="absolute top-2 end-2 w-6 h-6 text-zinc-50 drop-shadow" />}
+									{photo.status === "error" && <AlertCircle className="absolute top-2 end-2 w-6 h-6 text-red-500 drop-shadow" />}
+								</button>
+								<div className="mt-2 flex items-baseline justify-between gap-2">
+									<button onClick={() => togglePrivacy(photo.id)} className="text-start text-sm text-zinc-700 hover:text-zinc-900">
+										{photo.isPublic ? tx("add.public") : tx("add.protected")}
+									</button>
+									<button onClick={() => removePhoto(photo.id)} className="text-sm text-zinc-400 hover:text-red-700">
+										{tx("add.remove")}
+									</button>
+								</div>
+							</li>
+						))}
+					</ul>
+				)}
+
+				<details className="mt-10 max-w-2xl">
+					<summary className="cursor-pointer text-zinc-700 underline decoration-zinc-300 underline-offset-[6px]">{tx("privacy.title")}</summary>
+					<p className="mt-3 text-zinc-600">{tx("privacy.public")}</p>
+					<p className="mt-2 text-zinc-600">{tx("privacy.protected")}</p>
+				</details>
+			</Section>
+
+			<Section title={tx("import.title")} body={tx("import.body")}>
+				<div className="flex flex-wrap items-end gap-3 max-w-xl">
+					<div className="flex-1 min-w-48">
+						<label htmlFor="import-path" className="block text-sm text-zinc-600 mb-1.5">{tx("import.folder")}</label>
+						<input id="import-path" dir="ltr" value={importPath} onChange={(e) => setImportPath(e.target.value)} placeholder="/import" className={field} />
+					</div>
+					<button onClick={handleStartImport} disabled={importStatus?.state === "RUNNING"} className={btnLine}>
+						{importStatus?.state === "RUNNING" ? (
+							<>
+								<Loader2 className="w-4 h-4 animate-spin" /> {tx("import.running")}
+							</>
+						) : (
+							tx("import.start")
+						)}
+					</button>
+				</div>
+				{importStatus && importStatus.state !== "NONE" && (
+					<div className="mt-5 space-y-2">
+						<p className="meta text-zinc-600">
+							{tx("import.progress", {
+								found: importStatus.total ?? 0,
+								imported: importStatus.imported ?? 0,
+								dup: importStatus.duplicates ?? 0,
+								failed: importStatus.failed ?? 0,
+							})}
+						</p>
+						{importStatus.state === "COMPLETED" && <p className="text-zinc-700">{tx("import.done")}</p>}
+						{importStatus.state === "FAILED" && (
+							<p className="text-red-700">{tx("import.failed", { error: importStatus.error || "" })}</p>
+						)}
+						{(importStatus.failures?.length ?? 0) > 0 && (
+							<details className="text-sm text-zinc-500">
+								<summary className="cursor-pointer">{tx("import.failedFiles")}</summary>
+								<ul className="mt-1 space-y-0.5 font-mono text-xs" dir="ltr">
+									{importStatus.failures!.map((f, i) => (
+										<li key={i}>
+											{f.file}: {f.error}
+										</li>
+									))}
+								</ul>
+							</details>
+						)}
+					</div>
+				)}
+			</Section>
+
+			{fullScreenImage && (
+				<div
+					role="dialog"
+					aria-modal="true"
+					className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/90 p-6"
+					onClick={() => setFullScreenImage(null)}
+				>
+					<button onClick={() => setFullScreenImage(null)} aria-label={tx("photo.close")} className="absolute top-4 end-4 p-2 text-zinc-50/80 hover:text-zinc-50">
+						<X className="w-6 h-6" />
+					</button>
+					{/* eslint-disable-next-line @next/next/no-img-element */}
+					<img src={fullScreenImage} alt="" className="max-h-full max-w-full object-contain" />
+				</div>
+			)}
+		</AdminPage>
 	);
 }

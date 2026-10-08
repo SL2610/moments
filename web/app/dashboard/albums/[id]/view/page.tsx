@@ -2,29 +2,13 @@
 
 import { Fragment, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import {
-	Lock,
-	Globe,
-	Share2,
-	UploadCloud,
-	Loader2,
-	X,
-	UserSearch,
-	Eye,
-	EyeOff,
-	Download,
-	Trash2,
-	CheckSquare,
-	Check,
-	Copy,
-	SquareCheckBig,
-	ArrowLeft,
-} from "lucide-react";
+import { Check, Loader2, Lock, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { apiFetch } from "@/lib/api";
 import { useAlbumFeatures } from "@/features";
+import { useAdminText } from "@/lib/i18n/admin";
+import { AdminPage, AlbumNav, Loading, PageHead, btnInk, btnLine, formatDate, linkQuiet } from "@/components/admin/Kit";
+import Link from "next/link";
 import { useRequireAuth } from "@/lib/useRequireAuth";
 import JSZip from "jszip";
 import { fetchImageAsBlob, downloadImage } from "@/lib/download";
@@ -44,6 +28,7 @@ interface Photo {
 
 export default function AlbumViewPage() {
 	const { isLoading: isAuthLoading, isAuthenticated } = useRequireAuth();
+	const tx = useAdminText();
 	const params = useParams<{ id: string }>();
 	const router = useRouter();
 	const albumId = params?.id || "";
@@ -92,11 +77,13 @@ export default function AlbumViewPage() {
 
 	const [publicId, setPublicId] = useState("");
 	const [albumTitle, setAlbumTitle] = useState("");
+	const [albumDate, setAlbumDate] = useState("");
 	useEffect(() => {
 		apiFetch("/api/albums")
 			.then((res) => (res.ok ? res.json() : []))
-			.then((albums: { id: string; publicId: string; title: string }[]) => {
+			.then((albums: { id: string; publicId: string; title: string; eventDate: string | null }[]) => {
 				const album = albums.find((a) => a.id === albumId);
+				setAlbumDate(album?.eventDate ?? "");
 				setPublicId(album?.publicId ?? "");
 				setAlbumTitle(album?.title ?? "");
 			});
@@ -104,6 +91,7 @@ export default function AlbumViewPage() {
 
 	const features = useAlbumFeatures(albumId, albumTitle);
 	const [view, setView] = useState("photos");
+	const [notice, setNotice] = useState("");
 	// A tab whose panel is empty shows the photo grid (with any grid inserts for that tab).
 	const featurePanel = view === "photos" ? null : features.panel(view);
 	const shareUrl = publicId ? guestLink(publicId) : "";
@@ -131,10 +119,7 @@ export default function AlbumViewPage() {
 	const handleDeleteSelected = async () => {
 		if (selectedPhotoIds.length === 0) return;
 		const count = selectedPhotoIds.length;
-		const photoWord = count === 1 ? "photo" : "photos";
-		const confirmDelete = window.confirm(
-			`Permanently delete ${count} ${photoWord}?\n\nThis cannot be undone.`,
-		);
+		const confirmDelete = window.confirm(tx("photos.confirmDelete", { n: count }));
 		if (!confirmDelete) return;
 
 		try {
@@ -148,7 +133,7 @@ export default function AlbumViewPage() {
 			setIsSelectionMode(false);
 		} catch (error) {
 			console.error("Batch delete failed:", error);
-			alert("Failed to delete some photos.");
+			setNotice(tx("genericError"));
 		}
 	};
 
@@ -190,7 +175,7 @@ export default function AlbumViewPage() {
 			URL.revokeObjectURL(url);
 		} catch (error) {
 			console.error("Zip download failed:", error);
-			alert("Failed to download photos as zip.");
+			setNotice(tx("genericError"));
 		} finally {
 			setIsDownloadingZip(false);
 		}
@@ -199,11 +184,7 @@ export default function AlbumViewPage() {
 	const handleTogglePrivacySelected = async (makePublic: boolean) => {
 		if (selectedPhotoIds.length === 0) return;
 
-		const count = selectedPhotoIds.length;
-		const photoWord = count === 1 ? "photo" : "photos";
-		const message = makePublic
-			? `Make ${count} ${photoWord} public?\n\nPublic photos are visible to anyone with the album link.`
-			: `Make ${count} ${photoWord} protected?\n\nProtected photos are only shown to the people in them, matched by facial recognition.\n\nAny unscanned photo switched from public will start AI scanning automatically.`;
+		const message = makePublic ? tx("privacy.public") : tx("privacy.protected");
 		const confirmToggle = window.confirm(message);
 		if (!confirmToggle) return;
 
@@ -223,7 +204,7 @@ export default function AlbumViewPage() {
 			setIsSelectionMode(false);
 		} catch (error) {
 			console.error("Batch privacy toggle failed:", error);
-			alert("Failed to update privacy settings.");
+			setNotice(tx("genericError"));
 		}
 	};
 
@@ -250,9 +231,7 @@ export default function AlbumViewPage() {
 	};
 
 	const handleDeleteAlbum = async () => {
-		const confirmDelete = window.confirm(
-			"WARNING: Are you sure you want to permanently delete this ENTIRE album and all its photos? This cannot be undone.",
-		);
+		const confirmDelete = window.confirm(tx("photos.confirmDeleteAlbum"));
 		if (!confirmDelete) return;
 
 		try {
@@ -262,7 +241,7 @@ export default function AlbumViewPage() {
 			if (res.ok) {
 				router.push("/dashboard");
 			} else {
-				alert("Failed to delete album from the server.");
+				setNotice(tx("genericError"));
 			}
 		} catch (error) {
 			console.error("Delete album failed:", error);
@@ -275,15 +254,13 @@ export default function AlbumViewPage() {
 			await downloadImage(selectedPhoto.viewUrl, `wedding-${selectedPhoto.id}.jpg`);
 		} catch (error) {
 			console.error("Single photo download failed:", error);
-			alert("Failed to download photo.");
+			setNotice(tx("genericError"));
 		}
 	};
 
 	const handleDeleteSingle = async () => {
 		if (!selectedPhoto) return;
-		const confirmDelete = window.confirm(
-			"Are you sure you want to permanently remove this photo?",
-		);
+		const confirmDelete = window.confirm(tx("photos.confirmDeleteOne"));
 		if (!confirmDelete) return;
 
 		try {
@@ -295,458 +272,246 @@ export default function AlbumViewPage() {
 				setPhotos((prev) => prev.filter((p) => p.id !== selectedPhoto.id));
 				setSelectedPhoto(null);
 			} else {
-				alert("Failed to delete photo from the server.");
+				setNotice(tx("genericError"));
 			}
 		} catch (error) {
 			console.error("Delete failed:", error);
 		}
 	};
 
-	if (isAuthLoading || !isAuthenticated || isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-				<Loader2 className="w-10 h-10 animate-spin text-violet-600" />
-			</div>
-		);
-	}
+	if (isAuthLoading || !isAuthenticated || isLoading) return <Loading />;
+
+	const closePhoto = () => {
+		setSelectedPhoto(null);
+		setImageDims({ width: 1, height: 1 });
+		setShowBoxes(false);
+	};
 
 	return (
-		<div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-6 lg:p-10">
-			<div className="max-w-7xl mx-auto space-y-6">
-				<button
-					onClick={() => router.push("/dashboard")}
-					className="flex items-center gap-1.5 text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 transition-colors"
-				>
-					<ArrowLeft className="w-4 h-4" />
-					Back to Dashboard
-				</button>
+		<AdminPage>
+			<PageHead
+				back
+				meta={formatDate(albumDate) || tx("meta")}
+				title={<span dir="auto">{albumTitle || "…"}</span>}
+				actions={
+					<button onClick={handleShareClick} className={btnInk}>
+						{tx("photos.share")}
+					</button>
+				}
+			/>
+			<AlbumNav albumId={albumId} current="photos" />
 
-				<div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-					<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-6">
-						<div>
-							<h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-								Album Gallery
-							</h1>
-							<p className="text-zinc-500 mt-1">
-								Viewing as Host · {photos.length}{" "}
-								{photos.length === 1 ? "photo" : "photos"}
-							</p>
-						</div>
+			{notice && (
+				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#fbfaf7] px-4 py-3 text-red-800">
+					<p>{notice}</p>
+					<button onClick={() => setNotice("")} aria-label={tx("photo.close")} className="p-1">
+						<X className="w-4 h-4" />
+					</button>
+				</div>
+			)}
 
-						{!isSelectionMode && (
-							<div className="flex gap-2 w-full sm:w-auto flex-wrap">
-								<Button
-									onClick={() => setIsSelectionMode(true)}
-									variant="outline"
-									disabled={photos.length === 0}
-								>
-									<CheckSquare className="w-4 h-4 mr-2" /> Select
-								</Button>
-								<Button
-									onClick={() => router.push(`/dashboard/albums/${albumId}`)}
-									variant="outline"
-								>
-									<UploadCloud className="w-4 h-4 mr-2" /> Add More
-								</Button>
-								<Button
-									onClick={handleShareClick}
-									className="bg-violet-600 hover:bg-violet-700 text-white"
-								>
-									<Share2 className="w-4 h-4 mr-2" /> Share
-								</Button>
-								<Button
-									onClick={handleDeleteAlbum}
-									variant="outline"
-									className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300 px-3"
-									title="Delete Entire Album"
-								>
-									<Trash2 className="w-4 h-4" />
-								</Button>
-							</div>
+			{/* views: photos, plus whatever the build adds (stories, blessings...) */}
+			{features.tabs.length > 0 && (
+				<div role="tablist" aria-label={tx("photos.title")} className="flex gap-7 overflow-x-auto mb-8">
+					{[{ key: "photos", label: tx("photos.tabPhotos") }, ...features.tabs].map((tab) => (
+						<button
+							key={tab.key}
+							role="tab"
+							aria-selected={view === tab.key}
+							onClick={() => setView(tab.key)}
+							className={`shrink-0 pb-2 border-b text-base transition-colors ${view === tab.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
+						>
+							{tab.label}
+						</button>
+					))}
+				</div>
+			)}
+
+			{featurePanel ? (
+				featurePanel
+			) : (
+				<>
+					{/* toolbar */}
+					<div className="sticky top-14 z-20 -mx-6 sm:-mx-10 px-6 sm:px-10 py-3 mb-6 bg-zinc-50/95 border-b border-zinc-300 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+						{isSelectionMode ? (
+							<>
+								<p className="meta text-zinc-700">{tx("photos.selected", { n: selectedPhotoIds.length })}</p>
+								<div className="flex flex-wrap items-center gap-x-5">
+									<button onClick={handleSelectAll} className={linkQuiet}>{tx("photos.selectAll")}</button>
+									<button onClick={() => handleTogglePrivacySelected(true)} disabled={selectedPhotoIds.length === 0} className={linkQuiet}>
+										{tx("photos.makePublic")}
+									</button>
+									<button onClick={() => handleTogglePrivacySelected(false)} disabled={selectedPhotoIds.length === 0} className={linkQuiet}>
+										{tx("photos.makeProtected")}
+									</button>
+									<button onClick={handleDownloadSelectedZip} disabled={selectedPhotoIds.length === 0 || isDownloadingZip} className={linkQuiet}>
+										{isDownloadingZip ? <Loader2 className="w-4 h-4 animate-spin" /> : tx("photos.download")}
+									</button>
+									<button onClick={handleDeleteSelected} disabled={selectedPhotoIds.length === 0} className={`${linkQuiet} text-red-700 hover:text-red-800`}>
+										{tx("photos.delete")}
+									</button>
+									<button
+										onClick={() => {
+											setIsSelectionMode(false);
+											setSelectedPhotoIds([]);
+										}}
+										className={btnLine}
+									>
+										{tx("photos.done")}
+									</button>
+								</div>
+							</>
+						) : (
+							<>
+								<p className="meta text-zinc-600">{tx("photos.count", { n: photos.length })}</p>
+								<div className="flex flex-wrap items-center gap-x-5">
+									<Link href={`/dashboard/albums/${albumId}#add`} className={linkQuiet}>{tx("nav.add")}</Link>
+									<button onClick={() => setIsSelectionMode(true)} disabled={photos.length === 0} className={linkQuiet}>
+										{tx("photos.select")}
+									</button>
+								</div>
+							</>
 						)}
 					</div>
 
-					{isSelectionMode && (
-						<div className="border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800 px-6 py-4">
-							<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-								<div className="flex items-center gap-3">
-									<span className="text-sm font-bold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-900 px-3 py-1 rounded-full">
-										{selectedPhotoIds.length} selected
-									</span>
-									<Button onClick={handleSelectAll} variant="outline" size="sm">
-										<SquareCheckBig className="w-4 h-4 mr-2" />
-										{selectedPhotoIds.length === photos.length
-											? "Deselect All"
-											: "Select All"}
-									</Button>
-								</div>
-
-								<div className="flex items-center gap-2 flex-wrap">
-									<Button
-										onClick={handleDownloadSelectedZip}
-										variant="outline"
-										size="sm"
-										disabled={selectedPhotoIds.length === 0 || isDownloadingZip}
-									>
-										{isDownloadingZip ? (
-											<Loader2 className="w-4 h-4 mr-2 animate-spin" />
-										) : (
-											<Download className="w-4 h-4 mr-2" />
-										)}
-										{isDownloadingZip ? "Zipping..." : "Download"}
-									</Button>
-									<Button
-										onClick={() => handleTogglePrivacySelected(true)}
-										variant="outline"
-										size="sm"
-										disabled={selectedPhotoIds.length === 0}
-										title="Visible to anyone with the album link"
-									>
-										<Globe className="w-4 h-4 mr-2" /> Make Public
-									</Button>
-									<Button
-										onClick={() => handleTogglePrivacySelected(false)}
-										variant="outline"
-										size="sm"
-										disabled={selectedPhotoIds.length === 0}
-										title="Only shown to matched faces via facial recognition"
-									>
-										<Lock className="w-4 h-4 mr-2" /> Make Protected
-									</Button>
-									<Button
-										onClick={handleDeleteSelected}
-										variant="outline"
-										size="sm"
-										disabled={selectedPhotoIds.length === 0}
-										className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 hover:text-red-700 dark:hover:text-red-300"
-									>
-										<Trash2 className="w-4 h-4 mr-2" /> Delete
-									</Button>
-								</div>
-
-								<Button
-									onClick={() => {
-										setIsSelectionMode(false);
-										setSelectedPhotoIds([]);
-									}}
-									variant="ghost"
-									size="sm"
-									className="text-zinc-500 hover:text-zinc-700 shrink-0"
-								>
-									<X className="w-4 h-4 mr-1.5" /> Done
-								</Button>
-							</div>
+					{photos.length === 0 ? (
+						<div className="py-20">
+							<p className="text-lg text-zinc-600">{tx("photos.empty")}</p>
+							<Link href={`/dashboard/albums/${albumId}`} className={`${btnInk} mt-6`}>{tx("nav.add")}</Link>
 						</div>
-					)}
-				</div>
-
-				{features.tabs.length > 0 && (
-					<div role="tablist" aria-label="Album view" className="flex gap-6 border-b border-zinc-200">
-						{[{ key: "photos", label: "Photos" }, ...features.tabs].map((tab) => (
-							<button
-								key={tab.key}
-								role="tab"
-								aria-selected={view === tab.key}
-								onClick={() => setView(tab.key)}
-								className={`pb-3 -mb-px text-sm border-b-2 transition-colors ${view === tab.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
-							>
-								{tab.label}
-							</button>
-						))}
-					</div>
-				)}
-
-				{featurePanel ? (
-					featurePanel
-				) : photos.length === 0 ? (
-					<div className="text-center py-20 text-zinc-500">
-						No photos found. Upload some to get started!
-					</div>
-				) : (
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-						{photos.map((photo, index) => [
-							<Fragment key={`insert-${index}`}>{features.gridInsert(view, index)}</Fragment>,
-							<div
-								key={photo.id}
-								onClick={() => {
-									if (isSelectionMode) {
-										toggleSelection(photo.id);
-									} else {
-										setSelectedPhoto(photo);
-										setShowBoxes(false);
-									}
-								}}
-								className={`group relative aspect-square bg-zinc-100 dark:bg-zinc-800 rounded-xl overflow-hidden shadow-sm transition-all cursor-pointer
-                                    ${selectedPhotoIds.includes(photo.id) ? "ring-4 ring-violet-500 scale-[0.98]" : "border border-zinc-200 dark:border-zinc-700 hover:border-violet-400"}`}
-							>
-								<Image
-									src={photo.thumbUrl || photo.viewUrl}
-									alt="Album Photo"
-									fill
-									className="object-cover transition-transform duration-500 group-hover:scale-105"
-									unoptimized
-								/>
-
-								{isSelectionMode && (
-									<div className="absolute top-2 right-2 z-10">
-										<div
-											className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-md
-                                            ${selectedPhotoIds.includes(photo.id) ? "bg-violet-600 border-violet-600" : "bg-black/30 border-white/80 hover:border-white"}`}
+					) : (
+						<ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-5">
+							{photos.map((photo, index) => {
+								const selected = selectedPhotoIds.includes(photo.id);
+								return [
+									<Fragment key={`insert-${index}`}>{features.gridInsert(view, index)}</Fragment>,
+									<li key={photo.id}>
+										<button
+											type="button"
+											onClick={() => (isSelectionMode ? toggleSelection(photo.id) : setSelectedPhoto(photo))}
+											aria-pressed={isSelectionMode ? selected : undefined}
+											className={`group relative block w-full aspect-square overflow-hidden bg-[#ebe3d6] ${selected ? "crop" : ""}`}
 										>
-											{selectedPhotoIds.includes(photo.id) && (
-												<Check className="w-4 h-4 text-white" />
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img
+												src={photo.thumbUrl || photo.viewUrl}
+												alt=""
+												loading="lazy"
+												className={`h-full w-full object-cover transition duration-500 ${selected ? "scale-[0.92]" : "group-hover:scale-[1.03]"}`}
+											/>
+											{isSelectionMode && (
+												<span
+													aria-hidden
+													className={`absolute top-2 start-2 flex h-6 w-6 items-center justify-center border ${selected ? "bg-zinc-900 border-zinc-900" : "bg-zinc-50/80 border-zinc-50"}`}
+												>
+													{selected && <Check className="h-4 w-4 text-zinc-50" />}
+												</span>
 											)}
-										</div>
-									</div>
-								)}
+										</button>
+										<p className="mt-1.5 flex items-center justify-between gap-2 text-xs text-zinc-500">
+											<span>
+												{!photo.processed && !photo.isPublic
+													? tx("photos.scanning")
+													: photo.faceCount > 0
+														? tx("photos.faces", { n: photo.faceCount })
+														: ""}
+											</span>
+											{!photo.isPublic && (
+												<span className="inline-flex items-center gap-1" title={tx("photos.protected")}>
+													<Lock className="h-3 w-3" aria-label={tx("photos.protected")} />
+												</span>
+											)}
+										</p>
+									</li>,
+								];
+							})}
+						</ul>
+					)}
 
-								<div className="absolute top-2 left-2">
-									<span
-										className={`flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm border transition-colors duration-300
-                                        ${
-																					photo.isPublic
-																						? "bg-emerald-500/90 text-white border-emerald-400"
-																						: "bg-zinc-900/80 text-zinc-100 border-zinc-700"
-																				}`}
-									>
-										{photo.isPublic ? (
-											<Globe className="w-3 h-3" />
-										) : (
-											<Lock className="w-3 h-3" />
-										)}
-										{photo.isPublic ? "Public" : "Protected"}
-									</span>
-								</div>
-
-								<div className="absolute bottom-2 right-2 left-2 flex justify-center">
-									{!photo.processed && !photo.isPublic ? (
-										<span className="flex items-center gap-1.5 py-1 px-2.5 rounded-full text-[10px] font-bold bg-amber-500/90 text-white backdrop-blur-md shadow-sm border border-amber-400">
-											<Loader2 className="w-3 h-3 animate-spin" /> Scanning...
-										</span>
-									) : (
-										photo.processed && (
-											<button
-												onClick={(e) => {
-													e.stopPropagation();
-													if (isSelectionMode) {
-														toggleSelection(photo.id);
-													} else {
-														setSelectedPhoto(photo);
-														setShowBoxes(true);
-													}
-												}}
-												className="flex items-center gap-1.5 py-1 px-3 rounded-full text-[10px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-colors shadow-lg border border-violet-400"
-											>
-												<UserSearch className="w-3 h-3" />
-												Scanned ({photo.faceCount || 0}{" "}
-												{photo.faceCount === 1 ? "Person" : "People"})
-											</button>
-										)
-									)}
-								</div>
-							</div>
-						])}
+					<div className="mt-20 border-t border-zinc-300 pt-6">
+						<button onClick={handleDeleteAlbum} className={`${linkQuiet} text-red-700 hover:text-red-800`}>
+							{tx("photos.deleteAlbum")}
+						</button>
 					</div>
-				)}
-			</div>
+				</>
+			)}
 
 			{isShareModalOpen && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-					<div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 max-w-md w-full p-6 relative">
-						<button
-							onClick={() => setIsShareModalOpen(false)}
-							className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-						>
-							<X className="w-5 h-5" />
+				<div
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="share-title"
+					className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-zinc-950/55 p-3 sm:p-6"
+					onClick={() => setIsShareModalOpen(false)}
+				>
+					<div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[#fbfaf7] p-7">
+						<div className="flex items-start justify-between gap-4">
+							<h2 id="share-title" className="text-3xl text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
+								{tx("share.title")}
+							</h2>
+							<button onClick={() => setIsShareModalOpen(false)} aria-label={tx("photo.close")} className="p-2 -m-2 text-zinc-500 hover:text-zinc-900">
+								<X className="w-5 h-5" />
+							</button>
+						</div>
+						<p className="mt-2 text-zinc-600">{tx("share.body")}</p>
+						<div className="crop mt-6 mx-auto w-fit bg-white p-4">
+							<QRCodeSVG value={shareUrl} size={200} level="M" marginSize={0} fgColor="#191917" bgColor="#ffffff" />
+						</div>
+						<p dir="ltr" className="mt-6 break-all text-center text-sm text-zinc-700">{shareUrl.replace(/^https?:\/\//, "")}</p>
+						<button onClick={handleCopyLink} className={`${btnInk} mt-4 w-full`}>
+							{isCopied ? tx("settings.copied") : tx("settings.copy")}
 						</button>
-
-						<div className="text-center space-y-4 mb-4 mt-2">
-							<div className="w-12 h-12 bg-violet-100 dark:bg-violet-900 rounded-full flex items-center justify-center mx-auto">
-								<Share2 className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-							</div>
-							<h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-								Share with Guests
-							</h3>
-							<p className="text-zinc-500 text-sm">
-								Send this link to your guests so they can take a selfie and find
-								their photos.
-							</p>
-						</div>
-
-						<div className="flex flex-col items-center gap-3 p-5 bg-white rounded-xl border border-zinc-200 dark:border-zinc-700">
-							<QRCodeSVG
-								value={shareUrl}
-								size={180}
-								level="H"
-								marginSize={2}
-								fgColor="#1c1a16"
-								bgColor="#ffffff"
-							/>
-							<p className="text-xs text-zinc-400">
-								Scan with a phone camera to open
-							</p>
-						</div>
-
-						<div className="flex items-center space-x-2 bg-zinc-100 dark:bg-zinc-800 p-2 rounded-xl border border-zinc-200 dark:border-zinc-700">
-							<div className="flex-1 truncate text-sm text-zinc-600 dark:text-zinc-300 px-2 font-mono">
-								{shareUrl}
-							</div>
-							<Button
-								onClick={handleCopyLink}
-								size="sm"
-								className={`shrink-0 transition-all ${isCopied ? "bg-emerald-600 hover:bg-emerald-700" : "bg-violet-600 hover:bg-violet-700"}`}
-							>
-								{isCopied ? (
-									<Check className="w-4 h-4 mr-1.5" />
-								) : (
-									<Copy className="w-4 h-4 mr-1.5" />
-								)}
-								{isCopied ? "Copied!" : "Copy Link"}
-							</Button>
-						</div>
 					</div>
 				</div>
 			)}
 
 			{selectedPhoto && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
-					<div className="relative max-w-5xl w-full bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 flex flex-col max-h-[90vh]">
-						<div className="flex justify-between items-center p-4 sm:p-6 border-b border-zinc-800">
-							<div>
-								<h3 className="text-white font-bold text-lg">
-									AI Inspection Mode
-								</h3>
-								<p className="text-zinc-400 text-xs mt-0.5">
-									{selectedPhoto.faceCount} signatures found.
-								</p>
-							</div>
-
-							<div className="flex items-center gap-2">
-								<Button
-									onClick={handleTogglePrivacySingle}
-									variant="secondary"
-									size="sm"
-									className={`text-white hover:text-white border-transparent 
-                                        ${
-																					selectedPhoto.isPublic
-																						? "bg-emerald-600 hover:bg-emerald-700"
-																						: "bg-amber-600 hover:bg-amber-700"
-																				}`}
-									title={
-										selectedPhoto.isPublic
-											? "Currently Public (visible to anyone with the link). Click to protect."
-											: "Currently Protected (only shown to matched faces). Click to make public."
-									}
-								>
-									{selectedPhoto.isPublic ? (
-										<>
-											<Globe className="w-4 h-4 mr-2" /> Public
-										</>
-									) : (
-										<>
-											<Lock className="w-4 h-4 mr-2" /> Protected
-										</>
-									)}
-								</Button>
-
-								<div className="w-px h-6 bg-zinc-700 mx-1"></div>
-
-								<Button
-									onClick={() => setShowBoxes(!showBoxes)}
-									variant="secondary"
-									size="sm"
-									className={`border-zinc-700 transition-colors ${showBoxes ? "bg-violet-950 text-violet-400 hover:bg-violet-900" : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-white"}`}
-									title={showBoxes ? "Hide Face Scans" : "Show Face Scans"}
-								>
-									{showBoxes ? (
-										<EyeOff className="w-4 h-4" />
-									) : (
-										<Eye className="w-4 h-4" />
-									)}
-									<span className="hidden sm:inline ml-2">
-										{showBoxes ? "Hide Face Scans" : "Show Face Scans"}
-									</span>
-								</Button>
-
-								<Button
-									onClick={handleDownload}
-									variant="secondary"
-									size="sm"
-									className="bg-zinc-800 text-zinc-300 hover:bg-violet-600 hover:text-white border-zinc-700 hover:border-violet-500"
-									title="Download Original Photo"
-								>
-									<Download className="w-4 h-4" />
-								</Button>
-
-								<Button
-									onClick={handleDeleteSingle}
-									variant="secondary"
-									size="sm"
-									className="bg-zinc-800 text-zinc-300 hover:bg-red-600 hover:text-white border-zinc-700 hover:border-red-500"
-									title="Delete Photo"
-								>
-									<Trash2 className="w-4 h-4" />
-								</Button>
-
-								<div className="w-px h-6 bg-zinc-700 mx-1"></div>
-
-								<button
-									onClick={() => {
-										setSelectedPhoto(null);
-										setImageDims({ width: 1, height: 1 });
-									}}
-									className="p-2 bg-zinc-800 text-zinc-400 rounded-full hover:bg-zinc-700 hover:text-white transition-colors ml-1"
-								>
-									<X className="w-5 h-5" />
-								</button>
-							</div>
+				<div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex flex-col bg-zinc-950" onClick={closePhoto}>
+					<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-zinc-50" onClick={(e) => e.stopPropagation()}>
+						<p className="meta text-zinc-400">{tx("photos.faces", { n: selectedPhoto.faceCount })}</p>
+						<div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+							<button onClick={handleTogglePrivacySingle} className="min-h-10 text-zinc-100 underline decoration-zinc-600 underline-offset-[6px] hover:decoration-zinc-100">
+								{selectedPhoto.isPublic ? tx("photo.public") : tx("photo.protected")}
+							</button>
+							<button onClick={() => setShowBoxes(!showBoxes)} className="min-h-10 text-zinc-300 hover:text-zinc-50">
+								{showBoxes ? tx("photo.hideFaces") : tx("photo.showFaces")}
+							</button>
+							<button onClick={handleDownload} className="min-h-10 text-zinc-300 hover:text-zinc-50">{tx("photos.download")}</button>
+							<button onClick={handleDeleteSingle} className="min-h-10 text-red-300 hover:text-red-200">{tx("photos.delete")}</button>
+							<button onClick={closePhoto} aria-label={tx("photo.close")} className="p-2 text-zinc-300 hover:text-zinc-50">
+								<X className="w-5 h-5" />
+							</button>
 						</div>
-
-						<div className="relative flex-1 flex justify-center items-center bg-black overflow-hidden p-4 min-h-[50vh]">
-							<div className="relative inline-block max-w-full max-h-full">
-								<img
-									src={selectedPhoto.previewUrl || selectedPhoto.viewUrl}
-									alt="Inspection"
-									className="max-w-full max-h-[65vh] w-auto h-auto block shadow-2xl rounded-sm"
-									onLoad={(e) => {
-										setImageDims({
-											width: e.currentTarget.naturalWidth,
-											height: e.currentTarget.naturalHeight,
-										});
-									}}
-								/>
-
-								{showBoxes &&
-									selectedPhoto.faceBoxes?.map((boxStr, idx) => {
-										const box = JSON.parse(boxStr);
-										const detail = [
-											box.confidence != null ? `conf ${box.confidence}` : null,
-											box.quality != null ? `quality ${box.quality}` : null,
-											`${box.w}x${box.h}px`,
-										].filter(Boolean).join(" | ");
-										return (
-											<div
-												key={idx}
-												title={`face #${idx + 1} | ${detail}`}
-												className="absolute border-2 border-violet-400 bg-violet-500/10 rounded-lg shadow-[0_0_15px_rgba(139,92,246,0.4)] transition-all hover:bg-violet-500/30"
-												style={{
-													left: `${(box.x / imageDims.width) * 100}%`,
-													top: `${(box.y / imageDims.height) * 100}%`,
-													width: `${(box.w / imageDims.width) * 100}%`,
-													height: `${(box.h / imageDims.height) * 100}%`,
-												}}
-											>
-												<span className="absolute -top-6 left-0 bg-violet-600 text-white text-[9px] px-1.5 py-0.5 rounded font-bold uppercase whitespace-nowrap">
-													ID: {idx + 1}
-												</span>
-											</div>
-										);
-									})}
-							</div>
+					</div>
+					<div className="relative flex-1 min-h-0 flex items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
+						<div className="relative inline-block max-h-full">
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={selectedPhoto.previewUrl || selectedPhoto.viewUrl}
+								alt=""
+								className="block max-h-[calc(100svh-7rem)] max-w-full w-auto h-auto"
+								onLoad={(e) => setImageDims({ width: e.currentTarget.naturalWidth, height: e.currentTarget.naturalHeight })}
+							/>
+							{showBoxes &&
+								selectedPhoto.faceBoxes?.map((boxStr, idx) => {
+									const box = JSON.parse(boxStr);
+									return (
+										<div
+											key={idx}
+											className="crop crop-light absolute"
+											style={{
+												left: `${(box.x / imageDims.width) * 100}%`,
+												top: `${(box.y / imageDims.height) * 100}%`,
+												width: `${(box.w / imageDims.width) * 100}%`,
+												height: `${(box.h / imageDims.height) * 100}%`,
+											}}
+										/>
+									);
+								})}
 						</div>
 					</div>
 				</div>
 			)}
-		</div>
+		</AdminPage>
 	);
 }
