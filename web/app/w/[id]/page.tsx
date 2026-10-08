@@ -802,7 +802,7 @@ export default function WeddingPage() {
 				<GuestBar
 					className="relative border-b border-zinc-900/10"
 					start={<CoupleMark names={info.eventName} />}
-					end={<span className="text-zinc-600">{langToggle}</span>}
+					end={<span className="text-zinc-900">{langToggle}</span>}
 				/>
 
 				<main className="relative flex-1 w-full max-w-6xl mx-auto px-6 sm:px-10 flex flex-col justify-end pb-10 pt-24">

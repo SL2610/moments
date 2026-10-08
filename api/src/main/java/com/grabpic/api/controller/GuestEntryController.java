@@ -46,8 +46,10 @@ public class GuestEntryController {
         body.put("eventName", album.getTitle());
         body.put("eventDate", album.getEventDate() == null ? "" : album.getEventDate());
         body.put("passwordRequired", album.getGuestPasswordHash() != null);
-        // A stable URL: link previews (og:image) are fetched days after sharing.
-        body.put("coverUrl", album.getCoverKey() == null ? null : "/api/w/" + album.getPublicId() + "/cover");
+        // A stable path, since link previews (og:image) are fetched days after sharing;
+        // ?v changes with the cover so the hour of browser caching never shows the old one.
+        body.put("coverUrl", album.getCoverKey() == null ? null
+                : "/api/w/" + album.getPublicId() + "/cover?v=" + Integer.toHexString(album.getCoverKey().hashCode()));
         return ResponseEntity.ok(body);
     }
 
