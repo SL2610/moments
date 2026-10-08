@@ -302,7 +302,7 @@ export default function AlbumViewPage() {
 			<AlbumNav albumId={albumId} current="photos" />
 
 			{notice && (
-				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#fbfaf7] px-4 py-3 text-red-800">
+				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#faf8f3] px-4 py-3 text-red-800">
 					<p>{notice}</p>
 					<button onClick={() => setNotice("")} aria-label={tx("photo.close")} className="p-1">
 						<X className="w-4 h-4" />
@@ -390,7 +390,7 @@ export default function AlbumViewPage() {
 											type="button"
 											onClick={() => (isSelectionMode ? toggleSelection(photo.id) : setSelectedPhoto(photo))}
 											aria-pressed={isSelectionMode ? selected : undefined}
-											className={`group relative block w-full aspect-square overflow-hidden bg-[#ebe3d6] ${selected ? "crop" : ""}`}
+											className={`group relative block w-full aspect-square overflow-hidden bg-[#eee9e1] ${selected ? "crop" : ""}`}
 										>
 											{/* eslint-disable-next-line @next/next/no-img-element */}
 											<img
@@ -444,7 +444,7 @@ export default function AlbumViewPage() {
 					className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-zinc-950/55 p-3 sm:p-6"
 					onClick={() => setIsShareModalOpen(false)}
 				>
-					<div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[#fbfaf7] p-7">
+					<div onClick={(e) => e.stopPropagation()} className="w-full max-w-md bg-[#faf8f3] p-7">
 						<div className="flex items-start justify-between gap-4">
 							<h2 id="share-title" className="text-3xl text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
 								{tx("share.title")}

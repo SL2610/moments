@@ -64,7 +64,7 @@ export default function DashboardPage() {
 					<li key={album.id}>
 						<Link href={`/dashboard/albums/${album.id}/view`} className="group block">
 							<div className="crop">
-								<div className="aspect-[4/5] overflow-hidden bg-[#ebe3d6]">
+								<div className="aspect-[4/5] overflow-hidden bg-[#eee9e1]">
 									{album.coverUrl ? (
 										// eslint-disable-next-line @next/next/no-img-element
 										<img

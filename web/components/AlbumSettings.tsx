@@ -98,7 +98,7 @@ export default function AlbumSettings({ album, onChange }: { album: Album; onCha
 						<p className="text-sm text-zinc-600 mb-2">{tx("settings.cover")}</p>
 						<div className="flex items-end gap-5">
 							<div className="crop w-28 shrink-0">
-								<div className="aspect-[4/5] overflow-hidden bg-[#ebe3d6]">
+								<div className="aspect-[4/5] overflow-hidden bg-[#eee9e1]">
 									{album.coverUrl && (
 										// eslint-disable-next-line @next/next/no-img-element
 										<img src={album.coverUrl} alt="" className="h-full w-full object-cover grayscale" />

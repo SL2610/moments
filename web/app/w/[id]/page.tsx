@@ -774,7 +774,7 @@ export default function WeddingPage() {
 	if (!session) {
 		const dateMeta = info.eventDate.replace(/[./-]/g, " · ");
 		return (
-			<div className="min-h-[100svh] bg-[#fbfaf7] flex flex-col">
+			<div className="min-h-[100svh] bg-[#faf8f3] flex flex-col">
 				{/* The couple's album cover, set like a magazine: their names lead, WED is only the credit. */}
 				<div className="flex items-center justify-between px-6 pt-5 text-zinc-500">
 					<p className="meta" dir="ltr">{dateMeta}</p>
@@ -956,7 +956,7 @@ export default function WeddingPage() {
 									align="end"
 									sideOffset={6}
 									collisionPadding={12}
-									className="z-40 min-w-52 bg-[#fbfaf7] border border-zinc-300 p-1.5 space-y-0.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
+									className="z-40 min-w-52 bg-[#faf8f3] border border-zinc-300 p-1.5 space-y-0.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
 								>
 									<DropdownMenu.Item
 										onSelect={() => withName(() => uploadInputRef.current?.click())}
@@ -1064,7 +1064,7 @@ export default function WeddingPage() {
 								onPointerUp={cancelLongPress}
 								onPointerLeave={cancelLongPress}
 								onPointerCancel={cancelLongPress}
-								className={`group relative block w-full cursor-pointer bg-[#ebe3d6] overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-2 sm:mb-3 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
+								className={`group relative block w-full cursor-pointer bg-[#eee9e1] overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-2 sm:mb-3 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
 							>
 								{isSelecting && (
 									<span
@@ -1333,7 +1333,7 @@ export default function WeddingPage() {
 			{/* -------------------------------------------------- selfie search */}
 			{isSearchOpen && (
 				<div role="dialog" aria-modal="true" aria-labelledby="search-title" className="fixed inset-0 z-50 bg-zinc-950/55 sm:flex sm:items-center sm:justify-center sm:p-6">
-					<div className="relative h-full sm:h-auto w-full sm:max-w-lg sm:max-h-[92vh] overflow-y-auto bg-[#fbfaf7] px-6 pt-6 pb-8 space-y-6">
+					<div className="relative h-full sm:h-auto w-full sm:max-w-lg sm:max-h-[92vh] overflow-y-auto bg-[#faf8f3] px-6 pt-6 pb-8 space-y-6">
 						<div className="flex items-start justify-between gap-4">
 							<div>
 								<p className="meta text-zinc-500" dir="ltr">{info.eventName}</p>
@@ -1422,7 +1422,7 @@ export default function WeddingPage() {
 										)}
 										{/* a viewfinder: crop marks around a face guide */}
 										<div className="crop mx-2 my-3">
-											<div className="aspect-[4/5] bg-[#ebe3d6] flex flex-col items-center justify-center gap-5 transition-colors hover:bg-[#e4dccf]">
+											<div className="aspect-[4/5] bg-[#eee9e1] flex flex-col items-center justify-center gap-5 transition-colors hover:bg-[#e2dcd2]">
 												<div aria-hidden className="h-[46%] aspect-[3/4] rounded-[50%] border border-dashed border-zinc-500/60" />
 												<p className="flex items-center gap-2 text-base text-zinc-800">
 													{isMobile ? <Camera className="w-5 h-5" /> : <Video className="w-5 h-5" />}
@@ -1599,7 +1599,7 @@ export default function WeddingPage() {
 							maxLength={80}
 							autoComplete="name"
 							aria-labelledby="name-title"
-							className="w-full h-12 rounded-[2px] border border-zinc-300 bg-[#fbfaf7] px-4 text-base focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
+							className="w-full h-12 rounded-[2px] border border-zinc-300 bg-[#faf8f3] px-4 text-base focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
 						/>
 						<div className="flex gap-2">
 							<Button type="submit" disabled={isSavingName || !nameInput.trim()} className="flex-1 min-h-12">

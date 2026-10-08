@@ -5,46 +5,46 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * WED album palette (shared with the site): ivory, charcoal, forest. Remapping the
+ * WED palette (shared with the site): ivory, near-black, espresso; champagne only in fine details. Remapping the
  * Tailwind ramps re-themes every existing utility class: violet -> forest
- * accent, zinc -> paper-to-ink neutrals, emerald/red/amber -> muted.
+ * accent, zinc -> paper-to-ink neutrals, emerald -> champagne, red/amber -> muted.
  */
 @theme {
-	--color-violet-50: #eef2ef;
-	--color-violet-100: #dbe4dd;
-	--color-violet-200: #b9c9bd;
-	--color-violet-300: #8ea595;
-	--color-violet-400: #5d7c69;
-	--color-violet-500: #35584a;
-	--color-violet-600: #1d3a2f;
-	--color-violet-700: #172f26;
-	--color-violet-800: #12251e;
-	--color-violet-900: #0d1b16;
-	--color-violet-950: #08110d;
+	--color-violet-50: #f5efe5;
+	--color-violet-100: #ece2d2;
+	--color-violet-200: #ddcbb0;
+	--color-violet-300: #c7ad86;
+	--color-violet-400: #9a8263;
+	--color-violet-500: #5a4a3e;
+	--color-violet-600: #2b2420;
+	--color-violet-700: #241e1b;
+	--color-violet-800: #1d1816;
+	--color-violet-900: #161211;
+	--color-violet-950: #0e0b0a;
 
-	--color-zinc-50: #f4efe6;
-	--color-zinc-100: #ebe3d6;
-	--color-zinc-200: #ddd4c4;
-	--color-zinc-300: #c8beac;
-	--color-zinc-400: #776f63;
-	--color-zinc-500: #645e54;
-	--color-zinc-600: #4f4a42;
-	--color-zinc-700: #3b3832;
-	--color-zinc-800: #28261f;
-	--color-zinc-900: #191917;
-	--color-zinc-950: #0f0f0d;
+	--color-zinc-50: #f7f4ee;
+	--color-zinc-100: #eee9e1;
+	--color-zinc-200: #e2dcd2;
+	--color-zinc-300: #cfc8bd;
+	--color-zinc-400: #8a847c;
+	--color-zinc-500: #6f6a64;
+	--color-zinc-600: #57534e;
+	--color-zinc-700: #403c38;
+	--color-zinc-800: #2b2826;
+	--color-zinc-900: #1d1b19;
+	--color-zinc-950: #121110;
 
-	--color-emerald-50: #eff2ee;
-	--color-emerald-100: #dfe5dd;
-	--color-emerald-200: #c3cec0;
-	--color-emerald-300: #a2b19e;
-	--color-emerald-400: #7f927b;
-	--color-emerald-500: #62755e;
-	--color-emerald-600: #52634f;
-	--color-emerald-700: #43523f;
-	--color-emerald-800: #364232;
-	--color-emerald-900: #2a3427;
-	--color-emerald-950: #1b211a;
+	--color-emerald-50: #f5efe5;
+	--color-emerald-100: #ece2d2;
+	--color-emerald-200: #ddcbb0;
+	--color-emerald-300: #c7ad86;
+	--color-emerald-400: #a8906a;
+	--color-emerald-500: #8c7350;
+	--color-emerald-600: #6f5a3f;
+	--color-emerald-700: #574631;
+	--color-emerald-800: #403427;
+	--color-emerald-900: #2b231b;
+	--color-emerald-950: #1a1511;
 
 	--color-red-50: #faf0f0;
 	--color-red-100: #f2dddd;
@@ -118,24 +118,24 @@
 
 :root {
 	--radius: 0.125rem;
-	--background: #f4efe6;
-	--foreground: #191917;
-	--card: #fbf8f2;
+	--background: #f7f4ee;
+	--foreground: #1d1b19;
+	--card: #faf8f3;
 	--card-foreground: #1c1a16;
-	--popover: #fbf8f2;
+	--popover: #faf8f3;
 	--popover-foreground: #1c1a16;
-	--primary: #1d3a2f;
-	--primary-foreground: #e9e3d6;
-	--secondary: #ebe3d6;
+	--primary: #2b2420;
+	--primary-foreground: #faf8f3;
+	--secondary: #eee9e1;
 	--secondary-foreground: #1c1a16;
-	--muted: #ebe3d6;
-	--muted-foreground: #645e54;
-	--accent: #ebe3d6;
+	--muted: #eee9e1;
+	--muted-foreground: #6f6a64;
+	--accent: #eee9e1;
 	--accent-foreground: #1c1a16;
 	--destructive: #9a3038;
 	--border: rgba(25, 25, 23, 0.16);
 	--input: rgba(25, 25, 23, 0.22);
-	--ring: #1d3a2f;
+	--ring: #2b2420;
 	--chart-1: oklch(0.646 0.222 41.116);
 	--chart-2: oklch(0.6 0.118 184.704);
 	--chart-3: oklch(0.398 0.07 227.392);
@@ -205,8 +205,8 @@ html:lang(he) {
 		@apply bg-background text-foreground font-sans antialiased;
 	}
 	::selection {
-		background: #1d3a2f;
-		color: #e9e3d6;
+		background: #2b2420;
+		color: #faf8f3;
 	}
 }
 
@@ -368,12 +368,12 @@ section {
 	width: 22px;
 	height: 22px;
 	pointer-events: none;
-	border: 0 solid var(--color-violet-600);
+	border: 0 solid #c7ad86;
 	z-index: 1;
 }
 .crop::before { top: -12px; inset-inline-start: -12px; border-top-width: 1px; border-inline-start-width: 1px; }
 .crop::after { bottom: -12px; inset-inline-end: -12px; border-bottom-width: 1px; border-inline-end-width: 1px; }
-.crop-light::before, .crop-light::after { border-color: #e9e3d6; }
+.crop-light::before, .crop-light::after { border-color: #e2cfa8; }
 
 .meta {
 	font-family: var(--font-ui-stack);
