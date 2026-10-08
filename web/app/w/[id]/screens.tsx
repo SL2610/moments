@@ -82,7 +82,7 @@ export function Finding({ names, prints }: { names: string; prints: ScreenPhoto[
 								className="print-drop bg-white p-2 shadow-[0_14px_30px_-18px_rgba(29,27,25,0.55)]"
 								style={{ ["--tilt" as string]: tilt, transform: `rotate(${tilt})`, animationDelay: `${150 + i * 260}ms` }}
 							>
-								<div className="aspect-[4/3.4] bg-[#eee9e1] overflow-hidden">
+								<div className="aspect-[4/3.4] bg-[#f3efe9] overflow-hidden">
 									{print && (
 										// eslint-disable-next-line @next/next/no-img-element
 										<img src={print.thumbUrl || print.viewUrl} alt="" className="w-full h-full object-cover" />
@@ -144,7 +144,7 @@ export function Viewer({
 	const num = (n: number) => n.toLocaleString(locale === "he" ? "he-IL" : "en-US");
 
 	return (
-		<div className="fixed inset-0 z-[55] flex flex-col bg-[#171311] text-zinc-50" role="dialog" aria-modal="true">
+		<div className="fixed inset-0 z-[55] flex flex-col bg-[#11100f] text-zinc-50" role="dialog" aria-modal="true">
 			<div className="flex items-center justify-between px-2 sm:px-4 h-16">
 				<button onClick={onClose} aria-label={t("guest.selfieSearch.cancelButton")} className="p-3 text-white/80 hover:text-white">
 					<X className="w-5 h-5" />
@@ -309,7 +309,7 @@ export function WeddingStory({
 						{groups.map((g) => (
 							<li key={g.key} className="border-b border-zinc-200">
 								<button onClick={() => setOpen(g)} className="group w-full flex items-center gap-6 py-4 text-start">
-									<span className="w-32 sm:w-40 aspect-square shrink-0 overflow-hidden bg-[#eee9e1]">
+									<span className="w-32 sm:w-40 aspect-square shrink-0 overflow-hidden bg-[#f3efe9]">
 										{/* eslint-disable-next-line @next/next/no-img-element */}
 										<img src={g.coverThumbUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
 									</span>
@@ -329,7 +329,7 @@ export function WeddingStory({
 								<button
 									disabled={!photos}
 									onClick={() => photos && onOpenPhoto(photos, i)}
-									className="block w-full aspect-[4/5] overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+									className="block w-full aspect-[4/5] overflow-hidden bg-[#f3efe9] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
 								>
 									{photos && (
 										// eslint-disable-next-line @next/next/no-img-element

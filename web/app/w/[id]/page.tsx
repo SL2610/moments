@@ -945,7 +945,7 @@ export default function WeddingPage() {
 									align="end"
 									sideOffset={6}
 									collisionPadding={12}
-									className="z-40 min-w-52 bg-[#faf8f3] border border-zinc-300 p-1.5 space-y-0.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
+									className="z-40 min-w-52 bg-[#fbf9f5] border border-zinc-300 p-1.5 space-y-0.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
 								>
 									<DropdownMenu.Item
 										onSelect={() => withName(() => uploadInputRef.current?.click())}
@@ -1130,7 +1130,7 @@ export default function WeddingPage() {
 								onPointerUp={cancelLongPress}
 								onPointerLeave={cancelLongPress}
 								onPointerCancel={cancelLongPress}
-								className={`group relative block w-full cursor-pointer bg-[#eee9e1] overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-2 sm:mb-3 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
+								className={`group relative block w-full cursor-pointer bg-[#f3efe9] overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 transition-all ${galleryLayout === "masonry" ? "mb-2 sm:mb-3 break-inside-avoid" : "aspect-square"} ${isSelecting && selectedIds.includes(photo.id) ? "ring-2 ring-violet-600 border-violet-600 scale-[0.97]" : "border-zinc-200"}`}
 							>
 								{isSelecting && (
 									<span
@@ -1237,7 +1237,7 @@ export default function WeddingPage() {
 			{isSelecting && (
 				<div
 					className="fixed bottom-2 inset-x-2 sm:inset-x-auto sm:bottom-4 sm:left-1/2 sm:-translate-x-1/2 sm:min-w-[26rem] z-40 rounded-[2px] px-3 py-2.5 shadow-2xl space-y-2"
-					style={{ background: "#171311f0" }}
+					style={{ background: "#11100ff0" }}
 				>
 					<div className="flex items-center gap-2">
 						<button
@@ -1316,7 +1316,7 @@ export default function WeddingPage() {
 
 							{/* the viewfinder: crop marks around a face guide */}
 							<div className="crop crop-flip mt-8 mx-3">
-								<div className="relative aspect-[4/5] overflow-hidden bg-[#eee9e1]">
+								<div className="relative aspect-[4/5] overflow-hidden bg-[#f3efe9]">
 									{isCameraOpen && (
 										<video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
 									)}
@@ -1423,7 +1423,7 @@ export default function WeddingPage() {
 														setViewerList(shownMatches);
 														setViewerIndex(i);
 													}}
-													className="block w-full aspect-[4/5] overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+													className="block w-full aspect-[4/5] overflow-hidden bg-[#f3efe9] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
 												>
 													{/* eslint-disable-next-line @next/next/no-img-element */}
 													<img src={photo.thumbUrl || photo.viewUrl} alt="" loading="lazy" className="w-full h-full object-cover object-[center_20%] transition-transform duration-500 hover:scale-[1.03]" />
@@ -1539,7 +1539,7 @@ export default function WeddingPage() {
 							maxLength={80}
 							autoComplete="name"
 							aria-labelledby="name-title"
-							className="w-full h-12 rounded-[2px] border border-zinc-300 bg-[#faf8f3] px-4 text-base focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
+							className="w-full h-12 rounded-[2px] border border-zinc-300 bg-white px-4 text-base focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600"
 						/>
 						<div className="flex gap-2">
 							<Button type="submit" disabled={isSavingName || !nameInput.trim()} className="flex-1 min-h-12">

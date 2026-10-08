@@ -63,7 +63,7 @@ export default function Navbar() {
 								align="end"
 								sideOffset={8}
 								collisionPadding={12}
-								className="z-50 min-w-56 bg-[#faf8f3] border border-zinc-300 p-1.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
+								className="z-50 min-w-56 bg-[#fbf9f5] border border-zinc-300 p-1.5 shadow-[0_18px_40px_-20px_rgba(25,25,23,0.5)]"
 							>
 								{userEmail && <p className="px-3 pt-2 pb-2.5 text-xs text-zinc-500 truncate border-b border-zinc-200 mb-1">{userEmail}</p>}
 								<DropdownMenu.Item onSelect={() => router.push("/dashboard")} className={item}>

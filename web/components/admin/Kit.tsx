@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { useAdminText } from "@/lib/i18n/admin";
 
 export const field =
-	"w-full h-12 rounded-[2px] border border-zinc-300 bg-[#faf8f3] px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600";
+	"w-full h-12 rounded-[2px] border border-zinc-300 bg-white px-3.5 text-base text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-violet-600 focus:ring-1 focus:ring-violet-600";
 
 export const btnInk =
 	"inline-flex items-center justify-center gap-2 min-h-12 px-6 rounded-[2px] bg-zinc-900 text-zinc-50 text-base font-medium transition-colors hover:bg-violet-600 disabled:opacity-50 disabled:hover:bg-zinc-900";
@@ -50,7 +50,7 @@ export function PageHead({
 			)}
 			{cover && (
 				<div className="crop mt-6">
-					<div className="aspect-[4/3] sm:aspect-[21/8] overflow-hidden bg-[#eee9e1]">
+					<div className="aspect-[4/3] sm:aspect-[21/8] overflow-hidden bg-[#f3efe9]">
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={cover} alt="" className="w-full h-full object-cover object-[center_35%]" />
 					</div>

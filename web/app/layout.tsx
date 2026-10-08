@@ -3,8 +3,8 @@ import { cookies } from "next/headers";
 import {
 	Bodoni_Moda,
 	Frank_Ruhl_Libre,
-	Hanken_Grotesk,
-	Assistant,
+	DM_Sans,
+	Heebo,
 } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -29,14 +29,14 @@ const hebrewDisplayFont = Frank_Ruhl_Libre({
 	weight: ["300", "400", "500", "600"],
 });
 
-// Latin UI face; Hebrew pages switch to Assistant in globals.css.
-const uiFont = Hanken_Grotesk({
+// Latin UI face; Hebrew pages switch to Heebo in globals.css.
+const uiFont = DM_Sans({
 	variable: "--font-ui-face",
 	subsets: ["latin"],
 	weight: ["400", "500", "600"],
 });
 
-const hebrewUiFont = Assistant({
+const hebrewUiFont = Heebo({
 	variable: "--font-ui-he-face",
 	subsets: ["hebrew"],
 	weight: ["400", "500", "600"],

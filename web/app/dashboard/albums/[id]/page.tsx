@@ -298,7 +298,7 @@ export default function AlbumUploadPage() {
 			<AlbumNav albumId={albumId} current="page" />
 
 			{notice && (
-				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#faf8f3] px-4 py-3 text-red-800">
+				<div role="alert" className="mb-8 flex items-start justify-between gap-4 border-s-2 border-red-700 bg-[#fbf9f5] px-4 py-3 text-red-800">
 					<p>{notice}</p>
 					<button onClick={() => setNotice("")} aria-label={tx("photo.close")} className="p-1 text-red-800/70 hover:text-red-900">
 						<X className="w-4 h-4" />
@@ -360,7 +360,7 @@ export default function AlbumUploadPage() {
 					<ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-5">
 						{photos.map((photo) => (
 							<li key={photo.id}>
-								<button type="button" onClick={() => setFullScreenImage(photo.previewUrl)} className="relative block w-full aspect-square overflow-hidden bg-[#eee9e1]">
+								<button type="button" onClick={() => setFullScreenImage(photo.previewUrl)} className="relative block w-full aspect-square overflow-hidden bg-[#f3efe9]">
 									{/* eslint-disable-next-line @next/next/no-img-element */}
 									<img src={photo.previewUrl} alt="" className="h-full w-full object-cover" />
 									{photo.status === "uploading" && (
