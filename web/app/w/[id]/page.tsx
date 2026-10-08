@@ -141,8 +141,13 @@ export default function WeddingPage() {
 	}, [selfiePreview]);
 	// face search runs only after the guest agrees, once per wedding on this device
 	const [consented, setConsented] = useState(false);
+	// agreed on an earlier visit: the box isn't asked again
+	const [consentKept, setConsentKept] = useState(false);
+	const [consentNudge, setConsentNudge] = useState(false);
 	useEffect(() => {
-		setConsented(localStorage.getItem(`wed.consent.${publicId}`) === "1");
+		const kept = localStorage.getItem(`wed.consent.${publicId}`) === "1";
+		setConsentKept(kept);
+		setConsented(kept);
 	}, [publicId]);
 	const searchAbort = useRef<AbortController | null>(null);
 	const [searchError, setSearchError] = useState("");
@@ -1366,17 +1371,26 @@ export default function WeddingPage() {
 
 							{selfie ? (
 								<div className="mt-7 space-y-5">
-									{!consented && (
+									{!consentKept && (
 										<div className="text-sm text-zinc-700">
 											<label className="flex items-start gap-3 cursor-pointer">
 												<input
 													type="checkbox"
 													checked={consented}
-													onChange={(e) => setConsented(e.target.checked)}
+													onChange={(e) => {
+														setConsented(e.target.checked);
+														setConsentNudge(false);
+													}}
+													aria-describedby={consentNudge ? "consent-nudge" : undefined}
 													className="mt-0.5 h-5 w-5 shrink-0 accent-zinc-900"
 												/>
 												<span>{t("guest.consent.agree")}</span>
 											</label>
+											{consentNudge && (
+												<p id="consent-nudge" role="alert" className="mt-2 ms-8 text-red-700">
+													{t("guest.consent.nudge")}
+												</p>
+											)}
 											<details className="mt-2 ms-8 text-zinc-600">
 												<summary className="cursor-pointer underline underline-offset-4 decoration-zinc-300 w-fit min-h-11 inline-flex items-center">
 													{t("guest.consent.howTitle")}
@@ -1386,9 +1400,8 @@ export default function WeddingPage() {
 										</div>
 									)}
 									<button
-										onClick={() => handleSearch(selfie)}
-										disabled={!consented}
-										className="w-full h-14 rounded-[2px] bg-zinc-900 text-zinc-50 text-base font-medium transition-colors hover:bg-violet-700 disabled:opacity-40"
+										onClick={() => (consented ? handleSearch(selfie) : setConsentNudge(true))}
+										className="w-full h-14 rounded-[2px] bg-zinc-900 text-zinc-50 text-base font-medium transition-colors hover:bg-violet-700"
 									>
 										{t("guest.selfie.use")}
 									</button>

@@ -89,6 +89,7 @@ const en = {
 	"guest.selfie.retake": "Retake",
 	"guest.selfie.previewAlt": "Your selfie",
 	"guest.consent.agree": "I agree that this selfie is used to find my photos in this album.",
+	"guest.consent.nudge": "Tick the box first, so we know it's OK to search with your face.",
 	"guest.consent.howTitle": "How we handle your selfie",
 	"guest.consent.howBody": "The photo itself is never saved. We turn it into a face pattern, compare it with this wedding's photos, and keep that pattern in memory for at most 15 minutes so a second selfie can sharpen the search. Then it's gone. Faces in the album's photos are deleted together with the album.",
 	"guest.finding.slow": "This is taking longer than usual. You can keep waiting, or cancel and try again.",
