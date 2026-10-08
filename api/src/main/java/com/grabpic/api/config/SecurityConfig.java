@@ -57,7 +57,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/photos/view").permitAll()
                         // Wedding entry by unguessable id: info and join only. The
                         // couple's optional password is checked in join.
-                        .requestMatchers(HttpMethod.GET, "/api/w/*", "/api/w/*/cover").permitAll()
+                        // Read-only wedding pages (info, cover, and any read-only page under /api/w/{id}/).
+                        .requestMatchers(HttpMethod.GET, "/api/w/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/w/*/join").permitAll()
                         // Controllers further scope guests to the album in their token.
                         .requestMatchers("/api/albums/*/guest/**").hasAnyRole("GUEST", "ADMIN")
