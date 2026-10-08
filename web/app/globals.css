@@ -406,18 +406,17 @@ body::after {
 	to { clip-path: inset(0); transform: none; filter: none; }
 }
 
-/* Finding screen: the album's prints land one by one; the bar creeps on until the match returns. */
-.progress-creep { width: 60%; }
+/* Finding screen: the album's prints land one by one; the line sweeps without measuring anything. */
 @media (prefers-reduced-motion: no-preference) {
 	.print-drop { animation: print-drop 800ms cubic-bezier(0.16, 1, 0.3, 1) both; }
-	.progress-creep { animation: progress-creep 14s cubic-bezier(0.1, 0.7, 0.2, 1) forwards; }
+	.progress-indeterminate { animation: progress-sweep 1.6s ease-in-out infinite; }
 }
 @keyframes print-drop {
 	from { opacity: 0; transform: translateY(-20px) rotate(var(--tilt)) scale(1.04); }
 }
-@keyframes progress-creep {
-	from { width: 4%; }
-	to { width: 90%; }
+@keyframes progress-sweep {
+	from { inset-inline-start: -33%; }
+	to { inset-inline-start: 100%; }
 }
 /* The selfie viewfinder's marks sit top-end and bottom-start, as on a camera screen. */
 .crop-flip::before { inset-inline-start: auto; inset-inline-end: -12px; border-inline-start-width: 0; border-inline-end-width: 1px; }

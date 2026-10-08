@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -133,6 +133,18 @@ export default function WeddingPage() {
 	// selfie search
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [isSearching, setIsSearching] = useState(false);
+	// the photo under review ("Use this photo / Retake") before anything is searched
+	const [selfie, setSelfie] = useState<File | null>(null);
+	const selfiePreview = useMemo(() => (selfie ? URL.createObjectURL(selfie) : ""), [selfie]);
+	useEffect(() => () => {
+		if (selfiePreview) URL.revokeObjectURL(selfiePreview);
+	}, [selfiePreview]);
+	// face search runs only after the guest agrees, once per wedding on this device
+	const [consented, setConsented] = useState(false);
+	useEffect(() => {
+		setConsented(localStorage.getItem(`wed.consent.${publicId}`) === "1");
+	}, [publicId]);
+	const searchAbort = useRef<AbortController | null>(null);
 	const [searchError, setSearchError] = useState("");
 	const [matches, setMatches] = useState<Photo[] | null>(null);
 	const [isClaiming, setIsClaiming] = useState(false);
@@ -359,7 +371,7 @@ export default function WeddingPage() {
 		}
 	};
 
-	const onSelfieScreen = isSearchOpen && !isSearching && matches === null;
+	const onSelfieScreen = isSearchOpen && !isSearching && matches === null && !selfie;
 	useEffect(() => {
 		if (onSelfieScreen && !isCameraOpen && !cameraDenied) startCamera();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -375,7 +387,8 @@ export default function WeddingPage() {
 			(blob) => {
 				if (blob) {
 					stopCamera();
-					handleSearch(new File([blob], "selfie.jpg", { type: "image/jpeg" }));
+					setSearchError("");
+					setSelfie(new File([blob], "selfie.jpg", { type: "image/jpeg" }));
 				}
 			},
 			"image/jpeg",
@@ -396,9 +409,12 @@ export default function WeddingPage() {
 		"search-timeout": "guest.selfieSearch.errors.searchTimeout",
 	};
 
-	/** Runs as soon as a selfie is taken or picked: there is nothing to confirm. */
+	/** Searches with the reviewed selfie; only after the guest has agreed. */
 	const handleSearch = async (selfie: File) => {
-		if (!session) return;
+		if (!session || !consented) return;
+		localStorage.setItem(`wed.consent.${publicId}`, "1");
+		const abort = new AbortController();
+		searchAbort.current = abort;
 		setIsSearching(true);
 		setSearchError("");
 		setMatches(null);
@@ -411,6 +427,7 @@ export default function WeddingPage() {
 			// A previous selfie from this session strengthens the next search.
 			if (searchSessionId) formData.append("search_id", searchSessionId);
 			const aiRes = await fetch("/api/ai/search", {
+				signal: abort.signal,
 				method: "POST",
 				body: formData,
 			});
@@ -427,6 +444,7 @@ export default function WeddingPage() {
 			if (sid) setSearchSessionId(sid);
 			setNeedsSecondSelfie(Boolean(needsSecond));
 			if (!ids || ids.length === 0) {
+				setSelfie(null);
 				setMatches([]);
 				return;
 			}
@@ -436,14 +454,18 @@ export default function WeddingPage() {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(ids),
+					signal: abort.signal,
 				},
 			);
 			if (!detailsRes.ok) throw new Error(t("guest.selfieSearch.errors.default"));
 			const found: Photo[] = (await detailsRes.json()).map(
 				(p: Omit<Photo, "tags">) => ({ ...p, tags: [] }),
 			);
+			setResultTab("all");
+			setSelfie(null);
 			setMatches(found);
 		} catch (err) {
+			if ((err as DOMException)?.name === "AbortError") return;
 			setSearchError(err instanceof Error ? err.message : t("guest.selfieSearch.errors.generic"));
 		} finally {
 			setIsSearching(false);
@@ -469,7 +491,14 @@ export default function WeddingPage() {
 		}
 	};
 
+	const cancelSearch = () => {
+		searchAbort.current?.abort();
+		setIsSearching(false);
+	};
+
 	const closeSearch = () => {
+		searchAbort.current?.abort();
+		setSelfie(null);
 		setIsSearchOpen(false);
 		setViewerList(null);
 		setMatches(null);
@@ -708,7 +737,9 @@ export default function WeddingPage() {
 		e.target.value = "";
 		if (!file) return;
 		stopCamera();
-		handleSearch(file);
+		setSearchError("");
+		setMatches(null);
+		setSelfie(file);
 	};
 
 	const downloadFavorites = async () => {
@@ -1296,7 +1327,7 @@ export default function WeddingPage() {
 			{/* ------------------------------------- selfie, finding, results: full screens */}
 			{isSearchOpen &&
 				(isSearching ? (
-					<Finding names={info.eventName} prints={photos.slice(0, 4)} />
+					<Finding names={info.eventName} prints={photos.slice(0, 4)} onCancel={cancelSearch} />
 				) : matches === null ? (
 					<div role="dialog" aria-modal="true" aria-labelledby="search-title" className="fixed inset-0 z-50 overflow-y-auto bg-zinc-50 flex flex-col">
 						<GuestBar
@@ -1314,45 +1345,94 @@ export default function WeddingPage() {
 							</h2>
 							<p className="mt-2 max-w-[19rem] text-zinc-600">{t("guest.selfie.body")}</p>
 
-							{/* the viewfinder: crop marks around a face guide */}
+							{/* the viewfinder: crop marks around a face guide (a guide only, never a crop) */}
 							<div className="crop crop-flip mt-8 mx-3">
 								<div className="relative aspect-[4/5] overflow-hidden bg-[#f3efe9]">
-									{isCameraOpen && (
-										<video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
+									{selfie ? (
+										// eslint-disable-next-line @next/next/no-img-element
+										<img src={selfiePreview} alt={t("guest.selfie.previewAlt")} className="absolute inset-0 w-full h-full object-cover" />
+									) : (
+										isCameraOpen && <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
 									)}
-									<div aria-hidden className="absolute inset-0 flex items-center justify-center">
-										<div className={`h-[64%] aspect-[3/4] rounded-[50%] border border-dashed ${isCameraOpen ? "border-white/90" : "border-zinc-500/50"}`} />
-									</div>
+									{!selfie && (
+										<div aria-hidden className="absolute inset-0 flex items-center justify-center">
+											<div className={`h-[64%] aspect-[3/4] rounded-[50%] border border-dashed ${isCameraOpen ? "border-white/90" : "border-zinc-500/50"}`} />
+										</div>
+									)}
 								</div>
-							</div>
-
-							<div className="mt-7 flex justify-center">
-								{isMobile && !isCameraOpen ? (
-									<label aria-label={t("guest.selfie.shutter")} className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center cursor-pointer transition-colors hover:bg-violet-600 focus-within:ring-2 focus-within:ring-zinc-900 focus-within:ring-offset-2">
-										<Camera className="w-6 h-6" strokeWidth={1.5} />
-										<input type="file" accept="image/*" capture="user" className="sr-only" onChange={pickSelfie} />
-									</label>
-								) : (
-									<button
-										onClick={isCameraOpen ? takePhoto : startCamera}
-										aria-label={t("guest.selfie.shutter")}
-										className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center transition-colors hover:bg-violet-600"
-									>
-										<Camera className="w-6 h-6" strokeWidth={1.5} />
-									</button>
-								)}
-							</div>
-
-							<div className="mt-8">
-								<SelfieTips />
 							</div>
 
 							{searchError && <p role="alert" className="mt-6 text-sm text-red-700 text-center">{searchError}</p>}
 
-							<label className="mt-8 self-center min-h-11 inline-flex items-center text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900 cursor-pointer">
-								{t("guest.selfieSearch.choosePhoto")}
-								<input type="file" accept="image/*" className="sr-only" onChange={pickSelfie} />
-							</label>
+							{selfie ? (
+								<div className="mt-7 space-y-5">
+									{!consented && (
+										<div className="text-sm text-zinc-700">
+											<label className="flex items-start gap-3 cursor-pointer">
+												<input
+													type="checkbox"
+													checked={consented}
+													onChange={(e) => setConsented(e.target.checked)}
+													className="mt-0.5 h-5 w-5 shrink-0 accent-zinc-900"
+												/>
+												<span>{t("guest.consent.agree")}</span>
+											</label>
+											<details className="mt-2 ms-8 text-zinc-600">
+												<summary className="cursor-pointer underline underline-offset-4 decoration-zinc-300 w-fit min-h-11 inline-flex items-center">
+													{t("guest.consent.howTitle")}
+												</summary>
+												<p className="mt-1 leading-relaxed">{t("guest.consent.howBody")}</p>
+											</details>
+										</div>
+									)}
+									<button
+										onClick={() => handleSearch(selfie)}
+										disabled={!consented}
+										className="w-full h-14 rounded-[2px] bg-zinc-900 text-zinc-50 text-base font-medium transition-colors hover:bg-violet-700 disabled:opacity-40"
+									>
+										{t("guest.selfie.use")}
+									</button>
+									<button
+										onClick={() => {
+											setSelfie(null);
+											setSearchError("");
+										}}
+										className="block mx-auto min-h-11 text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900"
+									>
+										{t("guest.selfie.retake")}
+									</button>
+								</div>
+							) : (
+								<>
+									<div className="mt-7 flex justify-center">
+										{isMobile && !isCameraOpen ? (
+											<label className="flex flex-col items-center gap-2.5 cursor-pointer group">
+												<span className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center transition-colors group-hover:bg-violet-700 group-focus-within:ring-2 group-focus-within:ring-zinc-900 group-focus-within:ring-offset-2">
+													<Camera className="w-6 h-6" strokeWidth={1.5} />
+												</span>
+												<span className="text-sm font-medium text-zinc-900">{t("guest.selfie.shutter")}</span>
+												<input type="file" accept="image/*" capture="user" className="sr-only" onChange={pickSelfie} />
+											</label>
+										) : (
+											<button onClick={isCameraOpen ? takePhoto : startCamera} className="flex flex-col items-center gap-2.5 group">
+												<span className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center transition-colors group-hover:bg-violet-700">
+													<Camera className="w-6 h-6" strokeWidth={1.5} />
+												</span>
+												<span className="text-sm font-medium text-zinc-900">{t("guest.selfie.shutter")}</span>
+											</button>
+										)}
+									</div>
+
+									<div className="mt-8">
+										<SelfieTips />
+									</div>
+
+									<label className="mt-8 self-center min-h-11 inline-flex items-center text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900 cursor-pointer">
+										{t("guest.selfieSearch.choosePhoto")}
+										<input type="file" accept="image/*" className="sr-only" onChange={pickSelfie} />
+									</label>
+								</>
+							)}
 							<p className="mt-6 text-xs text-zinc-500 text-center">{t("guest.selfieSearch.privacyNote")}</p>
 						</main>
 					</div>
@@ -1383,9 +1463,18 @@ export default function WeddingPage() {
 									<p className="mt-4 text-zinc-600">
 										{searchSessionId ? t("guest.selfieSearch.noMatchRetryWithSession") : t("guest.selfieSearch.noMatchRetryFresh")}
 									</p>
-									<button onClick={() => setMatches(null)} className="mt-8 h-14 px-8 rounded-[2px] bg-zinc-900 text-zinc-50 hover:bg-violet-600 transition-colors">
-										{t("guest.selfieSearch.tryAgainButton")}
+									<button onClick={() => setMatches(null)} className="mt-8 h-14 px-8 rounded-[2px] bg-zinc-900 text-zinc-50 hover:bg-violet-700 transition-colors">
+										{t("guest.selfie.retake")}
 									</button>
+									<div className="mt-5 flex flex-wrap gap-x-7 gap-y-2">
+										<label className="min-h-11 inline-flex items-center text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900 cursor-pointer">
+											{t("guest.results.anotherPhoto")}
+											<input type="file" accept="image/*" className="sr-only" onChange={pickSelfie} />
+										</label>
+										<button onClick={closeSearch} className="min-h-11 text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900">
+											{t("guest.landing.seeAlbum")}
+										</button>
+									</div>
 								</div>
 							) : (
 								<>
@@ -1415,7 +1504,7 @@ export default function WeddingPage() {
 											))}
 										</nav>
 									)}
-									<ul className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
+									<ul className="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
 										{shownMatches.map((photo, i) => (
 											<li key={photo.id}>
 												<button
@@ -1485,6 +1574,7 @@ export default function WeddingPage() {
 					isFavorite={favorites.includes(viewerPhoto.id)}
 					onFavorite={() => toggleFavorite(viewerPhoto.id)}
 					onShare={() => sharePhoto(viewerPhoto)}
+					onDownload={() => downloadImage(viewerPhoto.viewUrl, `wedding-${viewerPhoto.id}.jpg`)}
 					extra={
 						viewerList ? undefined : (
 							<>

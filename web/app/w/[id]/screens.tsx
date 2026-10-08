@@ -62,9 +62,15 @@ export function Lockup() {
 
 const TILTS = ["-6deg", "5deg", "-3deg", "7deg"];
 
-/** While the selfie is matched: the album's own prints land on the table and a thin bar creeps on. */
-export function Finding({ names, prints }: { names: string; prints: ScreenPhoto[] }) {
+/** While the selfie is matched: the album's own prints land on the table; the line moves without a percentage. */
+export function Finding({ names, prints, onCancel }: { names: string; prints: ScreenPhoto[]; onCancel: () => void }) {
 	const { t } = useI18n();
+	// no real progress comes back from the search, so the bar never pretends to measure it
+	const [slow, setSlow] = useState(false);
+	useEffect(() => {
+		const timer = setTimeout(() => setSlow(true), 20_000);
+		return () => clearTimeout(timer);
+	}, []);
 	return (
 		<div className="fixed inset-0 z-50 overflow-y-auto bg-zinc-50 flex flex-col" role="status" aria-live="polite">
 			<GuestBar start={<CoupleMark names={names} />} end={<ChampagneRule />} />
@@ -93,10 +99,13 @@ export function Finding({ names, prints }: { names: string; prints: ScreenPhoto[
 					})}
 				</div>
 				<div className="mt-auto pt-12">
-					<div className="h-px bg-zinc-200">
-						<div className="progress-creep h-px bg-[#8a7350]" />
+					<div className="relative h-px overflow-hidden bg-zinc-200">
+						<div className="progress-indeterminate absolute inset-y-0 w-1/3 bg-[#8a7350]" />
 					</div>
-					<p className="mt-4 text-sm text-zinc-600">{t("guest.finding.detail")}</p>
+					<p className="mt-4 text-sm text-zinc-600">{t(slow ? "guest.finding.slow" : "guest.finding.detail")}</p>
+					<button onClick={onCancel} className="mt-3 min-h-11 text-sm text-zinc-800 underline underline-offset-[6px] decoration-zinc-300 hover:decoration-zinc-900">
+						{t("guest.finding.cancel")}
+					</button>
 				</div>
 			</main>
 		</div>
@@ -118,6 +127,7 @@ export function Viewer({
 	isFavorite,
 	onFavorite,
 	onShare,
+	onDownload,
 	extra,
 }: {
 	list: ScreenPhoto[];
@@ -128,6 +138,7 @@ export function Viewer({
 	isFavorite: boolean;
 	onFavorite: () => void;
 	onShare: () => void;
+	onDownload: () => void;
 	extra?: ReactNode;
 }) {
 	const { t, locale } = useI18n();
@@ -158,6 +169,9 @@ export function Viewer({
 					</button>
 					<button onClick={onShare} aria-label={t("guest.viewer.share")} className="p-3 text-white/80 hover:text-white">
 						<Share className="w-5 h-5" />
+					</button>
+					<button onClick={onDownload} aria-label={t("guest.gallery.downloadTitle")} className="p-3 text-white/80 hover:text-white">
+						<Download className="w-5 h-5" />
 					</button>
 				</div>
 			</div>
