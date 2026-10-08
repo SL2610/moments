@@ -77,7 +77,7 @@ export function Section({
 	aside?: ReactNode;
 }) {
 	return (
-		<section id={id} className="scroll-mt-20 border-t border-zinc-300 pt-6 mt-12 first:mt-0">
+		<section id={id} className="scroll-mt-20 border-t border-zinc-300 pt-6 mt-12 first:mt-0 [nav+&]:border-t-0 [nav+&]:pt-0 [nav+&]:mt-0">
 			<div className="flex flex-wrap items-baseline justify-between gap-4">
 				<h2 className="text-2xl text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
 					{title}

@@ -21,7 +21,7 @@ const admin = {
 		"albums.guestPage": "עמוד האורחים",
 		"albums.noDate": "בלי תאריך",
 
-		"nav.page": "עמוד האורחים",
+		"nav.page": "הגדרות האלבום",
 		"nav.photos": "התמונות",
 		"nav.add": "הוספת תמונות",
 
@@ -124,7 +124,7 @@ const admin = {
 		"albums.guestPage": "Guest page",
 		"albums.noDate": "No date yet",
 
-		"nav.page": "Guest page",
+		"nav.page": "Album settings",
 		"nav.photos": "Photos",
 		"nav.add": "Add photos",
 
