@@ -794,7 +794,8 @@ export default function WeddingPage() {
 					<>
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={info.coverUrl} alt="" className="develop absolute inset-0 w-full h-full object-cover object-[65%_center]" />
-						<div aria-hidden className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-zinc-50/95 from-5% via-zinc-50/55 via-40% to-zinc-50/0 to-70%" />
+						{/* Any couple's photo can sit here, so the wash guarantees the text, whatever the picture. */}
+						<div aria-hidden className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-zinc-50 from-10% via-zinc-50/75 via-45% to-zinc-50/0" />
 						<div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-zinc-50 via-zinc-50/60 to-transparent" />
 					</>
 				)}
