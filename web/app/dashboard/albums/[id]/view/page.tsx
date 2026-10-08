@@ -319,7 +319,7 @@ export default function AlbumViewPage() {
 							role="tab"
 							aria-selected={view === tab.key}
 							onClick={() => setView(tab.key)}
-							className={`shrink-0 pb-2 border-b text-base transition-colors ${view === tab.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
+							className={`shrink-0 pb-2 border-b text-base transition-colors ${view === tab.key ? "border-champagne text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
 						>
 							{tab.label}
 						</button>
@@ -413,7 +413,7 @@ export default function AlbumViewPage() {
 												{!photo.processed && !photo.isPublic
 													? tx("photos.scanning")
 													: photo.faceCount > 0
-														? tx("photos.faces", { n: photo.faceCount })
+														? (photo.faceCount === 1 ? tx("photos.oneFace") : tx("photos.faces", { n: photo.faceCount }))
 														: ""}
 											</span>
 											{!photo.isPublic && (
@@ -468,7 +468,7 @@ export default function AlbumViewPage() {
 			{selectedPhoto && (
 				<div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex flex-col bg-zinc-950" onClick={closePhoto}>
 					<div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-zinc-50" onClick={(e) => e.stopPropagation()}>
-						<p className="meta text-zinc-400">{tx("photos.faces", { n: selectedPhoto.faceCount })}</p>
+						<p className="meta text-zinc-400">{(selectedPhoto.faceCount === 1 ? tx("photos.oneFace") : tx("photos.faces", { n: selectedPhoto.faceCount }))}</p>
 						<div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
 							<button onClick={handleTogglePrivacySingle} className="min-h-10 text-zinc-100 underline decoration-zinc-600 underline-offset-[6px] hover:decoration-zinc-100">
 								{selectedPhoto.isPublic ? tx("photo.public") : tx("photo.protected")}

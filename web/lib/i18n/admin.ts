@@ -95,6 +95,7 @@ const admin = {
 		"photos.scanning": "בסריקה",
 		"photos.protected": "רק למי שמופיע",
 		"photos.faces": "{n} פנים",
+		"photos.oneFace": "פנים אחת",
 		"photos.tabPhotos": "תמונות",
 
 		"photo.showFaces": "הצגת הפנים שנמצאו",
@@ -198,6 +199,7 @@ const admin = {
 		"photos.scanning": "Scanning",
 		"photos.protected": "Only for who's in it",
 		"photos.faces": "{n} faces",
+		"photos.oneFace": "1 face",
 		"photos.tabPhotos": "Photos",
 
 		"photo.showFaces": "Show the faces found",

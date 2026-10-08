@@ -293,6 +293,7 @@ export default function AlbumUploadPage() {
 				back
 				meta={formatDate(album?.eventDate) || tx("meta")}
 				title={<span dir="auto">{album?.title ?? "…"}</span>}
+				cover={album?.coverUrl}
 			/>
 			<AlbumNav albumId={albumId} current="page" />
 

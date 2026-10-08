@@ -1,12 +1,8 @@
 // Hebrew (default locale). Keep keys in sync with en.ts.
 const he = {
 	// Navbar (admin area: login/signup/dashboard only, never shown on the guest pages)
-	"nav.admin": "ADMIN",
-	"nav.home": "ראשי",
 	"nav.dashboard": "ניהול",
 	"nav.logout": "יציאה",
-	"nav.login": "התחברות",
-	"nav.signup": "הרשמה",
 	"nav.menu": "תפריט",
 
 	// Shared auth error messages (server returns the English text on the left as a key)
@@ -19,6 +15,8 @@ const he = {
 
 	// Login page
 	"login.title": "ניהול האלבום",
+	"login.heading": "ברוכים השבים",
+	"signup.heading": "יוצרים את האלבום שלכם",
 	"login.email": "אימייל",
 	"login.password": "סיסמה",
 	"login.signingIn": "מתחברים...",

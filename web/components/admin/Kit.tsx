@@ -30,12 +30,15 @@ export function PageHead({
 	sub,
 	actions,
 	back,
+	cover,
 }: {
 	meta: ReactNode;
 	title: ReactNode;
 	sub?: ReactNode;
 	actions?: ReactNode;
 	back?: boolean;
+	/** The couple's cover, shown as their guests see it, in colour. */
+	cover?: string | null;
 }) {
 	const tx = useAdminText();
 	return (
@@ -45,7 +48,15 @@ export function PageHead({
 					<span aria-hidden className="inline-block rtl:-scale-x-100">←</span> {tx("back")}
 				</Link>
 			)}
-			<div className={`flex flex-wrap items-end justify-between gap-6 ${back ? "mt-6" : ""}`}>
+			{cover && (
+				<div className="crop mt-6">
+					<div className="aspect-[4/3] sm:aspect-[21/8] overflow-hidden bg-[#eee9e1]">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img src={cover} alt="" className="w-full h-full object-cover object-[center_35%]" />
+					</div>
+				</div>
+			)}
+			<div className={`flex flex-wrap items-end justify-between gap-6 ${back || cover ? "mt-6" : ""}`}>
 				<div className="min-w-0">
 					<p className="meta text-zinc-500" dir="auto">{meta}</p>
 					<h1
@@ -104,7 +115,7 @@ export function AlbumNav({ albumId, current }: { albumId: string; current: "page
 					key={item.key}
 					href={item.href}
 					aria-current={current === item.key ? "page" : undefined}
-					className={`pb-3 -mb-px border-b-2 text-base transition-colors ${current === item.key ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
+					className={`pb-3 -mb-px border-b-2 text-base transition-colors ${current === item.key ? "border-champagne text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-900"}`}
 				>
 					{item.label}
 				</Link>

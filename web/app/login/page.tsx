@@ -70,7 +70,10 @@ function LoginContent() {
 	return (
 		<main className="min-h-[calc(100svh-3.5rem)] bg-zinc-50 px-6 pt-[11svh] pb-16">
 			<div className="mx-auto w-full max-w-sm">
-				<h1 className="text-xl font-medium text-zinc-900">{t("login.title")}</h1>
+				<p className="meta text-zinc-500">{t("login.title")}</p>
+				<h1 className="mt-3 text-[clamp(2.4rem,9vw,3rem)] leading-[1.05] tracking-[-0.02em] text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>
+					{t("login.heading")}
+				</h1>
 
 				<form onSubmit={handleEmailLogin} className="mt-7 space-y-5">
 					<div className="space-y-1.5">

@@ -3,12 +3,8 @@ import type he from "./he";
 // English locale. Keep keys in sync with he.ts; `satisfies` below enforces it.
 const en = {
 	// Navbar (admin area: login/signup/dashboard only, never shown on the guest pages)
-	"nav.admin": "ADMIN",
-	"nav.home": "Home",
 	"nav.dashboard": "Dashboard",
 	"nav.logout": "Log out",
-	"nav.login": "Log in",
-	"nav.signup": "Sign up",
 	"nav.menu": "Menu",
 
 	// Shared auth error messages
@@ -21,6 +17,8 @@ const en = {
 
 	// Login page
 	"login.title": "Album admin",
+	"login.heading": "Welcome back",
+	"signup.heading": "Create your album",
 	"login.email": "Email",
 	"login.password": "Password",
 	"login.signingIn": "Signing in...",
