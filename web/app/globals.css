@@ -419,3 +419,6 @@ body::after {
 	from { width: 4%; }
 	to { width: 90%; }
 }
+/* The selfie viewfinder's marks sit top-end and bottom-start, as on a camera screen. */
+.crop-flip::before { inset-inline-start: auto; inset-inline-end: -12px; border-inline-start-width: 0; border-inline-end-width: 1px; }
+.crop-flip::after { inset-inline-end: auto; inset-inline-start: -12px; border-inline-end-width: 0; border-inline-start-width: 1px; }

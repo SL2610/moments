@@ -339,20 +339,29 @@ export default function WeddingPage() {
 
 	useEffect(() => () => stopCamera(), [stopCamera]);
 
-	const startDesktopCamera = async () => {
+	// Once refused, the shutter falls back to the phone's own camera picker instead of asking again.
+	const [cameraDenied, setCameraDenied] = useState(false);
+	const startCamera = async () => {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({
-				video: true,
+				video: { facingMode: "user" },
 				audio: false,
 			});
 			streamRef.current = stream;
 			setIsCameraOpen(true);
 		} catch {
-			setSearchError(t("guest.selfieSearch.cameraError"));
+			setCameraDenied(true);
+			if (!isMobile) setSearchError(t("guest.selfieSearch.cameraError"));
 		}
 	};
 
-	const takeDesktopPhoto = () => {
+	const onSelfieScreen = isSearchOpen && !isSearching && matches === null;
+	useEffect(() => {
+		if (onSelfieScreen && !isCameraOpen && !cameraDenied) startCamera();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [onSelfieScreen, cameraDenied]);
+
+	const takePhoto = () => {
 		if (!videoRef.current) return;
 		const canvas = document.createElement("canvas");
 		canvas.width = videoRef.current.videoWidth;
@@ -673,7 +682,9 @@ export default function WeddingPage() {
 	const pickSelfie = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		e.target.value = "";
-		if (file) handleSearch(file);
+		if (!file) return;
+		stopCamera();
+		handleSearch(file);
 	};
 
 	const downloadFavorites = async () => {
@@ -1273,7 +1284,7 @@ export default function WeddingPage() {
 							<p className="mt-2 max-w-[19rem] text-zinc-600">{t("guest.selfie.body")}</p>
 
 							{/* the viewfinder: crop marks around a face guide */}
-							<div className="crop mt-8 mx-3">
+							<div className="crop crop-flip mt-8 mx-3">
 								<div className="relative aspect-[4/5] overflow-hidden bg-[#eee9e1]">
 									{isCameraOpen && (
 										<video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover scale-x-[-1]" />
@@ -1285,14 +1296,14 @@ export default function WeddingPage() {
 							</div>
 
 							<div className="mt-7 flex justify-center">
-								{isMobile ? (
+								{isMobile && !isCameraOpen ? (
 									<label aria-label={t("guest.selfie.shutter")} className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center cursor-pointer transition-colors hover:bg-violet-600 focus-within:ring-2 focus-within:ring-zinc-900 focus-within:ring-offset-2">
 										<Camera className="w-6 h-6" strokeWidth={1.5} />
 										<input type="file" accept="image/*" capture="user" className="sr-only" onChange={pickSelfie} />
 									</label>
 								) : (
 									<button
-										onClick={isCameraOpen ? takeDesktopPhoto : startDesktopCamera}
+										onClick={isCameraOpen ? takePhoto : startCamera}
 										aria-label={t("guest.selfie.shutter")}
 										className="w-16 h-16 rounded-full bg-zinc-900 text-zinc-50 flex items-center justify-center transition-colors hover:bg-violet-600"
 									>
