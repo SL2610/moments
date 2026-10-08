@@ -794,8 +794,8 @@ export default function WeddingPage() {
 					<>
 						{/* eslint-disable-next-line @next/next/no-img-element */}
 						<img src={info.coverUrl} alt="" className="develop absolute inset-0 w-full h-full object-cover object-[65%_center]" />
-						<div aria-hidden className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-zinc-50 from-10% via-zinc-50/75 via-45% to-zinc-50/0" />
-						<div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-zinc-50 via-zinc-50/70 to-transparent" />
+						<div aria-hidden className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-zinc-50/95 from-5% via-zinc-50/55 via-40% to-zinc-50/0 to-70%" />
+						<div aria-hidden className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-zinc-50 via-zinc-50/60 to-transparent" />
 					</>
 				)}
 
@@ -894,7 +894,6 @@ export default function WeddingPage() {
 									{t("guest.gallery.downloadSelected").replace("{count}", String(favorites.length))}
 								</BarAction>
 							)}
-							<span className="text-zinc-500">{langToggle}</span>
 						<DropdownMenu.Root dir={dir}>
 							<DropdownMenu.Trigger asChild>
 								<button
@@ -946,6 +945,9 @@ export default function WeddingPage() {
 										</DropdownMenu.Item>
 									)}
 									{features.menuItems}
+									<DropdownMenu.Item onSelect={() => setLocale(locale === "he" ? "en" : "he")} lang={locale === "he" ? "en" : "he"} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-[2px] outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer">
+										{locale === "he" ? "English" : "עברית"}
+									</DropdownMenu.Item>
 								</DropdownMenu.Content>
 							</DropdownMenu.Portal>
 						</DropdownMenu.Root>
@@ -989,10 +991,10 @@ export default function WeddingPage() {
 											setSourceView(key === "wedding" ? "official" : "guests");
 										}
 									}}
-									className={`pb-2.5 sm:pb-3 border-b-2 -mb-px whitespace-nowrap text-sm sm:text-base transition-colors ${active ? "border-violet-600 text-violet-800 font-medium" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
+									className={`pb-2.5 sm:pb-3 border-b-2 -mb-px whitespace-nowrap text-sm sm:text-base transition-colors ${active ? "border-champagne text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
 								>
 									{label}
-									<span className={`ms-2 text-xs ${active ? "text-violet-500" : "text-zinc-400"}`}>
+									<span className={`ms-2 text-xs ${active ? "text-[#7a6442]" : "text-zinc-400"}`}>
 										{count}
 									</span>
 								</button>
@@ -1005,7 +1007,7 @@ export default function WeddingPage() {
 								onClick={() => chooseGalleryLayout("masonry")}
 								title={t("guest.gallery.layoutMasonry")}
 								aria-label={t("guest.gallery.layoutMasonry")}
-								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "masonry" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
+								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "masonry" ? "text-zinc-900" : "text-zinc-400 hover:text-zinc-900"}`}
 							>
 								<Columns3 className="w-5 h-5" />
 							</button>
@@ -1013,7 +1015,7 @@ export default function WeddingPage() {
 								onClick={() => chooseGalleryLayout("grid")}
 								title={t("guest.gallery.layoutGrid")}
 								aria-label={t("guest.gallery.layoutGrid")}
-								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "grid" ? "text-violet-700 bg-violet-100" : "text-zinc-500 hover:text-violet-700 hover:bg-zinc-100"}`}
+								className={`p-2 mb-1.5 rounded-[2px] transition-colors ${galleryLayout === "grid" ? "text-zinc-900" : "text-zinc-400 hover:text-zinc-900"}`}
 							>
 								<LayoutGrid className="w-5 h-5" />
 							</button>
@@ -1364,10 +1366,10 @@ export default function WeddingPage() {
 														setViewerList(matches);
 														setViewerIndex(i);
 													}}
-													className="block w-full aspect-square overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+													className="block w-full aspect-[4/5] overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
 												>
 													{/* eslint-disable-next-line @next/next/no-img-element */}
-													<img src={photo.thumbUrl || photo.viewUrl} alt="" loading="lazy" className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+													<img src={photo.thumbUrl || photo.viewUrl} alt="" loading="lazy" className="w-full h-full object-cover object-[center_20%] transition-transform duration-500 hover:scale-[1.03]" />
 												</button>
 											</li>
 										))}
