@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
 	Camera,
+	BookOpen,
 	Check,
 	CheckSquare,
 	ChevronLeft,
@@ -20,7 +21,7 @@ import {
 	UserSearch,
 	X,
 } from "lucide-react";
-import { BarAction, ChampagneRule, CoupleMark, Finding, GuestBar, Lockup, SelfieTips, Viewer } from "./screens";
+import { BarAction, ChampagneRule, CoupleMark, Finding, GuestBar, Lockup, SelfieTips, Viewer, WeddingStory } from "./screens";
 import { DropdownMenu } from "radix-ui";
 import JSZip from "jszip";
 import { fetchImageAsBlob, downloadImage } from "@/lib/download";
@@ -135,6 +136,9 @@ export default function WeddingPage() {
 	const [searchError, setSearchError] = useState("");
 	const [matches, setMatches] = useState<Photo[] | null>(null);
 	const [isClaiming, setIsClaiming] = useState(false);
+	// "all", or a chapter key from features.groups
+	const [resultTab, setResultTab] = useState("all");
+	const [storyOpen, setStoryOpen] = useState(false);
 	const [searchSessionId, setSearchSessionId] = useState<string | null>(null);
 	const [needsSecondSelfie, setNeedsSecondSelfie] = useState(false);
 	const [isMobile, setIsMobile] = useState(true);
@@ -221,13 +225,13 @@ export default function WeddingPage() {
 	// mobile keyboard opening (e.g. the tag input) doesn't scroll/shift
 	// the page behind the fixed overlay
 	useEffect(() => {
-		if (viewerIndex === null && !isSearchOpen) return;
+		if (viewerIndex === null && !isSearchOpen && !storyOpen) return;
 		const { overflow } = document.body.style;
 		document.body.style.overflow = "hidden";
 		return () => {
 			document.body.style.overflow = overflow;
 		};
-	}, [viewerIndex, isSearchOpen]);
+	}, [viewerIndex, isSearchOpen, storyOpen]);
 
 	// preload the neighboring previews for instant next/prev
 	useEffect(() => {
@@ -614,6 +618,26 @@ export default function WeddingPage() {
 		}
 	};
 
+	/** Fresh photo details (signed URLs) for ids, in the ids' order; the endpoint takes 500 at a time. */
+	const photosById = useCallback(
+		async (ids: string[]): Promise<Photo[]> => {
+			if (!session || ids.length === 0) return [];
+			const chunks = Array.from({ length: Math.ceil(ids.length / 500) }, (_, i) => ids.slice(i * 500, i * 500 + 500));
+			const found = new Map<string, Photo>();
+			for (const chunk of chunks) {
+				const res = await guestFetch(`/api/albums/${session.albumId}/guest/search-results`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(chunk),
+				});
+				if (!res.ok) continue;
+				for (const p of await res.json()) found.set(p.id, { ...p, tags: [] });
+			}
+			return ids.flatMap((id) => found.get(id) ?? []);
+		},
+		[session],
+	);
+
 	const handleDownloadZip = async (list: Photo[]) => {
 		if (list.length === 0) return;
 		setIsZipping(true);
@@ -688,13 +712,7 @@ export default function WeddingPage() {
 	};
 
 	const downloadFavorites = async () => {
-		if (!session || favorites.length === 0) return;
-		const res = await guestFetch(`/api/albums/${session.albumId}/guest/search-results`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(favorites),
-		});
-		if (res.ok) await handleDownloadZip(await res.json());
+		if (favorites.length > 0) await handleDownloadZip(await photosById(favorites));
 	};
 
 	const toggleSelect = (photoId: string) => {
@@ -891,6 +909,13 @@ export default function WeddingPage() {
 	}
 
 	const viewerPhoto = viewerIndex !== null ? viewing[viewerIndex] : null;
+	// Result tabs: every chapter the guest appears in, after "All photos".
+	const resultTabs = [
+		{ key: "all", label: t("guest.results.allTab") },
+		...features.groups.filter((g) => matches?.some((m) => g.photoIds.includes(m.id))),
+	];
+	const tabGroup = features.groups.find((g) => g.key === resultTab);
+	const shownMatches = tabGroup ? (matches ?? []).filter((m) => tabGroup.photoIds.includes(m.id)) : (matches ?? []);
 	const canLoadMore = !personFilter && photos.length < total;
 
 	return (
@@ -954,6 +979,12 @@ export default function WeddingPage() {
 												<Download className="w-4 h-4" />
 											)}
 											{t("guest.gallery.downloadAll")}
+										</DropdownMenu.Item>
+									)}
+									{features.groups.length > 0 && (
+										<DropdownMenu.Item onSelect={() => setStoryOpen(true)} className="flex items-center gap-2.5 text-sm text-zinc-700 dark:text-zinc-200 px-3 py-2.5 rounded-[2px] outline-none data-[highlighted]:bg-zinc-100 dark:data-[highlighted]:bg-zinc-800 cursor-pointer">
+											<BookOpen className="w-4 h-4" />
+											{t("guest.story.title")}
 										</DropdownMenu.Item>
 									)}
 									{features.menuItems}
@@ -1189,7 +1220,7 @@ export default function WeddingPage() {
 			</main>
 
 			{/* ---------------------------------------- floating actions */}
-			{!isSelecting && viewerIndex === null && !isSearchOpen && (
+			{!isSelecting && viewerIndex === null && !isSearchOpen && !storyOpen && (
 				<div className="fixed bottom-5 end-4 sm:end-6 z-40 flex flex-col items-end gap-3">
 					<button
 						onClick={() => setIsSearchOpen(true)}
@@ -1370,12 +1401,26 @@ export default function WeddingPage() {
 											</button>
 										</p>
 									)}
-									<ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-2">
-										{matches.map((photo, i) => (
+									{resultTabs.length > 1 && (
+										<nav className="mt-7 flex gap-6 overflow-x-auto border-b border-zinc-200 [scrollbar-width:none]" aria-label={t("guest.gallery.tabsAriaLabel")}>
+											{resultTabs.map((tab) => (
+												<button
+													key={tab.key}
+													onClick={() => setResultTab(tab.key)}
+													aria-pressed={resultTab === tab.key}
+													className={`pb-2.5 -mb-px border-b whitespace-nowrap text-sm transition-colors ${resultTab === tab.key ? "border-champagne text-zinc-900" : "border-transparent text-zinc-500 hover:text-zinc-800"}`}
+												>
+													{tab.label}
+												</button>
+											))}
+										</nav>
+									)}
+									<ul className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2">
+										{shownMatches.map((photo, i) => (
 											<li key={photo.id}>
 												<button
 													onClick={() => {
-														setViewerList(matches);
+														setViewerList(shownMatches);
 														setViewerIndex(i);
 													}}
 													className="block w-full aspect-[4/5] overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
@@ -1408,6 +1453,26 @@ export default function WeddingPage() {
 						</main>
 					</div>
 				))}
+
+			{storyOpen && (
+				<WeddingStory
+					names={info.eventName}
+					groups={features.groups}
+					load={photosById}
+					onClose={() => setStoryOpen(false)}
+					onOpenPhoto={(list, i) => {
+						setViewerList(list as Photo[]);
+						setViewerIndex(i);
+					}}
+					topAction={
+						favorites.length > 0 && (
+							<BarAction onClick={downloadFavorites} disabled={isZipping} busy={isZipping}>
+								{t("guest.gallery.downloadSelected").replace("{count}", String(favorites.length))}
+							</BarAction>
+						)
+					}
+				/>
+			)}
 
 			{/* -------------------------------------------------- photo viewer */}
 			{viewerPhoto && viewerIndex !== null && (

@@ -87,6 +87,10 @@ const en = {
 	"guest.tag.confirmMe": "That's me, tag me in these photos",
 
 	"guest.viewer.removeTagTitle": "Remove my tag",
+	"guest.story.title": "Your wedding story",
+	"guest.story.body": "Beautifully organised, ready to keep forever.",
+	"guest.story.count": "{count} photos",
+	"guest.results.allTab": "All photos",
 	"guest.landing.lockup": "All your moments, together",
 	"guest.back": "Back",
 	"guest.selfie.title": "Take a selfie",

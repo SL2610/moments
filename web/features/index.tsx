@@ -16,6 +16,14 @@ export interface GuestFeatureContext {
 	closeSearch: () => void;
 }
 
+/** A chapter of the day (ceremony, reception…), in the order it happened. */
+export interface MomentGroup {
+	key: string;
+	label: string;
+	photoIds: string[];
+	coverThumbUrl: string;
+}
+
 export interface GuestFeatures {
 	/** Under the entry form on the couple's cover page. */
 	landing: ReactNode;
@@ -27,9 +35,11 @@ export interface GuestFeatures {
 	overlays: ReactNode;
 	/** Above the gallery grid. */
 	galleryTop: ReactNode;
+	/** The album in chapters: tabs on the results, and "Your wedding story". None here. */
+	groups: MomentGroup[];
 }
 
-const NO_GUEST_FEATURES: GuestFeatures = { landing: null, menuItems: null, results: null, overlays: null, galleryTop: null };
+const NO_GUEST_FEATURES: GuestFeatures = { landing: null, menuItems: null, results: null, overlays: null, galleryTop: null, groups: [] };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- signature the private build implements
 export function useGuestFeatures(_ctx: GuestFeatureContext): GuestFeatures {

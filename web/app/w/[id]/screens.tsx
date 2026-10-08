@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { Camera, ChevronLeft, Download, Heart, Share, Sun, User, X } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Camera, ChevronLeft, ChevronRight, Download, Heart, Share, Sun, User, X } from "lucide-react";
+import type { MomentGroup } from "@/features";
 import Wordmark from "@/components/Wordmark";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 
@@ -237,5 +238,109 @@ export function BarAction({ onClick, disabled, busy, children }: { onClick: () =
 			{children}
 			<Download className={`w-4 h-4 ${busy ? "animate-pulse" : ""}`} />
 		</button>
+	);
+}
+
+// ------------------------------------------------------------------ 6. your wedding story
+
+/**
+ * The album in chapters: one row per chapter with its strongest photo, then that
+ * chapter's photos. `load` turns ids into photos (URLs are signed, so never cached).
+ */
+export function WeddingStory({
+	names,
+	groups,
+	load,
+	onClose,
+	onOpenPhoto,
+	topAction,
+}: {
+	names: string;
+	groups: MomentGroup[];
+	load: (ids: string[]) => Promise<ScreenPhoto[]>;
+	onClose: () => void;
+	onOpenPhoto: (list: ScreenPhoto[], index: number) => void;
+	topAction?: ReactNode;
+}) {
+	const { t, locale } = useI18n();
+	const [open, setOpen] = useState<MomentGroup | null>(null);
+	// loaded photos by chapter key; a chapter shows placeholders until its own list arrives
+	const [loaded, setLoaded] = useState<Record<string, ScreenPhoto[]>>({});
+	const photos = open ? (loaded[open.key] ?? null) : null;
+	const num = (n: number) => n.toLocaleString(locale === "he" ? "he-IL" : "en-US");
+
+	useEffect(() => {
+		if (!open) return;
+		load(open.photoIds).then((list) => setLoaded((prev) => ({ ...prev, [open.key]: list })));
+	}, [open, load]);
+
+	return (
+		<div role="dialog" aria-modal="true" aria-labelledby="story-title" className="fixed inset-0 z-50 overflow-y-auto bg-zinc-50">
+			<GuestBar
+				className="sticky top-0 z-10 bg-zinc-50"
+				start={
+					open ? (
+						<button onClick={() => setOpen(null)} aria-label={t("guest.back")} className="p-2 -ms-2 text-zinc-800 hover:text-zinc-950">
+							<ChevronLeft className="w-6 h-6 rtl:rotate-180" strokeWidth={1.25} />
+						</button>
+					) : (
+						<CoupleMark names={names} />
+					)
+				}
+				end={
+					<>
+						{topAction}
+						<button onClick={onClose} aria-label={t("guest.results.toAlbum")} className="p-2 -me-2 text-zinc-800 hover:text-zinc-950">
+							<X className="w-6 h-6" strokeWidth={1.25} />
+						</button>
+					</>
+				}
+			/>
+			<main className="max-w-3xl mx-auto px-5 sm:px-8 pb-14">
+				<h2 id="story-title" className="mt-6 text-[clamp(2.1rem,9vw,3.2rem)] leading-[1.08] tracking-[-0.02em] text-zinc-900" style={display}>
+					{open ? open.label : t("guest.story.title")}
+				</h2>
+				<p className="mt-2 text-lg text-zinc-600">
+					{open ? t("guest.story.count").replace("{count}", num(open.photoIds.length)) : t("guest.story.body")}
+				</p>
+
+				{!open ? (
+					<ul className="mt-8 border-t border-zinc-200">
+						{groups.map((g) => (
+							<li key={g.key} className="border-b border-zinc-200">
+								<button onClick={() => setOpen(g)} className="group w-full flex items-center gap-6 py-4 text-start">
+									<span className="w-32 sm:w-40 aspect-square shrink-0 overflow-hidden bg-[#eee9e1]">
+										{/* eslint-disable-next-line @next/next/no-img-element */}
+										<img src={g.coverThumbUrl} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+									</span>
+									<span className="flex-1 min-w-0">
+										<span className="block text-2xl text-zinc-900" style={display}>{g.label}</span>
+										<span className="block mt-1 text-sm text-zinc-500">{t("guest.story.count").replace("{count}", num(g.photoIds.length))}</span>
+									</span>
+									<ChevronRight className="w-5 h-5 text-zinc-500 rtl:rotate-180" strokeWidth={1.25} />
+								</button>
+							</li>
+						))}
+					</ul>
+				) : (
+					<ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-2" aria-busy={photos === null}>
+						{(photos ?? open.photoIds.slice(0, 6).map((id) => ({ id }) as ScreenPhoto)).map((p, i) => (
+							<li key={p.id}>
+								<button
+									disabled={!photos}
+									onClick={() => photos && onOpenPhoto(photos, i)}
+									className="block w-full aspect-[4/5] overflow-hidden bg-[#eee9e1] focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+								>
+									{photos && (
+										// eslint-disable-next-line @next/next/no-img-element
+										<img src={p.thumbUrl || p.viewUrl} alt="" loading="lazy" className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
+									)}
+								</button>
+							</li>
+						))}
+					</ul>
+				)}
+			</main>
+		</div>
 	);
 }

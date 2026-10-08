@@ -85,6 +85,10 @@ const he = {
 	"guest.tag.confirmMe": "אלה אני, סמנו אותי בתמונות",
 
 	"guest.viewer.removeTagTitle": "הסרת התיוג שלי",
+	"guest.story.title": "סיפור החתונה",
+	"guest.story.body": "מסודר יפה, ונשמר לתמיד.",
+	"guest.story.count": "{count} תמונות",
+	"guest.results.allTab": "כל התמונות",
 	"guest.landing.lockup": "כל הרגעים שלכם, ביחד",
 	"guest.back": "חזרה",
 	"guest.selfie.title": "צלמו סלפי",
