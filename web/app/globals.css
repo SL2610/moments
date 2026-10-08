@@ -393,8 +393,8 @@ body::after {
 	z-index: 100;
 	pointer-events: none;
 	background: url("/grain.png");
-	opacity: 0.03;
-	mix-blend-mode: multiply;
+	opacity: 0.018;
+	mix-blend-mode: soft-light; /* texture only: never shifts the ivory toward brown */
 }
 
 @media (prefers-reduced-motion: no-preference) {
