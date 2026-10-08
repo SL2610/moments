@@ -89,7 +89,8 @@ export default function Navbar() {
 						{locale === "he" ? "EN" : "עברית"}
 					</button>
 
-					<div className="hidden sm:flex items-center gap-2">
+					{/* Signed out, the page itself is the sign-in or sign-up form: no menu needed. */}
+					{isLoggedIn && <div className="hidden sm:flex items-center gap-2">
 						{isLoggedIn ? (
 							<>
 								{userEmail && (
@@ -160,8 +161,8 @@ export default function Navbar() {
 
 						</>
 					)}
-					</div>
-					<button
+					</div>}
+					{isLoggedIn && <button
 						onClick={() => setMobileOpen((prev) => !prev)}
 						className="sm:hidden min-h-11 min-w-11 -me-2.5 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors"
 						aria-label={t("nav.menu")}
@@ -171,12 +172,12 @@ export default function Navbar() {
 						) : (
 							<Menu className="w-5 h-5" />
 						)}
-					</button>
+					</button>}
 				</div>
 
 			</div>
 
-			{mobileOpen && (
+			{isLoggedIn && mobileOpen && (
 				<div className="sm:hidden border-t border-zinc-200 bg-zinc-50 px-4 pb-4 pt-2 space-y-1">
 					{isLoggedIn ? (
 						<>
