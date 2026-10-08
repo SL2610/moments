@@ -405,3 +405,17 @@ body::after {
 	from { clip-path: inset(0 0 100% 0); transform: scale(1.06); filter: brightness(1.25); }
 	to { clip-path: inset(0); transform: none; filter: none; }
 }
+
+/* Finding screen: the album's prints land one by one; the bar creeps on until the match returns. */
+.progress-creep { width: 60%; }
+@media (prefers-reduced-motion: no-preference) {
+	.print-drop { animation: print-drop 800ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+	.progress-creep { animation: progress-creep 14s cubic-bezier(0.1, 0.7, 0.2, 1) forwards; }
+}
+@keyframes print-drop {
+	from { opacity: 0; transform: translateY(-20px) rotate(var(--tilt)) scale(1.04); }
+}
+@keyframes progress-creep {
+	from { width: 4%; }
+	to { width: 90%; }
+}
