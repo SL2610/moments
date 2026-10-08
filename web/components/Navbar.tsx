@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { LogOut, LayoutDashboard, LogIn, Menu, X, Home } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import Mark from "@/components/Mark";
+import Wordmark from "@/components/Wordmark";
 import { useI18n, setLocale } from "@/lib/i18n/I18nProvider";
 
 export default function Navbar() {
@@ -74,10 +74,7 @@ export default function Navbar() {
 					dir="ltr"
 					aria-label="WED"
 				>
-					<Mark className="h-3.5 w-auto" />
-					<span className="text-[1.35rem] leading-none tracking-[0.14em]" style={{ fontFamily: "var(--font-display-face), serif" }}>
-						WED
-					</span>
+					<Wordmark />
 				</Link>
 
 				<div className="flex items-center gap-1">

@@ -793,7 +793,7 @@ export default function WeddingPage() {
 						<div className="crop mt-7">
 							<div className="overflow-hidden aspect-[4/5] bg-zinc-100">
 								{/* eslint-disable-next-line @next/next/no-img-element */}
-								<img src={info.coverUrl} alt="" className="develop w-full h-full object-cover grayscale contrast-[1.05]" />
+								<img src={info.coverUrl} alt="" className="develop w-full h-full object-cover" />
 							</div>
 						</div>
 					)}

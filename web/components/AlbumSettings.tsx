@@ -101,7 +101,7 @@ export default function AlbumSettings({ album, onChange }: { album: Album; onCha
 								<div className="aspect-[4/5] overflow-hidden bg-[#eee9e1]">
 									{album.coverUrl && (
 										// eslint-disable-next-line @next/next/no-img-element
-										<img src={album.coverUrl} alt="" className="h-full w-full object-cover grayscale" />
+										<img src={album.coverUrl} alt="" className="h-full w-full object-cover" />
 									)}
 								</div>
 							</div>

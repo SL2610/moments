@@ -15,7 +15,8 @@ import { LOCALE_COOKIE, DEFAULT_LOCALE, dirFor, isLocale } from "@/lib/i18n/loca
 const displayFont = Bodoni_Moda({
 	variable: "--font-display-face",
 	subsets: ["latin"],
-	weight: ["400", "500"],
+	// Variable with optical size: large headlines get the hairline strokes of the print cut.
+	axes: ["opsz"],
 	style: ["normal", "italic"],
 	// Its Times metric fallback has Hebrew glyphs and would shadow Frank Ruhl in mixed text.
 	adjustFontFallback: false,
@@ -25,7 +26,7 @@ const displayFont = Bodoni_Moda({
 const hebrewDisplayFont = Frank_Ruhl_Libre({
 	variable: "--font-display-he-face",
 	subsets: ["hebrew", "latin"],
-	weight: ["400", "500", "600"],
+	weight: ["300", "400", "500", "600"],
 });
 
 // Latin UI face; Hebrew pages switch to Assistant in globals.css.

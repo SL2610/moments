@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Mark from "@/components/Mark";
+import Wordmark from "@/components/Wordmark";
 import { useI18n } from "@/lib/i18n/I18nProvider";
 
 // The bare server address. Guests arrive at /w/<id>; this only points people the right way.
@@ -10,12 +10,7 @@ export default function Home() {
 	const he = locale === "he";
 	return (
 		<main className="min-h-screen flex flex-col justify-between px-6 sm:px-10 py-8 bg-zinc-50">
-			<div className="flex items-center gap-2.5 text-zinc-900" dir="ltr">
-				<Mark className="h-3.5 w-auto" />
-				<span className="text-[1.35rem] leading-none tracking-[0.14em]" style={{ fontFamily: "var(--font-display-face), serif" }}>
-					WED
-				</span>
-			</div>
+			<Wordmark className="text-zinc-900" />
 			<div className="max-w-xl">
 				<p className="meta text-zinc-500">{he ? "אלבום החתונה" : "The wedding album"}</p>
 				<h1 className="mt-3 text-[clamp(2.6rem,9vw,5rem)] leading-[0.95] tracking-[-0.02em] text-zinc-900" style={{ fontFamily: "var(--font-display)" }}>

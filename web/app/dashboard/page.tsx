@@ -70,7 +70,7 @@ export default function DashboardPage() {
 										<img
 											src={album.coverUrl}
 											alt=""
-											className="h-full w-full object-cover grayscale transition duration-700 group-hover:grayscale-0"
+											className="h-full w-full object-cover transition duration-700"
 										/>
 									) : (
 										<div className="flex h-full items-end p-6">

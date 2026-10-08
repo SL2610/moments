@@ -10,6 +10,7 @@
  * accent, zinc -> paper-to-ink neutrals, emerald -> champagne, red/amber -> muted.
  */
 @theme {
+	--color-champagne: #c7ad86;
 	--color-violet-50: #f5efe5;
 	--color-violet-100: #ece2d2;
 	--color-violet-200: #ddcbb0;
